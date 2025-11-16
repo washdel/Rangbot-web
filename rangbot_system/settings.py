@@ -4,6 +4,21 @@ Django settings for rangbot_system project.
 
 from pathlib import Path
 import os
+from decouple import config
+
+# Database MySQL untuk Docker
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': config('MYSQL_DATABASE', 'rangbot_db'),
+        'USER': config('MYSQL_USER', 'rangbot_user'),
+        'PASSWORD': config('MYSQL_PASSWORD', 'rangbot_pass'),
+        'HOST': config('MYSQL_HOST', 'localhost'),  # 'db' untuk Docker, 'localhost' untuk local
+        'PORT': config('MYSQL_PORT', '3306'),
+        'CHARSET': 'utf8mb4',
+        'INIT_COMMAND': "SET sql_mode='STRICT_TRANS_TABLES'",
+    }
+}
 
 # Setup pymysql untuk MySQL (jika menggunakan pymysql)
 try:
@@ -17,12 +32,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-rangbot-development-key-change-in-production'
+SECRET_KEY = config('SECRET_KEY', 'django-insecure-rangbot-development-key-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
+
 
 
 # Application definition

@@ -1,0 +1,63 @@
+version: '3.9'
+
+services:
+  # MySQL Database Service
+  db:
+    image: mysql:8.0
+    container_name: rangbot-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-rangbot_db}
+      MYSQL_USER: ${MYSQL_USER:-rangbot_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-rangbot_pass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - rangbot-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root123}"]
+      timeout: 20s
+      retries: 10
+      start_period: 40s
+    restart: unless-stopped
+
+  # Django Web Application Service
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rangbot-web
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    environment:
+      DEBUG: ${DEBUG:-True}
+      SECRET_KEY: ${SECRET_KEY:-django-insecure-dev-key-change-in-production}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-rangbot_db}
+      MYSQL_USER: ${MYSQL_USER:-rangbot_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-rangbot_pass}
+      MYSQL_HOST: db
+      MYSQL_PORT: ${MYSQL_PORT:-3306}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - rangbot-network
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  rangbot-network:
+    driver: bridge
