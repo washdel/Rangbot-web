@@ -1,0 +1,85 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white pt-20 pb-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Back Button -->
+        <a href="{% url 'main:member_dashboard' %}" class="inline-flex items-center gap-2 mb-6 text-gray-600 transition-colors font-light" onmouseover="this.style.color='#ef4444';" onmouseout="this.style.color='#6b7280';">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Kembali ke Dashboard
+        </a>
+
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl sm:text-4xl font-light text-gray-900 tracking-tight mb-2">
+                Notifikasi
+            </h1>
+            <p class="text-gray-600 font-light text-sm sm:text-base">
+                Semua notifikasi Anda
+            </p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+            <div class="p-4 rounded-xl border font-light text-sm {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50 border-yellow-200 text-yellow-800{% else %}bg-green-50 border-green-200 text-green-800{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Notifications List -->
+        <div class="bg-white rounded-2xl border p-6" style="border-color: rgba(229, 231, 235, 0.6);">
+            {% if notifications %}
+            <div class="space-y-4">
+                {% for notification in notifications %}
+                <div class="p-5 rounded-xl border transition-all duration-300 {% if not notification.is_read %}border-l-4{% endif %}" 
+                     style="{% if not notification.is_read %}border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05); border-left-color: #ef4444;{% else %}border-color: rgba(229, 231, 235, 0.6);{% endif %}">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="text-base font-light text-gray-900">{{ notification.title }}</h3>
+                                {% if not notification.is_read %}
+                                <span class="w-2 h-2 rounded-full" style="background: #ef4444;"></span>
+                                {% endif %}
+                            </div>
+                            <p class="text-sm font-light text-gray-600 mb-3">{{ notification.message }}</p>
+                            <div class="flex items-center gap-4 text-xs font-light text-gray-500">
+                                <span>{{ notification.get_notification_type_display }}</span>
+                                <span>•</span>
+                                <span>{{ notification.created_at|date:"d M Y H:i" }}</span>
+                            </div>
+                        </div>
+                        {% if not notification.is_read %}
+                        <form method="post" class="flex-shrink-0">
+                            {% csrf_token %}
+                            <input type="hidden" name="notification_id" value="{{ notification.id }}">
+                            <button type="submit" name="mark_read" class="px-4 py-2 rounded-xl border text-xs font-light transition-all duration-300 hover:scale-105" style="border-color: rgba(229, 231, 235, 0.6); color: #6b7280;">
+                                Tandai Dibaca
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <p class="text-gray-500 font-light">Tidak ada notifikasi</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,149 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white pb-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl sm:text-4xl font-light text-gray-900 tracking-tight mb-2">
+                Dashboard Admin
+            </h1>
+            <p class="text-gray-600 font-light text-sm sm:text-base">
+                Selamat datang, <span class="font-medium">{{ admin.full_name }}</span>
+            </p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+            <div class="p-4 rounded-xl border font-light text-sm {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50 border-yellow-200 text-yellow-800{% else %}bg-green-50 border-green-200 text-green-800{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Pending Orders -->
+            <div class="bg-white rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg" style="border-color: rgba(239, 68, 68, 0.3);">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: rgba(239, 68, 68, 0.1);">
+                        <i class="fas fa-clock text-xl" style="color: #ef4444;"></i>
+                    </div>
+                </div>
+                <h3 class="text-sm font-light text-gray-600 mb-1">Menunggu Verifikasi</h3>
+                <p class="text-3xl font-light mb-2" style="color: #ef4444;">{{ pending_orders }}</p>
+                <p class="text-xs text-gray-500 font-light">Purchase orders pending</p>
+            </div>
+
+            <!-- Verified Orders -->
+            <div class="bg-white rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg" style="border-color: rgba(134, 239, 172, 0.4);">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: rgba(134, 239, 172, 0.1);">
+                        <i class="fas fa-check-circle text-xl" style="color: #86efac;"></i>
+                    </div>
+                </div>
+                <h3 class="text-sm font-light text-gray-600 mb-1">Terverifikasi</h3>
+                <p class="text-3xl font-light mb-2" style="color: #86efac;">{{ verified_orders }}</p>
+                <p class="text-xs text-gray-500 font-light">Purchase orders verified</p>
+            </div>
+
+            <!-- Total Members -->
+            <div class="bg-white rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg" style="border-color: rgba(229, 231, 235, 0.6);">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: rgba(239, 68, 68, 0.1);">
+                        <i class="fas fa-users text-xl" style="color: #ef4444;"></i>
+                    </div>
+                </div>
+                <h3 class="text-sm font-light text-gray-600 mb-1">Total Members</h3>
+                <p class="text-3xl font-light mb-2" style="color: #1f2937;">{{ total_members }}</p>
+                <p class="text-xs text-gray-500 font-light">Registered members</p>
+            </div>
+
+            <!-- Total Devices -->
+            <div class="bg-white rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg" style="border-color: rgba(229, 231, 235, 0.6);">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: rgba(134, 239, 172, 0.1);">
+                        <i class="fas fa-robot text-xl" style="color: #86efac;"></i>
+                    </div>
+                </div>
+                <h3 class="text-sm font-light text-gray-600 mb-1">Total Devices</h3>
+                <p class="text-3xl font-light mb-2" style="color: #1f2937;">{{ total_devices }}</p>
+                <p class="text-xs text-gray-500 font-light">RangBot devices</p>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="bg-white rounded-2xl border p-6 sm:p-8" style="border-color: rgba(229, 231, 235, 0.6);">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl sm:text-2xl font-light text-gray-900 tracking-tight">Purchase Orders Terbaru</h2>
+                <a href="{% url 'main:purchase_orders_list' %}" class="text-sm font-light text-gray-600 hover:text-gray-900 transition-colors">
+                    Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+
+            {% if recent_orders %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b" style="border-color: rgba(229, 231, 235, 0.6);">
+                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">ID</th>
+                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Customer</th>
+                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Email</th>
+                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Total Unit</th>
+                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Total Harga</th>
+                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Status</th>
+                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Tanggal</th>
+                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                        <tr class="border-b hover:bg-gray-50 transition-colors" style="border-color: rgba(229, 231, 235, 0.3);">
+                            <td class="py-4 px-4 text-sm font-light text-gray-900">#{{ order.id }}</td>
+                            <td class="py-4 px-4 text-sm font-light text-gray-900">{{ order.customer_name|truncatewords:3 }}</td>
+                            <td class="py-4 px-4 text-sm font-light text-gray-600">{{ order.customer_email|truncatewords:1 }}</td>
+                            <td class="py-4 px-4 text-sm font-light text-gray-900">{{ order.get_total_units }}</td>
+                            <td class="py-4 px-4 text-sm font-light text-gray-900">Rp {{ order.total_price|floatformat:0 }}</td>
+                            <td class="py-4 px-4">
+                                {% if order.status == 'pending' %}
+                                <span class="px-3 py-1 rounded-full text-xs font-light" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                                    Menunggu
+                                </span>
+                                {% elif order.status == 'verified' %}
+                                <span class="px-3 py-1 rounded-full text-xs font-light" style="background: rgba(134, 239, 172, 0.1); color: #86efac;">
+                                    Terverifikasi
+                                </span>
+                                {% else %}
+                                <span class="px-3 py-1 rounded-full text-xs font-light" style="background: rgba(156, 163, 175, 0.1); color: #6b7280;">
+                                    Ditolak
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="py-4 px-4 text-sm font-light text-gray-600">{{ order.created_at|date:"d M Y" }}</td>
+                            <td class="py-4 px-4">
+                                <a href="{% url 'main:purchase_order_detail' order.id %}" class="text-sm font-light text-gray-600 hover:text-gray-900 transition-colors">
+                                    Detail <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-inbox text-4xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 font-light">Belum ada purchase orders</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

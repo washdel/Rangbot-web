@@ -1,0 +1,71 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white pt-20 pb-12">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Back Button -->
+        <a href="{% url 'main:member_dashboard' %}" class="inline-flex items-center gap-2 mb-6 text-gray-600 transition-colors font-light" onmouseover="this.style.color='#ef4444';" onmouseout="this.style.color='#6b7280';">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Kembali ke Dashboard
+        </a>
+
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl sm:text-4xl font-light text-gray-900 tracking-tight mb-2">
+                Profil Member
+            </h1>
+            <p class="text-gray-600 font-light text-sm sm:text-base">
+                Informasi akun Anda
+            </p>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="bg-white rounded-2xl border p-6 sm:p-8" style="border-color: rgba(229, 231, 235, 0.6);">
+            <div class="space-y-6">
+                <div class="flex items-center justify-between p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                    <span class="text-sm font-light text-gray-600">Nama Lengkap</span>
+                    <span class="text-sm font-light text-gray-900">{{ member.full_name }}</span>
+                </div>
+                <div class="flex items-center justify-between p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                    <span class="text-sm font-light text-gray-600">Email</span>
+                    <span class="text-sm font-light text-gray-900">{{ member.email }}</span>
+                </div>
+                <div class="flex items-center justify-between p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                    <span class="text-sm font-light text-gray-600">ID Member</span>
+                    <span class="text-sm font-light text-gray-900">{{ member.member_id }}</span>
+                </div>
+                <div class="flex items-center justify-between p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                    <span class="text-sm font-light text-gray-600">Username</span>
+                    <span class="text-sm font-light text-gray-900">{{ member.username }}</span>
+                </div>
+                {% if member.phone %}
+                <div class="flex items-center justify-between p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                    <span class="text-sm font-light text-gray-600">Nomor Telepon</span>
+                    <span class="text-sm font-light text-gray-900">{{ member.phone }}</span>
+                </div>
+                {% endif %}
+                <div class="flex items-center justify-between p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                    <span class="text-sm font-light text-gray-600">Jumlah Perangkat</span>
+                    <span class="text-sm font-light text-gray-900">{{ member.get_device_count }}</span>
+                </div>
+                <div class="flex items-center justify-between p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                    <span class="text-sm font-light text-gray-600">Akun Dibuat</span>
+                    <span class="text-sm font-light text-gray-900">{{ member.created_at|date:"d M Y" }}</span>
+                </div>
+                {% if member.last_login %}
+                <div class="flex items-center justify-between p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                    <span class="text-sm font-light text-gray-600">Login Terakhir</span>
+                    <span class="text-sm font-light text-gray-900">{{ member.last_login|date:"d M Y H:i" }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

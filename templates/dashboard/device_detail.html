@@ -1,0 +1,123 @@
+{% extends 'dashboard_base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white pt-20 pb-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Back Button -->
+        <a href="{% url 'main:member_dashboard' %}" class="inline-flex items-center gap-2 mb-6 text-gray-600 transition-colors font-light" onmouseover="this.style.color='#ef4444';" onmouseout="this.style.color='#6b7280';">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Kembali ke Dashboard
+        </a>
+
+        <!-- Device Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-light text-gray-900 tracking-tight mb-2">
+                        {{ device.device_name|default:device.serial_number }}
+                    </h1>
+                    <p class="text-gray-600 font-light text-sm sm:text-base">{{ device.serial_number }}</p>
+                </div>
+                <span class="px-4 py-2 rounded-xl text-sm font-medium" 
+                      style="{% if device.status == 'active' %}background: rgba(134, 239, 172, 0.1); color: #16a34a; border: 1px solid rgba(134, 239, 172, 0.3);{% elif device.status == 'inactive' %}background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3);{% else %}background: rgba(156, 163, 175, 0.1); color: #6b7280; border: 1px solid rgba(156, 163, 175, 0.3);{% endif %}">
+                    {{ device.get_status_display }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+            <a href="{% url 'main:device_control' device.id %}" class="p-4 rounded-xl border text-center transition-all duration-300 hover:scale-105 group" style="border-color: rgba(229, 231, 235, 0.6);">
+                <svg class="w-8 h-8 mx-auto mb-2 text-gray-400 group-hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+                <p class="text-xs font-light text-gray-600 group-hover:text-red-500 transition-colors">Kontrol</p>
+            </a>
+            <a href="{% url 'main:device_streaming' device.id %}" class="p-4 rounded-xl border text-center transition-all duration-300 hover:scale-105 group" style="border-color: rgba(229, 231, 235, 0.6);">
+                <svg class="w-8 h-8 mx-auto mb-2 text-gray-400 group-hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <p class="text-xs font-light text-gray-600 group-hover:text-red-500 transition-colors">Streaming</p>
+            </a>
+            <a href="{% url 'main:device_sensor' device.id %}" class="p-4 rounded-xl border text-center transition-all duration-300 hover:scale-105 group" style="border-color: rgba(229, 231, 235, 0.6);">
+                <svg class="w-8 h-8 mx-auto mb-2 text-gray-400 group-hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <p class="text-xs font-light text-gray-600 group-hover:text-red-500 transition-colors">Sensor</p>
+            </a>
+            <a href="{% url 'main:device_detection_history' device.id %}" class="p-4 rounded-xl border text-center transition-all duration-300 hover:scale-105 group" style="border-color: rgba(229, 231, 235, 0.6);">
+                <svg class="w-8 h-8 mx-auto mb-2 text-gray-400 group-hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p class="text-xs font-light text-gray-600 group-hover:text-red-500 transition-colors">Riwayat</p>
+            </a>
+        </div>
+
+        <!-- Device Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Status Card -->
+            <div class="lg:col-span-2 bg-white rounded-2xl border p-6" style="border-color: rgba(229, 231, 235, 0.6);">
+                <h2 class="text-xl font-light text-gray-900 mb-6">Status Perangkat</h2>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                        <span class="text-sm font-light text-gray-600">Status</span>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium" 
+                              style="{% if device.status == 'active' %}background: rgba(134, 239, 172, 0.1); color: #16a34a;{% elif device.status == 'inactive' %}background: rgba(239, 68, 68, 0.1); color: #dc2626;{% else %}background: rgba(156, 163, 175, 0.1); color: #6b7280;{% endif %}">
+                            {{ device.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                        <span class="text-sm font-light text-gray-600">Terhubung</span>
+                        <span class="text-sm font-light" style="color: {% if device.status == 'active' %}#16a34a{% else %}#6b7280{% endif %};">
+                            {% if device.status == 'active' %}Ya{% else %}Tidak{% endif %}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                        <span class="text-sm font-light text-gray-600">Update Terakhir</span>
+                        <span class="text-sm font-light text-gray-900">{{ device.last_data_update|date:"d M Y H:i"|default:"Belum ada" }}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                        <span class="text-sm font-light text-gray-600">Ditambahkan</span>
+                        <span class="text-sm font-light text-gray-900">{{ device.created_at|date:"d M Y" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Detections -->
+            <div class="bg-white rounded-2xl border p-6" style="border-color: rgba(229, 231, 235, 0.6);">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-light text-gray-900">Deteksi Terbaru</h2>
+                    <a href="{% url 'main:device_detection_history' device.id %}" class="text-xs font-light text-gray-500 hover:text-red-500 transition-colors">
+                        Lihat semua
+                    </a>
+                </div>
+                {% if detections %}
+                <div class="space-y-3">
+                    {% for detection in detections|slice:":5" %}
+                    <div class="p-3 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                                <img src="{{ detection.image_url }}" alt="Detection" class="w-full h-full object-cover" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath fill=%22%23e5e7eb%22 d=%22M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z%22/%3E%3C/svg%3E';">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs font-light text-gray-900 truncate">{{ detection.disease_detected|default:"Tidak ada penyakit" }}</p>
+                                <p class="text-xs font-light text-gray-500">{{ detection.created_at|date:"d M H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm font-light text-gray-500 font-light text-center py-8">Belum ada deteksi</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

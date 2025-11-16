@@ -1,0 +1,707 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RangBot - Sistem Deteksi Penyakit Stroberi Berbasis Robot Cerdas dengan AI">
+    <meta name="keywords" content="robot, stroberi, deteksi penyakit, AI, pertanian, smart farming">
+    <meta name="author" content="RangBot Team">
+    <title>{% block title %}RangBot - Sistem Deteksi Penyakit Stroberi{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        strawberry: {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            200: '#fecaca',
+                            300: '#fca5a5',
+                            400: '#f87171',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            800: '#991b1b',
+                            900: '#7f1d1d',
+                        },
+                        gray: {
+                            50: '#f9fafb',
+                            100: '#f3f4f6',
+                            200: '#e5e7eb',
+                            300: '#d1d5db',
+                            400: '#9ca3af',
+                            500: '#6b7280',
+                            600: '#4b5563',
+                            700: '#374151',
+                            800: '#1f2937',
+                            900: '#111827',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+            background: #ffffff;
+        }
+        
+        .gradient-bg {
+            background: #ffffff;
+        }
+
+        body {
+            background: #ffffff;
+            color: #1f2937;
+            position: relative;
+        }
+
+
+        .greenhouse-glow {
+            background: linear-gradient(140deg, rgba(255, 255, 255, 0.9), rgba(255, 240, 247, 0.85));
+            box-shadow: 0 25px 60px rgba(158, 196, 162, 0.2);
+        }
+
+        .soft-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(123, 179, 142, 0.15);
+            box-shadow: 0 20px 45px rgba(132, 169, 148, 0.15);
+        }
+
+        .leaf-pill {
+            background: linear-gradient(120deg, rgba(111, 207, 151, 0.18), rgba(255, 192, 203, 0.2));
+            border: 1px solid rgba(111, 207, 151, 0.25);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(120deg, #48b777, #ff7aa2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(120deg, #4fc07a 0%, #ff7a9c 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 30px rgba(255, 122, 156, 0.25);
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 18px 35px rgba(79, 192, 122, 0.35);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            border: 1px solid rgba(79, 192, 122, 0.3);
+            color: #2f8654;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        /* Smooth fade-in animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        /* Navbar shadow on scroll */
+        .navbar-scrolled {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #72d596;
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4fc07a;
+        }
+
+        .greenhouse-bubble {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(20px);
+            opacity: 0.7;
+            background: linear-gradient(135deg, rgba(238, 251, 242, 0.9), rgba(255, 228, 235, 0.7));
+        }
+
+        .strawberry-badge {
+            background: rgba(255, 122, 156, 0.12);
+            color: #c22f5f;
+            border: 1px solid rgba(255, 122, 156, 0.25);
+            border-radius: 999px;
+            padding: 0.4rem 1rem;
+            font-weight: 600;
+        }
+
+        /* Futuristic Effects */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.3), 0 0 40px rgba(239, 68, 68, 0.2); }
+            100% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.5), 0 0 60px rgba(239, 68, 68, 0.3); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        section {
+            opacity: 0;
+        }
+
+        section.animate-fade-in {
+            opacity: 1;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .futuristic-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 244, 0.9) 100%);
+            border: 1px solid rgba(34, 197, 94, 0.15);
+            box-shadow: 
+                0 10px 40px rgba(34, 197, 94, 0.08),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset,
+                0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .futuristic-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 
+                0 25px 70px rgba(34, 197, 94, 0.15),
+                0 0 0 1px rgba(34, 197, 94, 0.25) inset,
+                0 0 50px rgba(239, 68, 68, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .neon-glow {
+            text-shadow: 
+                0 0 10px rgba(34, 197, 94, 0.5),
+                0 0 20px rgba(34, 197, 94, 0.3),
+                0 0 30px rgba(239, 68, 68, 0.2);
+        }
+
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .parallax-bg {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        @media (max-width: 768px) {
+            .parallax-bg {
+                background-attachment: scroll;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="min-h-screen">
+    
+    <!-- Header - Logo and Auth (Fixed at top) - Plain Background -->
+    <header class="fixed top-0 w-full z-50 transition-all duration-500" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
+        
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 relative z-10">
+            <div class="flex justify-between items-center h-14 sm:h-16 md:h-18 lg:h-20">
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-2 sm:gap-3 md:gap-4 group transition-all duration-300 hover:scale-105 active:scale-95">
+                    <div class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 flex-shrink-0 group-hover:rotate-3 transition-transform duration-300">
+                        <!-- Glow Effect -->
+                        <div class="absolute -inset-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: radial-gradient(circle, rgba(134, 239, 172, 0.3) 0%, rgba(74, 222, 128, 0.2) 50%, transparent 100%); filter: blur(10px);"></div>
+                        <!-- Logo Container -->
+                        <div class="relative w-full h-full bg-white rounded-xl p-0.5 sm:p-1 md:p-1.5 shadow-lg group-hover:shadow-xl transition-all duration-300 border" style="border-color: rgba(229, 231, 235, 0.5); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(134, 239, 172, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.9);" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.5)'; this.style.boxShadow='0 6px 16px rgba(0, 0, 0, 0.08), 0 3px 8px rgba(134, 239, 172, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.95)';" onmouseout="this.style.borderColor='rgba(229, 231, 235, 0.5)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(134, 239, 172, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.9)';">
+                            <img src="{% static 'Logo/Logo1.png' %}" 
+                                 alt="RangBot Logo" 
+                                 class="w-full h-full object-contain rounded-lg scale-110"
+                                 style="transform: scale(1.15);"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <!-- Fallback jika gambar tidak ditemukan -->
+                            <div style="display: none;" class="w-full h-full rounded-lg flex items-center justify-center" style="background: rgba(240, 253, 244, 0.8);">
+                                <span class="text-sm sm:text-base md:text-lg font-bold" style="color: #16a34a;">RB</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-lg sm:text-xl md:text-2xl tracking-tight font-light transition-colors duration-200" style="color: #1f2937; letter-spacing: -0.5px;" onmouseover="this.style.color='#86efac';" onmouseout="this.style.color='#1f2937';">
+                            RangBot
+                        </span>
+                        <span class="text-[10px] sm:text-xs tracking-normal font-light transition-colors duration-200" style="color: #6b7280; letter-spacing: 0.3px;" onmouseover="this.style.color='#86efac';" onmouseout="this.style.color='#6b7280';">
+                            Strawberry Care System
+                        </span>
+                </div>
+                </a>
+
+                <!-- Auth Buttons - Desktop -->
+                <div class="hidden md:flex items-center gap-3 lg:gap-4">
+                    <a href="/login" class="px-5 lg:px-6 py-2 lg:py-2.5 transition-all duration-200 font-light text-sm lg:text-base rounded-lg relative overflow-hidden group" style="color: #6b7280; border: 1px solid rgba(229, 231, 235, 0.6); background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px);" onmouseover="this.style.color='#86efac'; this.style.borderColor='rgba(134, 239, 172, 0.4)'; this.style.background='rgba(240, 253, 244, 0.5)';" onmouseout="this.style.color='#6b7280'; this.style.borderColor='rgba(229, 231, 235, 0.6)'; this.style.background='rgba(255, 255, 255, 0.7)';">
+                        <span class="relative z-10">Login</span>
+                    </a>
+                    <a href="/register" class="px-5 lg:px-6 py-2 lg:py-2.5 transition-all duration-200 font-light text-sm lg:text-base rounded-lg text-white relative overflow-hidden group" style="background: #86efac; border: 1px solid rgba(134, 239, 172, 0.3); box-shadow: 0 4px 12px rgba(134, 239, 172, 0.3);" onmouseover="this.style.background='#4ade80'; this.style.borderColor='rgba(134, 239, 172, 0.4)'; this.style.boxShadow='0 6px 16px rgba(134, 239, 172, 0.4)';" onmouseout="this.style.background='#86efac'; this.style.borderColor='rgba(134, 239, 172, 0.3)'; this.style.boxShadow='0 4px 12px rgba(134, 239, 172, 0.3)';">
+                        <span class="relative z-10">Register</span>
+                    </a>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg transition-colors duration-200 focus:outline-none hover:bg-gray-100/50" style="color: #374151;">
+                    <i class="fas fa-bars text-lg sm:text-xl transition-colors duration-200" id="menu-icon"></i>
+                    <i class="fas fa-times text-lg sm:text-xl hidden transition-colors duration-200" id="close-icon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Bar - Menu Items (shows/hides on scroll) -->
+    <nav id="navbar" class="fixed top-14 sm:top-16 md:top-18 lg:top-20 left-0 right-0 z-40 transition-transform duration-300 translate-y-0">
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+            <div class="hidden md:flex items-center justify-center py-3 md:py-3.5 lg:py-4">
+                <div class="flex items-center gap-5 lg:gap-8 px-6 lg:px-8 py-2.5 lg:py-3 rounded-full" style="background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(229, 231, 235, 0.6); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);">
+                    <a href="/#hero" class="px-4 lg:px-5 py-2 transition-all duration-200 tracking-normal text-sm lg:text-base font-light border-b-2 border-transparent nav-link whitespace-nowrap" data-page="home" style="color: #6b7280;" onmouseover="this.style.color='#86efac'; this.style.borderBottomColor='rgba(134, 239, 172, 0.4)';" onmouseout="this.style.color='#6b7280'; this.style.borderBottomColor='transparent';">
+                        Beranda
+                    </a>
+                    <a href="/informasi-produk/" class="px-4 lg:px-5 py-2 transition-all duration-200 tracking-normal text-sm lg:text-base font-light border-b-2 border-transparent nav-link whitespace-nowrap" data-page="product-info" style="color: #6b7280;" onmouseover="this.style.color='#86efac'; this.style.borderBottomColor='rgba(134, 239, 172, 0.4)';" onmouseout="this.style.color='#6b7280'; this.style.borderBottomColor='transparent';">
+                        Informasi Produk
+                    </a>
+                    <a href="/pembelian/" class="px-4 lg:px-5 py-2 transition-all duration-200 tracking-normal text-sm lg:text-base font-light border-b-2 border-transparent nav-link whitespace-nowrap" data-page="purchase" style="color: #6b7280;" onmouseover="this.style.color='#86efac'; this.style.borderBottomColor='rgba(134, 239, 172, 0.4)';" onmouseout="this.style.color='#6b7280'; this.style.borderBottomColor='transparent';">
+                        Pembelian
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="md:hidden fixed top-14 sm:top-16 md:top-18 lg:top-20 left-0 right-0 z-50 border-b hidden backdrop-blur-md transition-all duration-200" style="background: rgba(255, 255, 255, 0.98); border-color: rgba(229, 231, 235, 0.4);">
+        <div class="px-4 py-4">
+            <div class="flex flex-col gap-1">
+                <a href="/#hero" class="text-left px-3 py-2.5 transition-colors duration-200 mobile-nav-link rounded-lg font-light text-sm" data-page="home" style="color: #6b7280;" onmouseover="this.style.color='#86efac'; this.style.background='rgba(240, 253, 244, 0.4)';" onmouseout="this.style.color='#6b7280'; this.style.background='transparent';">
+                    Beranda
+                </a>
+                <a href="/informasi-produk/" class="text-left px-3 py-2.5 transition-colors duration-200 mobile-nav-link rounded-lg font-light text-sm" data-page="product-info" style="color: #6b7280;" onmouseover="this.style.color='#86efac'; this.style.background='rgba(240, 253, 244, 0.4)';" onmouseout="this.style.color='#6b7280'; this.style.background='transparent';">
+                    Informasi Produk
+                </a>
+                <a href="/pembelian/" class="text-left px-3 py-2.5 transition-colors duration-200 mobile-nav-link rounded-lg font-light text-sm" data-page="purchase" style="color: #6b7280;" onmouseover="this.style.color='#86efac'; this.style.background='rgba(240, 253, 244, 0.4)';" onmouseout="this.style.color='#6b7280'; this.style.background='transparent';">
+                    Pembelian
+                </a>
+                <div class="flex flex-col gap-2 pt-3" style="border-top: 1px solid rgba(229, 231, 235, 0.4);">
+                    <a href="/login" class="px-3 py-2.5 text-center transition-all duration-200 font-light text-sm rounded-lg relative overflow-hidden group" style="color: #6b7280; border: 1px solid rgba(229, 231, 235, 0.6); background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px);" onmouseover="this.style.color='#86efac'; this.style.borderColor='rgba(134, 239, 172, 0.4)'; this.style.background='rgba(240, 253, 244, 0.5)';" onmouseout="this.style.color='#6b7280'; this.style.borderColor='rgba(229, 231, 235, 0.6)'; this.style.background='rgba(255, 255, 255, 0.7)';">
+                        <span class="relative z-10">Login</span>
+                    </a>
+                    <a href="/register" class="px-3 py-2.5 text-center transition-all duration-200 font-light text-sm rounded-lg text-white relative overflow-hidden group" style="background: #86efac; border: 1px solid rgba(134, 239, 172, 0.3); box-shadow: 0 4px 12px rgba(134, 239, 172, 0.3);" onmouseover="this.style.background='#4ade80'; this.style.borderColor='rgba(134, 239, 172, 0.4)'; this.style.boxShadow='0 6px 16px rgba(134, 239, 172, 0.4)';" onmouseout="this.style.background='#86efac'; this.style.borderColor='rgba(134, 239, 172, 0.3)'; this.style.boxShadow='0 4px 12px rgba(134, 239, 172, 0.3)';">
+                        <span class="relative z-10">Register</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <main class="pt-14 sm:pt-16 md:pt-20 lg:pt-24 xl:pt-28">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer - Plain Background -->
+    <footer class="relative mt-20 py-12 sm:py-16 overflow-hidden" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
+        
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-12">
+                <!-- Brand - With Logo -->
+                <div class="col-span-1 md:col-span-2 lg:col-span-1">
+                    <a href="/" class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6 group transition-all duration-300 hover:scale-105 active:scale-95">
+                        <div class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 flex-shrink-0 group-hover:rotate-3 transition-transform duration-300">
+                            <!-- Glow Effect -->
+                            <div class="absolute -inset-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: radial-gradient(circle, rgba(134, 239, 172, 0.3) 0%, rgba(74, 222, 128, 0.2) 50%, transparent 100%); filter: blur(10px);"></div>
+                            <!-- Logo Container -->
+                            <div class="relative w-full h-full bg-white rounded-xl p-0.5 sm:p-1 md:p-1.5 shadow-lg group-hover:shadow-xl transition-all duration-300 border" style="border-color: rgba(229, 231, 235, 0.5); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(134, 239, 172, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.9);" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.5)'; this.style.boxShadow='0 6px 16px rgba(0, 0, 0, 0.08), 0 3px 8px rgba(134, 239, 172, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.95)';" onmouseout="this.style.borderColor='rgba(229, 231, 235, 0.5)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(134, 239, 172, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.9)';">
+                                <img src="{% static 'Logo/Logo1.png' %}" 
+                                     alt="RangBot Logo" 
+                                     class="w-full h-full object-contain rounded-lg"
+                                     style="transform: scale(1.1);"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <!-- Fallback jika gambar tidak ditemukan -->
+                                <div style="display: none;" class="w-full h-full rounded-lg flex items-center justify-center" style="background: rgba(240, 253, 244, 0.8);">
+                                    <span class="text-base sm:text-lg font-light" style="color: #16a34a;">RB</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-lg sm:text-xl md:text-2xl tracking-tight font-light transition-colors duration-200" style="color: #1f2937; letter-spacing: -0.5px;" onmouseover="this.style.color='#86efac';" onmouseout="this.style.color='#1f2937';">
+                                RangBot
+                            </span>
+                            <span class="text-[10px] sm:text-xs tracking-normal font-light transition-colors duration-200" style="color: #6b7280; letter-spacing: 0.3px;" onmouseover="this.style.color='#86efac';" onmouseout="this.style.color='#6b7280';">
+                                Strawberry Care System
+                            </span>
+                    </div>
+                    </a>
+                    <p class="text-sm sm:text-base leading-relaxed font-light" style="color: #6b7280; max-width: 280px;">Sistem deteksi penyakit stroberi berbasis robot cerdas dengan teknologi AI untuk monitoring greenhouse yang efisien.</p>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-base sm:text-lg mb-4 sm:mb-6 tracking-tight font-light" style="color: #1f2937;">Quick Links</h3>
+                    <ul class="space-y-2.5 sm:space-y-3">
+                        <li><a href="/#hero" class="text-sm sm:text-base font-light transition-colors duration-200 inline-flex items-center gap-2 group" style="color: #6b7280;" onmouseover="this.style.color='#86efac';" onmouseout="this.style.color='#6b7280';">
+                            <svg class="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                            <span>Beranda</span>
+                        </a></li>
+                        <li><a href="/informasi-produk/" class="text-sm sm:text-base font-light transition-colors duration-200 inline-flex items-center gap-2 group" style="color: #6b7280;" onmouseover="this.style.color='#86efac';" onmouseout="this.style.color='#6b7280';">
+                            <svg class="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                            <span>Informasi Produk</span>
+                        </a></li>
+                        <li><a href="/pembelian/" class="text-sm sm:text-base font-light transition-colors duration-200 inline-flex items-center gap-2 group" style="color: #6b7280;" onmouseover="this.style.color='#86efac';" onmouseout="this.style.color='#6b7280';">
+                            <svg class="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                            <span>Pembelian</span>
+                        </a></li>
+                        <li><a href="/#teknologi" class="text-sm sm:text-base font-light transition-colors duration-200 inline-flex items-center gap-2 group" style="color: #6b7280;" onmouseover="this.style.color='#86efac';" onmouseout="this.style.color='#6b7280';">
+                            <svg class="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                            <span>Teknologi</span>
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <!-- Support -->
+                <div>
+                    <h3 class="text-base sm:text-lg mb-4 sm:mb-6 tracking-tight font-light" style="color: #1f2937;">Support</h3>
+                    <ul class="space-y-2.5 sm:space-y-3">
+                        <li><a href="/informasi-produk/#faq" class="text-sm sm:text-base font-light transition-colors duration-200 inline-flex items-center gap-2 group" style="color: #6b7280;" onmouseover="this.style.color='#86efac';" onmouseout="this.style.color='#6b7280';">
+                            <svg class="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                            <span>FAQ</span>
+                        </a></li>
+                        <li><a href="/informasi-produk/#forum" class="text-sm sm:text-base font-light transition-colors duration-200 inline-flex items-center gap-2 group" style="color: #6b7280;" onmouseover="this.style.color='#86efac';" onmouseout="this.style.color='#6b7280';">
+                            <svg class="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                            <span>Forum</span>
+                        </a></li>
+                        <li><a href="/login" class="text-sm sm:text-base font-light transition-colors duration-200 inline-flex items-center gap-2 group" style="color: #6b7280;" onmouseover="this.style.color='#86efac';" onmouseout="this.style.color='#6b7280';">
+                            <svg class="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                            <span>Login</span>
+                        </a></li>
+                        <li><a href="/register" class="text-sm sm:text-base font-light transition-colors duration-200 inline-flex items-center gap-2 group" style="color: #6b7280;" onmouseover="this.style.color='#86efac';" onmouseout="this.style.color='#6b7280';">
+                            <svg class="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                            <span>Daftar</span>
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact -->
+                <div>
+                    <h3 class="text-base sm:text-lg mb-4 sm:mb-6 tracking-tight font-light" style="color: #1f2937;">Kontak</h3>
+                    <ul class="space-y-3 sm:space-y-4">
+                        <li class="flex items-center gap-2.5 sm:gap-3 group cursor-pointer">
+                            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center transition-all duration-200 group-hover:scale-110" style="background: rgba(240, 253, 244, 0.5); border: 1px solid rgba(229, 231, 235, 0.5);">
+                                <svg class="w-4 h-4" style="color: #86efac;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <span class="text-sm sm:text-base font-light transition-colors duration-200" style="color: #6b7280;" onmouseover="this.style.color='#1f2937';" onmouseout="this.style.color='#6b7280';">info@rangbot.id</span>
+                        </li>
+                        <li class="flex items-center gap-2.5 sm:gap-3 group cursor-pointer">
+                            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center transition-all duration-200 group-hover:scale-110" style="background: rgba(240, 253, 244, 0.5); border: 1px solid rgba(229, 231, 235, 0.5);">
+                                <svg class="w-4 h-4" style="color: #86efac;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                </svg>
+                            </div>
+                            <span class="text-sm sm:text-base font-light transition-colors duration-200" style="color: #6b7280;" onmouseover="this.style.color='#1f2937';" onmouseout="this.style.color='#6b7280';">+62 812-3456-7890</span>
+                        </li>
+                        <li class="flex items-center gap-2.5 sm:gap-3 group cursor-pointer">
+                            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center transition-all duration-200 group-hover:scale-110" style="background: rgba(240, 253, 244, 0.5); border: 1px solid rgba(229, 231, 235, 0.5);">
+                                <svg class="w-4 h-4" style="color: #86efac;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <span class="text-sm sm:text-base font-light transition-colors duration-200" style="color: #6b7280;" onmouseover="this.style.color='#1f2937';" onmouseout="this.style.color='#6b7280';">Bandung, Indonesia</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Bottom Section -->
+            <div class="border-t pt-8 sm:pt-10 flex flex-col md:flex-row justify-between items-center gap-4" style="border-color: rgba(229, 231, 235, 0.5);">
+                <p class="text-xs sm:text-sm font-light transition-colors duration-200" style="color: #9ca3af;" onmouseover="this.style.color='#6b7280';" onmouseout="this.style.color='#9ca3af';">
+                    &copy; 2025 RangBot. All rights reserved.
+                </p>
+                <div class="flex items-center gap-4 sm:gap-6">
+                    <a href="#" class="group relative w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110" style="background: rgba(240, 253, 244, 0.5); border: 1px solid rgba(229, 231, 235, 0.5);" onmouseover="this.style.background='rgba(240, 253, 244, 0.7)'; this.style.borderColor='rgba(134, 239, 172, 0.4)';" onmouseout="this.style.background='rgba(240, 253, 244, 0.5)'; this.style.borderColor='rgba(229, 231, 235, 0.5)';">
+                        <i class="fab fa-facebook-f text-sm sm:text-base transition-colors duration-200" style="color: #86efac;"></i>
+                    </a>
+                    <a href="#" class="group relative w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110" style="background: rgba(240, 253, 244, 0.5); border: 1px solid rgba(229, 231, 235, 0.5);" onmouseover="this.style.background='rgba(240, 253, 244, 0.7)'; this.style.borderColor='rgba(134, 239, 172, 0.4)';" onmouseout="this.style.background='rgba(240, 253, 244, 0.5)'; this.style.borderColor='rgba(229, 231, 235, 0.5)';">
+                        <i class="fab fa-twitter text-sm sm:text-base transition-colors duration-200" style="color: #86efac;"></i>
+                    </a>
+                    <a href="#" class="group relative w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110" style="background: rgba(254, 242, 242, 0.5); border: 1px solid rgba(229, 231, 235, 0.5);" onmouseover="this.style.background='rgba(254, 242, 242, 0.7)'; this.style.borderColor='rgba(244, 63, 94, 0.3)';" onmouseout="this.style.background='rgba(254, 242, 242, 0.5)'; this.style.borderColor='rgba(229, 231, 235, 0.5)';">
+                        <i class="fab fa-instagram text-sm sm:text-base transition-colors duration-200" style="color: #f43f5e;"></i>
+                    </a>
+                    <a href="#" class="group relative w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110" style="background: rgba(240, 253, 244, 0.5); border: 1px solid rgba(229, 231, 235, 0.5);" onmouseover="this.style.background='rgba(240, 253, 244, 0.7)'; this.style.borderColor='rgba(134, 239, 172, 0.4)';" onmouseout="this.style.background='rgba(240, 253, 244, 0.5)'; this.style.borderColor='rgba(229, 231, 235, 0.5)';">
+                        <i class="fab fa-linkedin-in text-sm sm:text-base transition-colors duration-200" style="color: #86efac;"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scroll to Top Button -->
+    <button id="scrollToTop" class="fixed bottom-8 right-8 bg-gradient-to-br from-primary-500 to-strawberry-500 text-white w-14 h-14 rounded-full shadow-2xl hover:shadow-primary-500/50 transition-all duration-300 opacity-0 invisible hover:scale-110 hover:rotate-180 group z-50">
+        <i class="fas fa-arrow-up group-hover:scale-110 transition-transform relative z-10"></i>
+        <div class="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+    </button>
+    
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+        
+        if (mobileMenuBtn && mobileMenu && menuIcon && closeIcon) {
+        mobileMenuBtn.addEventListener('click', () => {
+                const isHidden = mobileMenu.classList.contains('hidden');
+                if (isHidden) {
+                    mobileMenu.classList.remove('hidden');
+                    menuIcon.classList.add('hidden');
+                    closeIcon.classList.remove('hidden');
+                } else {
+                    mobileMenu.classList.add('hidden');
+                    menuIcon.classList.remove('hidden');
+                    closeIcon.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Close mobile menu when clicking a link
+        const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (mobileMenu) mobileMenu.classList.add('hidden');
+                if (menuIcon) menuIcon.classList.remove('hidden');
+                if (closeIcon) closeIcon.classList.add('hidden');
+            });
+        });
+        
+        // Navigation bar hide/show on scroll
+        const navbar = document.getElementById('navbar');
+        if (navbar) {
+            let lastScrollY = 0;
+            let showNavbar = true;
+            
+        window.addEventListener('scroll', () => {
+                const currentScrollY = window.scrollY;
+                
+                if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                    // Scrolling down & past threshold
+                    if (showNavbar) {
+                        navbar.classList.add('-translate-y-full');
+                        showNavbar = false;
+                    }
+            } else {
+                    // Scrolling up
+                    if (!showNavbar) {
+                        navbar.classList.remove('-translate-y-full');
+                        showNavbar = true;
+                    }
+                }
+                
+                lastScrollY = currentScrollY;
+            });
+        }
+        
+        // Active nav link highlighting
+        const navLinks = document.querySelectorAll('.nav-link');
+        if (navLinks.length > 0) {
+            const currentPath = window.location.pathname;
+            const currentHash = window.location.hash;
+            
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                const dataPage = link.getAttribute('data-page');
+                
+                // Reset all links
+                link.style.color = '#6b7280';
+                link.style.borderBottomColor = 'transparent';
+                
+                // Check if current page matches
+                if (currentPath === '/' && (dataPage === 'home' || href === '/#hero')) {
+                    if (!currentHash || currentHash === '#hero' || currentHash === '') {
+                        link.style.color = '#86efac';
+                        link.style.borderBottomColor = 'rgba(134, 239, 172, 0.4)';
+                    }
+                } else if (currentPath === '/informasi-produk/' && dataPage === 'product-info') {
+                    link.style.color = '#86efac';
+                    link.style.borderBottomColor = 'rgba(134, 239, 172, 0.4)';
+                } else if (currentPath === '/pembelian/' && dataPage === 'purchase') {
+                    link.style.color = '#86efac';
+                    link.style.borderBottomColor = 'rgba(134, 239, 172, 0.4)';
+                }
+            });
+            
+            // Update active link on hash change (for home page)
+            window.addEventListener('hashchange', () => {
+                if (currentPath === '/') {
+                    const hash = window.location.hash || '#hero';
+                    navLinks.forEach(link => {
+                        const href = link.getAttribute('href');
+                        // Reset all links
+                        link.style.color = '#6b7280';
+                        link.style.borderBottomColor = 'transparent';
+                        
+                        if (href === '/#hero' || (hash === '#hero' && link.getAttribute('data-page') === 'home')) {
+                            link.style.color = '#86efac';
+                            link.style.borderBottomColor = 'rgba(134, 239, 172, 0.4)';
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Scroll to top button
+        const scrollToTopBtn = document.getElementById('scrollToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) {
+                scrollToTopBtn.classList.remove('opacity-0', 'invisible');
+                scrollToTopBtn.classList.add('opacity-100', 'visible');
+            } else {
+                scrollToTopBtn.classList.add('opacity-0', 'invisible');
+                scrollToTopBtn.classList.remove('opacity-100', 'visible');
+            }
+        });
+        
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

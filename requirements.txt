@@ -1,0 +1,21 @@
+Django==4.2.7
+django-cors-headers==4.3.1
+Pillow==10.1.0
+python-decouple==3.8
+whitenoise==6.6.0
+
+# MySQL Database Support (Laragon)
+# Pilih salah satu:
+# mysqlclient==2.2.0  # Recommended, but requires MySQL development libraries
+pymysql==1.1.0  # Alternative, pure Python (easier to install)
+
+# For Firebase integration (optional)
+firebase-admin==6.3.0
+pyrebase4==4.7.1
+
+# For API development (optional)
+djangorestframework==3.14.0
+
+# For development
+python-dotenv==1.0.0
+

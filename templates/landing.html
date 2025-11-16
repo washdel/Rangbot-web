@@ -1,0 +1,1123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section - Compact Elegant & Modern -->
+<section id="hero" class="relative overflow-hidden pt-8 sm:pt-12 md:pt-16 pb-6 sm:pb-8 md:pb-10 px-4 sm:px-6 lg:px-8 min-h-[55vh] flex items-center">
+    <!-- Elegant Subtle Background -->
+    <div class="absolute inset-0 z-0 overflow-hidden hero-bg">
+        <div class="absolute inset-0 bg-white"></div>
+        <!-- Subtle grid pattern -->
+        <div class="absolute inset-0 opacity-[0.02]" style="background-image: linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px); background-size: 40px 40px;"></div>
+        <!-- Elegant accent orbs -->
+        <div class="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl" style="background: rgba(134, 239, 172, 0.2);"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-rose-100/20 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto relative z-10 w-full">
+        <div class="grid lg:grid-cols-2 gap-4 lg:gap-6 xl:gap-8 items-center">
+            <!-- Left Content - Compact -->
+            <div class="space-y-3 sm:space-y-4 lg:space-y-5 animate-fade-in-up">
+                <!-- Compact Badge -->
+                <div class="inline-block group cursor-pointer">
+                    <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/95 backdrop-blur-sm border shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105" style="border-color: rgba(134, 239, 172, 0.5);" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.7)';" onmouseout="this.style.borderColor='rgba(134, 239, 172, 0.5)';">
+                        <div class="relative">
+                            <div class="w-2 h-2 rounded-full shadow-md" style="background: #86efac; box-shadow: 0 0 8px rgba(134, 239, 172, 0.4);"></div>
+                            <div class="absolute inset-0 w-2 h-2 rounded-full animate-ping opacity-50" style="background: #86efac;"></div>
+                        </div>
+                        <span class="text-xs text-gray-700 tracking-wide font-light">Smart Agriculture Technology</span>
+                    </div>
+                </div>
+                
+                <!-- Compact Heading -->
+                <div class="space-y-2 sm:space-y-3">
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-gray-900 leading-tight tracking-tight font-light">
+                        <span class="block">Otomasi Monitoring</span>
+                        <span class="relative inline-block mt-1">
+                            <span class="bg-gradient-to-r from-rose-500 via-red-500 to-rose-500 bg-clip-text text-transparent font-medium">Greenhouse Stroberi</span>
+                            <span class="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-rose-400/30 via-red-500/50 to-rose-400/30 rounded-full"></span>
+                </span>
+                </h1>
+                    
+                    <p class="text-sm sm:text-base text-gray-600 leading-relaxed max-w-xl font-light">
+                        Sistem robot berbasis AI untuk monitoring otomatis, deteksi penyakit stroberi real-time, 
+                        dan optimalisasi kondisi greenhouse secara presisi.
+                    </p>
+                </div>
+
+                <!-- Compact Features - Horizontal Layout -->
+                <div class="flex flex-wrap gap-2 sm:gap-3 pt-1">
+                    <div class="group flex items-center gap-2 px-3 py-2 rounded-lg bg-white/70 backdrop-blur-sm border border-gray-200/50 hover:border-rose-300/60 hover:bg-white/90 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-100 to-rose-200/80 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                            <svg class="w-4 h-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0">
+                            <h3 class="text-xs sm:text-sm text-gray-900 font-medium leading-tight">AI Akurat 98%</h3>
+                            <p class="text-[10px] sm:text-xs text-gray-600 leading-tight">Deteksi Penyakit</p>
+                        </div>
+                    </div>
+
+                    <div class="group flex items-center gap-2 px-3 py-2 rounded-lg bg-white/70 backdrop-blur-sm border border-gray-200/50 hover:bg-white/90 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.6)';" onmouseout="this.style.borderColor='rgba(229, 231, 235, 0.5)';">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-sm" style="background: linear-gradient(135deg, rgba(134, 239, 172, 0.3) 0%, rgba(134, 239, 172, 0.5) 100%);">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color: #86efac;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0">
+                            <h3 class="text-xs sm:text-sm text-gray-900 font-medium leading-tight">Real-time 24/7</h3>
+                            <p class="text-[10px] sm:text-xs text-gray-600 leading-tight">Monitoring</p>
+                </div>
+                    </div>
+
+                    <div class="group flex items-center gap-2 px-3 py-2 rounded-lg bg-white/70 backdrop-blur-sm border border-gray-200/50 hover:border-slate-300/60 hover:bg-white/90 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200/80 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                            <svg class="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                            </svg>
+                    </div>
+                        <div class="min-w-0">
+                            <h3 class="text-xs sm:text-sm text-gray-900 font-medium leading-tight">Fleksibel</h3>
+                            <p class="text-[10px] sm:text-xs text-gray-600 leading-tight">Modular System</p>
+                    </div>
+                </div>
+            </div>
+            
+                <!-- Compact CTA Buttons -->
+                <div class="flex flex-wrap gap-2 sm:gap-2.5 pt-2">
+                    <a href="/pembelian/" class="group relative px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-white font-light text-xs sm:text-sm inline-flex items-center justify-center space-x-2 overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); box-shadow: 0 10px 25px rgba(134, 239, 172, 0.25);" onmouseover="this.style.boxShadow='0 15px 35px rgba(134, 239, 172, 0.35)';" onmouseout="this.style.boxShadow='0 10px 25px rgba(134, 239, 172, 0.25)';">
+                        <span class="relative z-10">Beli Sekarang</span>
+                        <svg class="w-3 h-3 relative z-10 group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <div class="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </a>
+                    <a href="#demo" class="px-4 sm:px-5 py-2 sm:py-2.5 border border-gray-300/60 text-gray-700 rounded-lg font-light text-xs sm:text-sm inline-flex items-center justify-center space-x-2 transition-all duration-300 backdrop-blur-sm hover:shadow-md" onmouseover="this.style.color='#86efac'; this.style.borderColor='rgba(134, 239, 172, 0.8)'; this.style.background='rgba(134, 239, 172, 0.1)';" onmouseout="this.style.color='#374151'; this.style.borderColor='rgba(209, 213, 219, 0.6)'; this.style.background='transparent';">
+                        <span>Lihat Demonstrasi</span>
+                        <svg class="w-3 h-3 group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Content - RangBot Animation -->
+            <div class="relative lg:pl-6">
+                <div class="relative group">
+                    <!-- Compact Glass morphism card -->
+                    <div class="relative aspect-square max-w-xs sm:max-w-sm mx-auto bg-white/90 backdrop-blur-xl rounded-2xl overflow-hidden shadow-xl border border-white/60 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.5)';" onmouseout="this.style.borderColor='rgba(255, 255, 255, 0.6)';">
+                        <!-- Elegant gradient background -->
+                        <div class="absolute inset-0" style="background: linear-gradient(135deg, rgba(134, 239, 172, 0.15) 0%, rgba(255, 255, 255, 1) 50%, rgba(254, 242, 242, 0.1) 100%);"></div>
+                        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: radial-gradient(circle at center, rgba(134, 239, 172, 0.1) 0%, rgba(244, 63, 94, 0.08) 50%, transparent 100%);"></div>
+                        
+                        <!-- Content - RangBot on Rail -->
+                        <div class="relative h-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
+                            <!-- Rail with Grooves -->
+                            <div class="absolute top-[45%] left-3 right-3 h-3 sm:h-4 bg-gradient-to-r from-gray-300 via-gray-400 to-gray-300 shadow-lg" style="border-radius: 0;">
+                                <!-- Rail Grooves -->
+                                <div class="absolute top-0 left-1/4 w-1/2 h-full bg-gray-500/30"></div>
+                                <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/2 h-full bg-gray-500/30"></div>
+                                <!-- Rail Highlight -->
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+                            </div>
+                            
+                            <!-- RangBot Container - Based on Technical Drawing -->
+                            <div class="relative z-10 animate-rangbot-float">
+                                <!-- Hexagonal Frame for Rail Attachment (Top View) -->
+                                <div class="absolute -top-6 sm:-top-8 left-1/2 transform -translate-x-1/2 w-20 sm:w-24 h-12 sm:h-14 opacity-80">
+                                    <svg viewBox="0 0 100 60" class="w-full h-full">
+                                        <!-- Hexagonal Frame -->
+                                        <path d="M20 10 L80 10 L95 30 L80 50 L20 50 L5 30 Z" 
+                                              fill="none" 
+                                              stroke="#6b7280" 
+                                              stroke-width="1.5" 
+                                              stroke-linecap="round" 
+                                              stroke-linejoin="round"/>
+                                        <!-- Wheels inside frame -->
+                                        <circle cx="30" cy="30" r="4" fill="#4b5563" opacity="0.7"/>
+                                        <circle cx="70" cy="30" r="4" fill="#4b5563" opacity="0.7"/>
+                                        <!-- Center block -->
+                                        <rect x="45" y="25" width="10" height="10" fill="#374151" rx="1"/>
+                                    </svg>
+                                </div>
+                                
+                                <!-- RangBot Main Body - Base Rectangular (Dark Gray) -->
+                                <div class="relative w-28 h-20 sm:w-32 sm:h-24 bg-gradient-to-br from-gray-700 via-gray-600 to-gray-500 shadow-2xl transform hover:scale-105 transition-all border-2 border-gray-400/50 mx-auto" style="border-radius: 2px;">
+                                    <!-- Upper Narrower Section (Light Gray) -->
+                                    <div class="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2 w-20 h-6 sm:w-24 sm:h-7 bg-gradient-to-br from-gray-400 to-gray-500 border border-gray-300 shadow-md" style="border-radius: 2px;">
+                                        <!-- Small Dome on Top -->
+                                        <div class="absolute -top-1.5 sm:-top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 sm:w-4 sm:h-4 bg-gray-300 rounded-full border border-gray-400"></div>
+                                    </div>
+                                    
+                                    <!-- Sensor Array Grid Pattern (Front) -->
+                                    <div class="absolute bottom-2 left-2 right-2 h-3 sm:h-4 bg-gray-800/60 border border-gray-600/50" style="border-radius: 1px;">
+                                        <div class="grid grid-cols-4 gap-0.5 p-0.5 h-full">
+                                            <div class="bg-gray-700/80"></div>
+                                            <div class="bg-gray-700/80"></div>
+                                            <div class="bg-gray-700/80"></div>
+                                            <div class="bg-gray-700/80"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Side Wheels/Rollers (Visible from side) -->
+                                    <div class="absolute top-1/2 -left-2 sm:-left-2.5 w-2 h-4 sm:w-2.5 sm:h-5 bg-gray-600 rounded-full border border-gray-500"></div>
+                                    <div class="absolute top-1/2 -right-2 sm:-right-2.5 w-2 h-4 sm:w-2.5 sm:h-5 bg-gray-600 rounded-full border border-gray-500"></div>
+                                    
+                                    <!-- Status Indicator Lights -->
+                                    <div class="absolute top-2 right-2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse shadow-lg"></div>
+                                    <div class="absolute top-4 right-2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full animate-pulse shadow-lg" style="animation-delay: 0.5s;"></div>
+                                    
+                                    <!-- Text Label -->
+                                    <div class="absolute bottom-1 left-0 right-0 text-center">
+                                        <div class="text-[7px] sm:text-[8px] text-white/90 tracking-wider font-bold">RANGBOT</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Compact RangBot Label -->
+                            <div class="absolute bottom-4 sm:bottom-6 text-center">
+                                <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/90 backdrop-blur-sm border border-gray-200/40 shadow-sm">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                                    <span class="text-[10px] sm:text-xs text-gray-700 font-light tracking-wide">RangBot AI</span>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    
+                    <!-- Compact Floating Stats -->
+                    <div class="absolute -bottom-2 sm:-bottom-3 left-0 right-0 grid grid-cols-3 gap-1.5 sm:gap-2 px-1.5 sm:px-2">
+                        <div class="group/stat bg-white/95 backdrop-blur-md rounded-md shadow-sm border border-gray-200/40 p-1.5 text-center hover:shadow-md hover:scale-105 transition-all duration-300 cursor-pointer">
+                            <div class="text-sm sm:text-base text-red-500 mb-0.5 font-medium">500+</div>
+                            <div class="text-[8px] sm:text-[9px] text-gray-600 font-light">Unit</div>
+                        </div>
+                        <div class="group/stat bg-white/95 backdrop-blur-md rounded-md shadow-sm border border-gray-200/40 p-1.5 text-center hover:shadow-md hover:scale-105 transition-all duration-300 cursor-pointer">
+                            <div class="text-sm sm:text-base text-green-500 mb-0.5 font-medium">98%</div>
+                            <div class="text-[8px] sm:text-[9px] text-gray-600 font-light">Akurasi</div>
+                        </div>
+                        <div class="group/stat bg-white/95 backdrop-blur-md rounded-md shadow-sm border border-gray-200/40 p-1.5 text-center hover:shadow-md hover:scale-105 transition-all duration-300 cursor-pointer">
+                            <div class="text-sm sm:text-base text-blue-500 mb-0.5 font-medium">24/7</div>
+                            <div class="text-[8px] sm:text-[9px] text-gray-600 font-light">Monitor</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Technology Section - Elegant & Consistent -->
+<section id="teknologi" class="py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50/50 to-white relative overflow-hidden">
+    <!-- Subtle Background Pattern -->
+    <div class="absolute inset-0 opacity-[0.015]" style="background-image: radial-gradient(circle at 2px 2px, rgba(0,0,0,0.15) 1px, transparent 0); background-size: 40px 40px;"></div>
+    
+    <div class="max-w-7xl mx-auto relative z-10">
+        <div class="text-center mb-16 sm:mb-20 max-w-3xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-4" style="background: rgba(134, 239, 172, 0.1); border-color: rgba(134, 239, 172, 0.4);">
+                <div class="w-2 h-2 rounded-full animate-pulse" style="background: #86efac;"></div>
+                <span class="text-xs sm:text-sm font-medium tracking-wide" style="color: #86efac;">Teknologi Canggih</span>
+            </div>
+            <h2 class="text-3xl sm:text-4xl md:text-5xl text-gray-900 mb-4 sm:mb-6 tracking-tight font-light">
+                <span class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">Teknologi Terdepan</span>
+            </h2>
+            <p class="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed font-light">
+                RangBot mengintegrasikan berbagai teknologi canggih untuk memberikan solusi monitoring greenhouse yang komprehensif dan efisien
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div class="group relative bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 sm:p-8 hover:shadow-2xl hover:border-emerald-300/60 hover:-translate-y-1 transition-all duration-500 cursor-pointer overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-rose-50/0 via-rose-50/30 to-rose-50/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div class="relative z-10">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg shadow-rose-500/30">
+                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl text-gray-900 mb-3 tracking-tight font-light">Artificial Intelligence</h3>
+                    <p class="text-gray-600 leading-relaxed text-sm sm:text-base font-light">Deep learning R-CNN untuk deteksi penyakit tanaman dengan presisi tinggi dan pembelajaran berkelanjutan</p>
+                </div>
+            </div>
+
+            <div class="group relative bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 sm:p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 cursor-pointer overflow-hidden" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.6)';" onmouseout="this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: linear-gradient(135deg, rgba(134, 239, 172, 0) 0%, rgba(134, 239, 172, 0.15) 50%, rgba(134, 239, 172, 0) 100%);"></div>
+                <div class="relative z-10">
+                    <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); box-shadow: 0 10px 25px rgba(134, 239, 172, 0.3);">
+                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl text-gray-900 mb-3 tracking-tight font-light">IoT Sensor Network</h3>
+                    <p class="text-gray-600 leading-relaxed text-sm sm:text-base font-light">Jaringan sensor pintar untuk monitoring suhu, kelembaban, dan parameter lingkungan greenhouse</p>
+                </div>
+            </div>
+
+            <div class="group relative bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 sm:p-8 hover:shadow-2xl hover:border-emerald-300/60 hover:-translate-y-1 transition-all duration-500 cursor-pointer overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-slate-50/0 via-slate-50/30 to-slate-50/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div class="relative z-10">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg shadow-slate-500/30">
+                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H9a3 3 0 003-3V9a3 3 0 00-3-3H6.75A4.5 4.5 0 002.25 15zM13.5 9a3 3 0 013 3v6a3 3 0 01-3 3H9.75a4.5 4.5 0 01-4.5-4.5V9a4.5 4.5 0 014.5-4.5H13.5z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl text-gray-900 mb-3 tracking-tight font-light">Cloud Computing</h3>
+                    <p class="text-gray-600 leading-relaxed text-sm sm:text-base font-light">Infrastruktur cloud untuk penyimpanan data aman, analisis real-time, dan akses dari berbagai platform</p>
+                </div>
+            </div>
+
+            <div class="group relative bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 sm:p-8 hover:shadow-2xl hover:border-emerald-300/60 hover:-translate-y-1 transition-all duration-500 cursor-pointer overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-rose-50/0 via-rose-50/30 to-rose-50/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div class="relative z-10">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg shadow-rose-500/30">
+                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl text-gray-900 mb-3 tracking-tight font-light">Computer Vision</h3>
+                    <p class="text-gray-600 leading-relaxed text-sm sm:text-base font-light">Kamera HD dengan sistem computer vision untuk pemantauan visual dan analisis kondisi tanaman</p>
+                    </div>
+                </div>
+                
+            <div class="group relative bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 sm:p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 cursor-pointer overflow-hidden" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.6)';" onmouseout="this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: linear-gradient(135deg, rgba(134, 239, 172, 0) 0%, rgba(134, 239, 172, 0.15) 50%, rgba(134, 239, 172, 0) 100%);"></div>
+                <div class="relative z-10">
+                    <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); box-shadow: 0 10px 25px rgba(134, 239, 172, 0.3);">
+                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl text-gray-900 mb-3 tracking-tight font-light">Precision Control</h3>
+                    <p class="text-gray-600 leading-relaxed text-sm sm:text-base font-light">Sistem kontrol presisi dengan motor berkualitas industri untuk navigasi akurat sepanjang greenhouse</p>
+                    </div>
+                </div>
+                
+            <div class="group relative bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 sm:p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 cursor-pointer overflow-hidden" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.6)';" onmouseout="this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: linear-gradient(135deg, rgba(134, 239, 172, 0) 0%, rgba(134, 239, 172, 0.15) 50%, rgba(134, 239, 172, 0) 100%);"></div>
+                <div class="relative z-10">
+                    <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); box-shadow: 0 10px 25px rgba(134, 239, 172, 0.3);">
+                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl text-gray-900 mb-3 tracking-tight font-light">Data Analytics</h3>
+                    <p class="text-gray-600 leading-relaxed text-sm sm:text-base font-light">Dashboard analytics komprehensif dengan visualisasi data dan insights untuk pengambilan keputusan</p>
+                    </div>
+                    </div>
+                </div>
+                
+        <!-- Integration Banner - Elegant -->
+        <div class="mt-16 sm:mt-20 relative overflow-hidden rounded-3xl p-8 sm:p-12 shadow-2xl group cursor-pointer">
+            <div class="absolute inset-0" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 50%, #86efac 100%);"></div>
+            <div class="absolute inset-0 bg-gradient-to-br from-rose-500/20 via-transparent to-rose-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 30px 30px;"></div>
+            <div class="relative z-10 max-w-4xl mx-auto text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                    <span class="text-xs sm:text-sm text-white font-medium tracking-wide">Platform Terintegrasi</span>
+                    </div>
+                <h3 class="text-2xl sm:text-3xl md:text-4xl text-white mb-4 tracking-tight font-light">Ekosistem Terintegrasi</h3>
+                <p class="text-base sm:text-lg md:text-xl text-white/95 leading-relaxed font-light">
+                    Semua teknologi bekerja harmonis dalam satu platform terpadu. Data real-time, kontrol jarak jauh, 
+                    dan analisis AI tersedia dalam dashboard yang intuitif untuk keputusan bisnis yang lebih baik.
+                        </p>
+                    </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section - Elegant & Consistent -->
+<section id="cara-kerja" class="py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden">
+    <!-- Subtle Background Pattern -->
+    <div class="absolute inset-0 opacity-[0.015]" style="background-image: radial-gradient(circle at 2px 2px, rgba(0,0,0,0.15) 1px, transparent 0); background-size: 40px 40px;"></div>
+    
+    <div class="max-w-7xl mx-auto relative z-10">
+        <div class="text-center mb-16 sm:mb-20 max-w-3xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-4" style="background: rgba(134, 239, 172, 0.1); border-color: rgba(134, 239, 172, 0.4);">
+                <div class="w-2 h-2 rounded-full animate-pulse" style="background: #86efac;"></div>
+                <span class="text-xs sm:text-sm font-medium tracking-wide" style="color: #86efac;">Proses Kerja</span>
+            </div>
+            <h2 class="text-3xl sm:text-4xl md:text-5xl text-gray-900 mb-4 sm:mb-6 tracking-tight font-light">
+                <span class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">Cara Kerja Sistem</span>
+            </h2>
+            <p class="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed font-light">
+                Proses terotomasi dari instalasi hingga insights bisnis dalam satu ekosistem terintegrasi
+            </p>
+        </div>
+
+        <div class="grid lg:grid-cols-4 gap-6 sm:gap-8">
+            <div class="relative group">
+                <div class="relative bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 sm:p-8 hover:shadow-2xl hover:border-emerald-300/60 hover:-translate-y-1 transition-all duration-500 h-full cursor-pointer overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-rose-50/0 via-rose-50/30 to-rose-50/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative z-10">
+                        <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 text-white mb-6 shadow-lg shadow-rose-500/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                            <span class="text-xl sm:text-2xl tracking-tight font-light">01</span>
+                        </div>
+                        <h3 class="text-xl text-gray-900 mb-4 tracking-tight font-light">Instalasi & Konfigurasi</h3>
+                        <p class="text-gray-600 leading-relaxed text-sm sm:text-base font-light">Tim teknisi profesional melakukan instalasi sistem rel, robot, dan sensor sesuai layout greenhouse Anda</p>
+                    </div>
+                </div>
+                <div class="hidden lg:block absolute top-20 -right-4 z-10 opacity-40 group-hover:opacity-100 transition-opacity duration-500">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color: #86efac;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="relative group">
+                <div class="relative bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 sm:p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 h-full cursor-pointer overflow-hidden" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.6)';" onmouseout="this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: linear-gradient(135deg, rgba(134, 239, 172, 0) 0%, rgba(134, 239, 172, 0.15) 50%, rgba(134, 239, 172, 0) 100%);"></div>
+                    <div class="relative z-10">
+                        <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl text-white mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); box-shadow: 0 10px 25px rgba(134, 239, 172, 0.3);">
+                            <span class="text-xl sm:text-2xl tracking-tight font-light">02</span>
+                        </div>
+                        <h3 class="text-xl text-gray-900 mb-4 tracking-tight font-light">Navigasi Otomatis</h3>
+                        <p class="text-gray-600 leading-relaxed text-sm sm:text-base font-light">Robot bergerak dengan presisi tinggi di sepanjang rel, menjangkau seluruh area greenhouse secara sistematis</p>
+                    </div>
+                </div>
+                <div class="hidden lg:block absolute top-20 -right-4 z-10 opacity-40 group-hover:opacity-100 transition-opacity duration-500">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color: #86efac;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                    </div>
+                    </div>
+
+            <div class="relative group">
+                <div class="relative bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 sm:p-8 hover:shadow-2xl hover:border-rose-300/60 hover:-translate-y-1 transition-all duration-500 h-full cursor-pointer overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-rose-50/0 via-rose-50/30 to-rose-50/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative z-10">
+                        <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 text-white mb-6 shadow-lg shadow-rose-500/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                            <span class="text-xl sm:text-2xl tracking-tight font-light">03</span>
+                    </div>
+                        <h3 class="text-xl text-gray-900 mb-4 tracking-tight font-light">Scanning & Monitoring</h3>
+                        <p class="text-gray-600 leading-relaxed text-sm sm:text-base font-light">Kamera dan sensor mengumpulkan data visual, suhu, kelembaban, dan parameter lingkungan secara kontinyu</p>
+                    </div>
+                    </div>
+                <div class="hidden lg:block absolute top-20 -right-4 z-10 opacity-40 group-hover:opacity-100 transition-opacity duration-500">
+                    <svg class="w-6 h-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                    </div>
+                    </div>
+
+            <div class="relative group">
+                <div class="relative bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 sm:p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 h-full cursor-pointer overflow-hidden" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.6)';" onmouseout="this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: linear-gradient(135deg, rgba(134, 239, 172, 0) 0%, rgba(134, 239, 172, 0.15) 50%, rgba(134, 239, 172, 0) 100%);"></div>
+                    <div class="relative z-10">
+                        <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl text-white mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); box-shadow: 0 10px 25px rgba(134, 239, 172, 0.3);">
+                            <span class="text-xl sm:text-2xl tracking-tight font-light">04</span>
+                    </div>
+                        <h3 class="text-xl text-gray-900 mb-4 tracking-tight font-light">Analisis & Insights</h3>
+                        <p class="text-gray-600 leading-relaxed text-sm sm:text-base font-light">AI menganalisis data, mendeteksi penyakit, dan memberikan rekomendasi melalui dashboard real-time Anda</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Block Preview Section - Elegant & Consistent -->
+<section id="peta" class="py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 via-white to-gray-50/50 relative overflow-hidden">
+    <!-- Subtle Background Pattern -->
+    <div class="absolute inset-0 opacity-[0.015]" style="background-image: radial-gradient(circle at 2px 2px, rgba(0,0,0,0.15) 1px, transparent 0); background-size: 40px 40px;"></div>
+    
+    <div class="max-w-7xl mx-auto relative z-10">
+        <div class="text-center mb-12 sm:mb-16 max-w-3xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-4" style="background: rgba(134, 239, 172, 0.1); border-color: rgba(134, 239, 172, 0.4);">
+                <div class="w-2 h-2 rounded-full animate-pulse" style="background: #86efac;"></div>
+                <span class="text-xs sm:text-sm font-medium tracking-wide" style="color: #86efac;">Sistem Interaktif</span>
+            </div>
+            <h2 class="text-3xl sm:text-4xl md:text-5xl text-gray-900 mb-4 sm:mb-6 tracking-tight font-light">
+                <span class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">Sistem Pergerakan RangBot</span>
+            </h2>
+            <p class="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed font-light">
+                Robot bergerak otomatis di rel tengah antar blok greenhouse untuk monitoring menyeluruh
+            </p>
+        </div>
+        
+        <div class="max-w-6xl mx-auto">
+            <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-4 sm:p-6 shadow-2xl border border-gray-200/60 hover:shadow-3xl transition-all duration-500">
+                <!-- Block A - Compact -->
+                <div class="mb-3 sm:mb-4">
+                    <div class="rounded-lg p-3 sm:p-4 border-2 shadow-sm" style="background: linear-gradient(135deg, rgba(134, 239, 172, 0.2) 0%, rgba(134, 239, 172, 0.1) 100%); border-color: rgba(134, 239, 172, 0.4);">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm tracking-wide font-bold" style="color: #86efac;">BLOK A</span>
+                            <span class="text-[10px] sm:text-xs bg-white px-2 py-0.5 rounded-full font-medium" style="color: #4ade80;">Stroberi</span>
+                    </div>
+                        <div class="grid grid-cols-8 sm:grid-cols-10 gap-1.5 sm:gap-2">
+                            {% for i in "xxxxxxxxxx" %}
+                            <div class="flex flex-col items-center">
+                                <div class="text-lg sm:text-xl">🍓</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+                </div>
+
+                <!-- Rail with RangBot and Controls - Side by Side -->
+                <div class="flex flex-col lg:flex-row gap-4 items-start mb-3 sm:mb-4">
+                    <!-- Left Side: Rail with RangBot -->
+                    <div class="flex-1 relative py-3 sm:py-4 w-full">
+                        <!-- Rail with Grooves -->
+                        <div id="rail" class="relative h-3 sm:h-4 bg-gradient-to-r from-gray-300 via-gray-400 to-gray-300 shadow-lg mb-3 sm:mb-4" style="border-radius: 0;">
+                            <!-- Rail Grooves -->
+                            <div class="absolute top-0 left-1/4 w-1/2 h-full bg-gray-500/30"></div>
+                            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/2 h-full bg-gray-500/30"></div>
+                            <!-- Rail Highlight -->
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+        </div>
+        
+                        <!-- RangBot Container - Hanging on Rail -->
+                        <div id="rangbot-container" class="relative transition-all duration-500 ease-in-out z-10 mb-3 sm:mb-4" style="left: 50%; transform: translateX(-50%);">
+                            <div class="group cursor-pointer">
+                                <!-- Hexagonal Frame for Rail Attachment (Top View) -->
+                                <div class="absolute -top-6 sm:-top-8 left-1/2 transform -translate-x-1/2 w-20 sm:w-24 h-12 sm:h-14 opacity-80 z-0">
+                                    <svg viewBox="0 0 100 60" class="w-full h-full">
+                                        <!-- Hexagonal Frame -->
+                                        <path d="M20 10 L80 10 L95 30 L80 50 L20 50 L5 30 Z" 
+                                              fill="none" 
+                                              stroke="#6b7280" 
+                                              stroke-width="1.5" 
+                                              stroke-linecap="round" 
+                                              stroke-linejoin="round"/>
+                                        <!-- Wheels inside frame -->
+                                        <circle cx="30" cy="30" r="4" fill="#4b5563" opacity="0.7"/>
+                                        <circle cx="70" cy="30" r="4" fill="#4b5563" opacity="0.7"/>
+                                        <!-- Center block -->
+                                        <rect x="45" y="25" width="10" height="10" fill="#374151" rx="1"/>
+                                    </svg>
+                </div>
+                                
+                                <!-- RangBot Main Body - Base Rectangular (Dark Gray) -->
+                                <div id="rangbot" class="relative w-28 h-20 sm:w-32 sm:h-24 bg-gradient-to-br from-gray-700 via-gray-600 to-gray-500 shadow-2xl transform hover:scale-105 transition-all border-2 border-gray-400/50 mx-auto" style="border-radius: 2px;">
+                                    <!-- Upper Narrower Section (Light Gray) -->
+                                    <div class="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2 w-20 h-6 sm:w-24 sm:h-7 bg-gradient-to-br from-gray-400 to-gray-500 border border-gray-300 shadow-md" style="border-radius: 2px;">
+                                        <!-- Small Dome on Top -->
+                                        <div class="absolute -top-1.5 sm:-top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 sm:w-4 sm:h-4 bg-gray-300 rounded-full border border-gray-400"></div>
+            </div>
+                                    
+                                    <!-- Sensor Array Grid Pattern (Front) -->
+                                    <div class="absolute bottom-2 left-2 right-2 h-3 sm:h-4 bg-gray-800/60 border border-gray-600/50" style="border-radius: 1px;">
+                                        <div class="grid grid-cols-4 gap-0.5 p-0.5 h-full">
+                                            <div class="bg-gray-700/80"></div>
+                                            <div class="bg-gray-700/80"></div>
+                                            <div class="bg-gray-700/80"></div>
+                                            <div class="bg-gray-700/80"></div>
+        </div>
+    </div>
+                                    
+                                    <!-- Side Wheels/Rollers (Visible from side) -->
+                                    <div class="absolute top-1/2 -left-2 sm:-left-2.5 w-2 h-4 sm:w-2.5 sm:h-5 bg-gray-600 rounded-full border border-gray-500"></div>
+                                    <div class="absolute top-1/2 -right-2 sm:-right-2.5 w-2 h-4 sm:w-2.5 sm:h-5 bg-gray-600 rounded-full border border-gray-500"></div>
+                                    
+                                    <!-- Status Indicator Lights -->
+                                    <div class="absolute top-2 right-2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse shadow-lg"></div>
+                                    <div class="absolute top-4 right-2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full animate-pulse shadow-lg" style="animation-delay: 0.5s;"></div>
+                                    
+                                    <!-- Text Label -->
+                                    <div class="absolute bottom-1 left-0 right-0 text-center">
+                                        <div class="text-[7px] sm:text-[8px] text-white/90 tracking-wider font-bold">RANGBOT</div>
+        </div>
+        
+                                    <!-- Movement Indicator -->
+                                    <div id="movement-indicator" class="absolute -top-10 sm:-top-12 left-1/2 transform -translate-x-1/2 opacity-0 transition-opacity duration-300 z-20">
+                                        <div class="text-white px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-medium shadow-lg whitespace-nowrap" style="background: #86efac;">
+                                            <span id="movement-text">Bergerak...</span>
+                                        </div>
+                    </div>
+                    </div>
+                                <!-- RangBot Label -->
+                                <div class="text-center mt-2 sm:mt-3">
+                                    <span class="text-[10px] sm:text-xs text-gray-700 bg-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-md border-2 border-gray-200 font-medium">
+                                        RangBot AI
+                                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    <!-- Right Side: Control Buttons -->
+                    <div class="w-full lg:w-auto lg:min-w-[200px] flex-shrink-0">
+                        <div class="space-y-3 sm:space-y-4">
+                            <!-- Control Buttons -->
+                            <div class="flex flex-col gap-2 sm:gap-3">
+                                <!-- Left Button -->
+                                <button id="move-left-btn" onclick="moveRangBot('left')" class="group relative px-4 sm:px-5 py-2 sm:py-2.5 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 font-medium text-xs sm:text-sm" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%);" onmouseover="this.style.background='linear-gradient(135deg, #4ade80 0%, #22c55e 100%)';" onmouseout="this.style.background='linear-gradient(135deg, #86efac 0%, #4ade80 100%)';">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                    <span>Kiri</span>
+                                </button>
+                                
+                                <!-- Right Button -->
+                                <button id="move-right-btn" onclick="moveRangBot('right')" class="group relative px-4 sm:px-5 py-2 sm:py-2.5 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 font-medium text-xs sm:text-sm" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%);" onmouseover="this.style.background='linear-gradient(135deg, #4ade80 0%, #22c55e 100%)';" onmouseout="this.style.background='linear-gradient(135deg, #86efac 0%, #4ade80 100%)';">
+                                    <span>Kanan</span>
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+        </div>
+        
+                            <!-- Status Display -->
+                            <div id="status-display" class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border shadow-sm w-full justify-center" style="background: rgba(134, 239, 172, 0.1); color: #86efac; border-color: rgba(134, 239, 172, 0.3);">
+                                <div class="w-1.5 h-1.5 rounded-full animate-pulse" style="background: #86efac;"></div>
+                                <span class="text-[10px] sm:text-xs font-medium">Siap</span>
+                            </div>
+                        </div>
+                </div>
+                </div>
+
+                <!-- Block B - Compact -->
+                <div>
+                    <div class="rounded-lg p-3 sm:p-4 border-2 shadow-sm" style="background: linear-gradient(135deg, rgba(134, 239, 172, 0.2) 0%, rgba(134, 239, 172, 0.1) 100%); border-color: rgba(134, 239, 172, 0.4);">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm tracking-wide font-bold" style="color: #86efac;">BLOK B</span>
+                            <span class="text-[10px] sm:text-xs bg-white px-2 py-0.5 rounded-full font-medium" style="color: #4ade80;">Stroberi</span>
+                        </div>
+                        <div class="grid grid-cols-8 sm:grid-cols-10 gap-1.5 sm:gap-2">
+                            {% for i in "xxxxxxxxxx" %}
+                            <div class="flex flex-col items-center">
+                                <div class="text-lg sm:text-xl">🍓</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+                </div>
+            </div>
+
+            <!-- Info Card - Elegant -->
+            <div class="mt-8 rounded-2xl p-6 sm:p-8 border shadow-lg backdrop-blur-sm" style="background: linear-gradient(135deg, rgba(134, 239, 172, 0.15) 0%, rgba(255, 255, 255, 1) 50%, rgba(134, 239, 172, 0.1) 100%); border-color: rgba(134, 239, 172, 0.3);">
+                <div class="flex items-start gap-4 sm:gap-6">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); box-shadow: 0 10px 25px rgba(134, 239, 172, 0.3);">
+                        <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-gray-900 mb-3 font-light text-lg sm:text-xl">Monitoring Otomatis & Manual</h4>
+                        <p class="text-gray-600 leading-relaxed text-sm sm:text-base mb-4 font-light">
+                            RangBot bergerak sepanjang rel secara otomatis, memindai kedua sisi blok untuk mendeteksi penyakit, 
+                            mengukur suhu & kelembaban, serta mengambil gambar tanaman secara real-time.
+                        </p>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-3 group/item cursor-pointer">
+                                <div class="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors" style="background: rgba(134, 239, 172, 0.2);" onmouseover="this.style.background='rgba(134, 239, 172, 0.3)';" onmouseout="this.style.background='rgba(134, 239, 172, 0.2)';">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color: #86efac;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <p class="text-gray-600 text-sm sm:text-base font-light">
+                                    <span class="font-medium text-gray-800">Kontrol Manual:</span> RangBot dapat digerakkan secara manual melalui web interface untuk monitoring spesifik pada area tertentu.
+                                </p>
+                            </div>
+                            <div class="flex items-start gap-3 group/item cursor-pointer">
+                                <div class="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors" style="background: rgba(134, 239, 172, 0.2);" onmouseover="this.style.background='rgba(134, 239, 172, 0.3)';" onmouseout="this.style.background='rgba(134, 239, 172, 0.2)';">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color: #86efac;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <p class="text-gray-600 text-sm sm:text-base font-light">
+                                    <span class="font-medium text-gray-800">Deteksi Manual:</span> Sistem deteksi penyakit dapat diaktifkan secara manual melalui web untuk analisis mendalam pada tanaman tertentu.
+            </p>
+        </div>
+                            <div class="flex items-start gap-3 group/item cursor-pointer">
+                                <div class="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors" style="background: rgba(134, 239, 172, 0.2);" onmouseover="this.style.background='rgba(134, 239, 172, 0.3)';" onmouseout="this.style.background='rgba(134, 239, 172, 0.2)';">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color: #86efac;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <p class="text-gray-600 text-sm sm:text-base font-light">
+                                    <span class="font-medium text-gray-800">Monitoring Real-time:</span> Pantau kondisi greenhouse, posisi RangBot, dan data sensor secara real-time melalui dashboard web.
+                                </p>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</section>
+
+<!-- Demo Section - Elegant & Consistent -->
+<section id="demo" class="py-20 sm:py-24 md:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50/30 to-white relative overflow-hidden">
+    <!-- Subtle Background Pattern -->
+    <div class="absolute inset-0 opacity-[0.015]" style="background-image: radial-gradient(circle at 2px 2px, rgba(0,0,0,0.15) 1px, transparent 0); background-size: 40px 40px;"></div>
+    
+    <div class="max-w-7xl mx-auto relative z-10">
+        <div class="text-center mb-16 sm:mb-20 max-w-3xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-200/60 mb-4">
+                <div class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
+                <span class="text-xs sm:text-sm text-rose-700 font-medium tracking-wide">Video Demonstrasi</span>
+            </div>
+            <h2 class="text-3xl sm:text-4xl md:text-5xl text-gray-900 mb-4 sm:mb-6 tracking-tight font-light">
+                <span class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">RangBot dalam Aksi</span>
+            </h2>
+            <p class="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed font-light">
+                Lihat bagaimana RangBot bekerja di greenhouse komersial dan teknologi yang kami gunakan
+            </p>
+        </div>
+        
+        <!-- Video Demo - Elegant -->
+        <div class="max-w-5xl mx-auto mb-16">
+            <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl overflow-hidden shadow-2xl border border-gray-700/50 hover:shadow-3xl transition-all duration-500">
+                <div class="aspect-video bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 flex items-center justify-center relative group cursor-pointer hover:opacity-95 transition-opacity">
+                    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 30px 30px;"></div>
+                    <div class="relative z-10 flex flex-col items-center gap-4">
+                        <!-- Red Circular Play Button - Elegant -->
+                        <button class="relative w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 rounded-full shadow-2xl shadow-rose-500/50 group-hover:scale-110 group-hover:shadow-rose-500/70 transition-all duration-500 cursor-pointer focus:outline-none hover:scale-115 active:scale-105 flex items-center justify-center" onclick="playVideo()" aria-label="Putar Video Demonstrasi">
+                            <svg class="w-10 h-10 sm:w-12 sm:h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                            <div class="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        </button>
+                        <span class="text-white text-sm sm:text-base tracking-wide font-light">Putar Video Demonstrasi</span>
+                    </div>
+
+                    <div class="absolute top-4 sm:top-6 left-4 sm:left-6 flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-rose-600/90 backdrop-blur-sm text-white text-xs sm:text-sm rounded-lg shadow-lg border border-rose-500/30">
+                        <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                        <span class="font-medium">Live Demo</span>
+                            </div>
+                        </div>
+                        
+                <div class="bg-gray-800/95 backdrop-blur-sm px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between border-t border-gray-700/50">
+                    <div class="text-white tracking-wide text-sm sm:text-base font-light">Operasi RangBot di Greenhouse Komersial</div>
+                    <div class="text-gray-400 text-xs sm:text-sm font-light">03:24</div>
+                                    </div>
+                                </div>
+                                
+            <div class="mt-8 text-center">
+                <button onclick="playVideo()" class="group relative bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-xl shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-rose-500/40 px-8 sm:px-10 py-3 sm:py-4 text-base sm:text-lg tracking-wide font-light inline-flex items-center justify-center space-x-2 hover:scale-105 active:scale-95 transition-all duration-300 overflow-hidden">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <span class="relative z-10">Tonton Demo Lengkap</span>
+                    <div class="absolute inset-0 bg-gradient-to-r from-rose-600 to-rose-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </button>
+                                </div>
+                            </div>
+
+        <!-- Photo Gallery - Elegant -->
+        <div class="space-y-6 sm:space-y-8">
+            <div class="text-center">
+                <h3 class="text-2xl sm:text-3xl text-gray-900 mb-2 tracking-tight font-light">Galeri RangBot</h3>
+                <p class="text-gray-600 text-sm sm:text-base font-light">Dokumentasi sistem RangBot di berbagai implementasi</p>
+                        </div>
+                        
+            <div class="grid md:grid-cols-3 gap-6 sm:gap-8">
+                <div class="group relative overflow-hidden rounded-2xl border border-gray-200/60 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.6)';" onmouseout="this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                    <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+                        <img src="https://images.unsplash.com/photo-1630267693768-824c7b5aaa1b?w=800&q=80" 
+                             alt="RangBot di Greenhouse" 
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                             onerror="this.style.display='none';">
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        <div class="absolute bottom-0 left-0 right-0 p-5 sm:p-6 text-white">
+                            <h4 class="text-lg sm:text-xl mb-1.5 tracking-tight font-light">RangBot di Greenhouse</h4>
+                            <p class="text-sm text-gray-200 font-light">Sistem navigasi presisi</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                <div class="group relative overflow-hidden rounded-2xl border border-gray-200/60 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.6)';" onmouseout="this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                    <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+                        <img src="https://images.unsplash.com/photo-1583383528064-e1867c88b7a6?w=800&q=80" 
+                             alt="Teknologi AI & Sensor" 
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                             onerror="this.style.display='none';">
+                        </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        <div class="absolute bottom-0 left-0 right-0 p-5 sm:p-6 text-white">
+                            <h4 class="text-lg sm:text-xl mb-1.5 tracking-tight font-light">Teknologi AI & Sensor</h4>
+                            <p class="text-sm text-gray-200 font-light">Monitoring real-time</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="group relative overflow-hidden rounded-2xl border border-gray-200/60 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.6)';" onmouseout="this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                    <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+                        <img src="https://images.unsplash.com/photo-1758524057756-7dc8ce53d88c?w=800&q=80" 
+                             alt="Dashboard Monitoring" 
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                             onerror="this.style.display='none';">
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        <div class="absolute bottom-0 left-0 right-0 p-5 sm:p-6 text-white">
+                            <h4 class="text-lg sm:text-xl mb-1.5 tracking-tight font-light">Dashboard Monitoring</h4>
+                            <p class="text-sm text-gray-200 font-light">Kontrol terpusat</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action - Elegant & Consistent -->
+<section id="cta" class="py-8 sm:py-10 md:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <!-- Elegant Gradient Background -->
+    <div class="absolute inset-0" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 50%, #86efac 100%);"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-rose-500/20 via-transparent to-rose-500/20"></div>
+    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 30px 30px;"></div>
+    
+    <div class="max-w-3xl mx-auto relative z-10">
+        <div class="text-center text-white space-y-3 sm:space-y-4">
+            <div class="space-y-2 sm:space-y-3">
+                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 mb-2">
+                    <div class="w-1 h-1 rounded-full bg-white animate-pulse"></div>
+                    <span class="text-[9px] sm:text-[10px] text-white font-medium tracking-wide">Bergabung Sekarang</span>
+                </div>
+                <h2 class="text-xl sm:text-2xl md:text-3xl text-white tracking-tight font-light leading-tight">
+                    Tingkatkan Produktivitas<br class="hidden sm:block"> Greenhouse Anda
+                </h2>
+                <p class="text-xs sm:text-sm md:text-base text-white/95 leading-relaxed max-w-xl mx-auto font-light">
+                    Bergabunglah dengan ratusan petani stroberi profesional yang telah meningkatkan 
+                    efisiensi operasional dan hasil panen hingga 40%
+                </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center pt-1">
+                <a href="/pembelian/" class="group relative bg-white text-gray-900 hover:bg-gray-50 rounded-lg shadow-xl shadow-white/20 px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm tracking-wide font-light inline-flex items-center justify-center space-x-2 hover:scale-105 active:scale-95 transition-all duration-300 overflow-hidden">
+                    <span class="relative z-10">Beli Sekarang</span>
+                    <svg class="w-3 h-3 relative z-10 group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                    <div class="absolute inset-0 bg-gradient-to-r from-gray-50 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </a>
+                <a href="#teknologi" class="border-2 border-white/80 text-white hover:bg-white/10 hover:border-white rounded-lg px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm tracking-wide font-light inline-flex items-center justify-center space-x-2 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-sm">
+                    <span>Lihat Informasi Detail</span>
+            </a>
+        </div>
+        
+            <div class="grid sm:grid-cols-3 gap-4 sm:gap-6 pt-6 sm:pt-8 max-w-2xl mx-auto border-t border-white/20">
+                <div class="text-center group cursor-pointer">
+                    <div class="text-2xl sm:text-3xl md:text-4xl text-white mb-1 tracking-tight font-light group-hover:scale-110 transition-transform duration-300">500+</div>
+                    <div class="text-white/95 tracking-wide text-[10px] sm:text-xs font-light">Greenhouse Aktif</div>
+                </div>
+                <div class="text-center group cursor-pointer">
+                    <div class="text-2xl sm:text-3xl md:text-4xl text-white mb-1 tracking-tight font-light group-hover:scale-110 transition-transform duration-300">98%</div>
+                    <div class="text-white/95 tracking-wide text-[10px] sm:text-xs font-light">Kepuasan Pelanggan</div>
+            </div>
+                <div class="text-center group cursor-pointer">
+                    <div class="text-2xl sm:text-3xl md:text-4xl text-white mb-1 tracking-tight font-light group-hover:scale-110 transition-transform duration-300">40%</div>
+                    <div class="text-white/95 tracking-wide text-[10px] sm:text-xs font-light">Peningkatan Hasil Panen</div>
+            </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // RangBot Movement System
+    let rangbotPosition = 50; // Start at center (50%)
+    const minPosition = 5; // Minimum position (5% from left)
+    const maxPosition = 95; // Maximum position (95% from left)
+    const moveStep = 10; // Movement step in percentage
+    let isMoving = false;
+
+    function moveRangBot(direction) {
+        if (isMoving) return; // Prevent multiple simultaneous movements
+        
+        isMoving = true;
+        const container = document.getElementById('rangbot-container');
+        const rangbot = document.getElementById('rangbot');
+        const statusDisplay = document.getElementById('status-display');
+        const movementIndicator = document.getElementById('movement-indicator');
+        const movementText = document.getElementById('movement-text');
+        const leftBtn = document.getElementById('move-left-btn');
+        const rightBtn = document.getElementById('move-right-btn');
+        
+        // Calculate new position
+        let newPosition = rangbotPosition;
+        if (direction === 'left') {
+            newPosition = Math.max(minPosition, rangbotPosition - moveStep);
+        } else if (direction === 'right') {
+            newPosition = Math.min(maxPosition, rangbotPosition + moveStep);
+        }
+        
+        // Update position
+        rangbotPosition = newPosition;
+        
+        // Update visual position
+        container.style.left = rangbotPosition + '%';
+        container.style.transform = 'translateX(-50%)';
+        
+        // Show movement indicator
+        movementText.textContent = direction === 'left' ? 'Bergerak ke Kiri' : 'Bergerak ke Kanan';
+        movementIndicator.style.opacity = '1';
+        
+        // Update status
+        statusDisplay.innerHTML = '<div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div><span class="text-xs sm:text-sm font-medium">Bergerak...</span>';
+        statusDisplay.className = 'inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 sm:px-6 py-2 sm:py-3 rounded-xl border border-blue-200 shadow-sm';
+        
+        // Disable buttons during movement
+        leftBtn.disabled = true;
+        rightBtn.disabled = true;
+        leftBtn.style.opacity = '0.6';
+        rightBtn.style.opacity = '0.6';
+        
+        // Add movement animation to robot
+        rangbot.style.transform = 'scale(1.05)';
+        if (direction === 'left') {
+            rangbot.style.transform += ' rotate(-2deg)';
+        } else {
+            rangbot.style.transform += ' rotate(2deg)';
+        }
+        
+        // Reset after animation
+        setTimeout(() => {
+            rangbot.style.transform = '';
+            movementIndicator.style.opacity = '0';
+            
+            // Update status to ready
+            statusDisplay.innerHTML = '<div class="w-2 h-2 rounded-full animate-pulse" style="background: #86efac;"></div><span class="text-xs sm:text-sm font-medium">Siap</span>';
+            statusDisplay.className = 'inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl border shadow-sm';
+            statusDisplay.style.background = 'rgba(134, 239, 172, 0.1)';
+            statusDisplay.style.color = '#86efac';
+            statusDisplay.style.borderColor = 'rgba(134, 239, 172, 0.3)';
+            
+            // Re-enable buttons
+            leftBtn.disabled = false;
+            rightBtn.disabled = false;
+            leftBtn.style.opacity = '1';
+            rightBtn.style.opacity = '1';
+            
+            isMoving = false;
+        }, 500);
+        
+        // Update button states based on position
+        if (rangbotPosition <= minPosition) {
+            leftBtn.disabled = true;
+            leftBtn.style.opacity = '0.5';
+            leftBtn.style.cursor = 'not-allowed';
+        } else {
+            leftBtn.disabled = false;
+            leftBtn.style.opacity = '1';
+            leftBtn.style.cursor = 'pointer';
+        }
+        
+        if (rangbotPosition >= maxPosition) {
+            rightBtn.disabled = true;
+            rightBtn.style.opacity = '0.5';
+            rightBtn.style.cursor = 'not-allowed';
+        } else {
+            rightBtn.disabled = false;
+            rightBtn.style.opacity = '1';
+            rightBtn.style.cursor = 'pointer';
+        }
+    }
+
+    // Keyboard controls
+    document.addEventListener('keydown', function(e) {
+        const section = document.getElementById('peta');
+        if (section && isElementInViewport(section)) {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                e.preventDefault();
+                moveRangBot('left');
+            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                e.preventDefault();
+                moveRangBot('right');
+            }
+        }
+    });
+
+    // Helper function to check if element is in viewport
+    function isElementInViewport(el) {
+        const rect = el.getBoundingClientRect();
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+    }
+
+    // Initialize RangBot position on load
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('rangbot-container');
+        if (container) {
+            container.style.left = rangbotPosition + '%';
+            container.style.transform = 'translateX(-50%)';
+            
+            // Initialize button states
+            const leftBtn = document.getElementById('move-left-btn');
+            const rightBtn = document.getElementById('move-right-btn');
+            if (leftBtn && rightBtn) {
+                leftBtn.style.opacity = '1';
+                rightBtn.style.opacity = '1';
+            }
+        }
+    });
+
+    // Video Play Function
+    function playVideo() {
+        // You can replace this with actual video modal or YouTube embed
+        alert('Video demo akan diputar. Fitur ini dapat diintegrasikan dengan YouTube atau video player lainnya.');
+        // Example: window.open('https://www.youtube.com/watch?v=YOUR_VIDEO_ID', '_blank');
+    }
+
+    // Make video container clickable
+    document.addEventListener('DOMContentLoaded', function() {
+        const videoContainer = document.querySelector('.aspect-video');
+        if (videoContainer) {
+            videoContainer.addEventListener('click', function(e) {
+                if (e.target.closest('button') === null) {
+                    playVideo();
+                }
+            });
+        }
+
+        // Make gallery images clickable
+        document.querySelectorAll('.group.relative.overflow-hidden.rounded-xl').forEach(galleryItem => {
+            galleryItem.style.cursor = 'pointer';
+            galleryItem.addEventListener('click', function() {
+                const img = this.querySelector('img');
+                if (img && img.src) {
+                    // Open image in lightbox or new tab
+                    window.open(img.src, '_blank');
+                }
+            });
+        });
+    });
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                const offset = 100; // Height of fixed navbar
+                const targetPosition = target.offsetTop - offset;
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
+    // Intersection Observer for fade-in animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-fade-in');
+            }
+        });
+    }, observerOptions);
+
+    // Observe all sections
+    document.querySelectorAll('section').forEach(section => {
+        observer.observe(section);
+    });
+
+    // Add hover effects to technology cards
+    document.querySelectorAll('#teknologi .group').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Add click effect to buttons
+    document.querySelectorAll('button, .btn-primary, a[href="/register"], a[href="/login"]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            // Ripple effect
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+</script>
+
+<style>
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.6);
+        transform: scale(0);
+        animation: ripple-animation 0.6s ease-out;
+        pointer-events: none;
+    }
+
+    @keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+
+    button, .btn-primary, a[href="/register"], a[href="/login"] {
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Enhanced animations for hero section */
+    @keyframes float {
+        0%, 100% { 
+            transform: translateY(0px) rotate(0deg); 
+        }
+        50% { 
+            transform: translateY(-15px) rotate(2deg); 
+        }
+    }
+
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    /* Interactive card hover effects */
+    #hero .group:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Glass morphism effect */
+    .backdrop-blur-xl {
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+</style>
+
+{% endblock %}
+
