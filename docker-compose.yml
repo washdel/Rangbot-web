@@ -18,10 +18,11 @@ services:
     networks:
       - rangbot-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root123}"]
-      timeout: 20s
-      retries: 10
-      start_period: 40s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
     restart: unless-stopped
 
   # Django Web Application Service
@@ -31,19 +32,22 @@ services:
       dockerfile: Dockerfile
     container_name: rangbot-web
     command: >
-      sh -c "python manage.py migrate --noinput &&
+      sh -c "echo 'Waiting for MySQL...' &&
+             while ! nc -z db 3306; do sleep 1; done &&
+             echo 'MySQL is ready!' &&
+             python manage.py migrate --noinput &&
              python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
     environment:
-      DEBUG: ${DEBUG:-True}
-      SECRET_KEY: ${SECRET_KEY:-django-insecure-dev-key-change-in-production}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-rangbot_db}
-      MYSQL_USER: ${MYSQL_USER:-rangbot_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-rangbot_pass}
-      MYSQL_HOST: db
-      MYSQL_PORT: ${MYSQL_PORT:-3306}
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0}
+      DEBUG: "True"
+      SECRET_KEY: "django-insecure-dev-key-change-in-production"
+      MYSQL_DATABASE: "rangbot_db"
+      MYSQL_USER: "rangbot_user"
+      MYSQL_PASSWORD: "rangbot_pass"
+      MYSQL_HOST: "db"
+      MYSQL_PORT: "3306"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,0.0.0.0"
     depends_on:
       db:
         condition: service_healthy

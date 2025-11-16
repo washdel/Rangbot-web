@@ -13,7 +13,7 @@ DATABASES = {
         'NAME': config('MYSQL_DATABASE', 'rangbot_db'),
         'USER': config('MYSQL_USER', 'rangbot_user'),
         'PASSWORD': config('MYSQL_PASSWORD', 'rangbot_pass'),
-        'HOST': config('MYSQL_HOST', 'localhost'),  # 'db' untuk Docker, 'localhost' untuk local
+        'HOST': config('MYSQL_HOST', 'db'),  # 'db' = service name di docker-compose
         'PORT': config('MYSQL_PORT', '3306'),
         'CHARSET': 'utf8mb4',
         'INIT_COMMAND': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -84,45 +84,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'rangbot_system.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-# Konfigurasi Database
-# Default: SQLite (untuk development)
-# Untuk menggunakan MySQL, uncomment bagian MySQL dan comment bagian SQLite
-
-# SQLite Configuration (Default) - COMMENTED, Using MySQL
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-# MySQL Configuration (Laragon)
-# Aktifkan MySQL untuk menggunakan database MySQL
-try:
-    from mysql_config import MYSQL_CONFIG
-    DATABASES = {
-        'default': MYSQL_CONFIG
-    }
-    print("✓ Menggunakan MySQL database")
-except ImportError:
-    print("⚠ mysql_config.py tidak ditemukan, menggunakan SQLite")
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-except Exception as e:
-    print(f"⚠ Error loading MySQL config: {e}, menggunakan SQLite")
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+# Database configuration
+# DATABASES is configured at the top of this file (lines 10-21)
+# Uses environment variables via python-decouple for Docker compatibility
 
 
 # Password validation
