@@ -1,0 +1,116 @@
+<!-- DISABLED TEMPLATE: Kept intentionally empty to avoid confusion. -->
+<!-- File retained only as reference marker. Not used by any view. -->
+.border-gray-300 { border-color: #d1d5db; }
+.border-red-200 { border-color: #fecaca; }
+.border-green-200 { border-color: #bbf7d0; }
+.border-t { border-top-width: 1px; }
+input { 
+    width: 100%; 
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    transition: all 0.3s;
+}
+input:focus {
+    outline: none;
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+button[type="submit"] {
+    width: 100%;
+    padding: 0.75rem;
+    background: linear-gradient(120deg, #4fc07a 0%, #ff7a9c 100%);
+    color: white;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+button[type="submit"]:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+}
+button[type="submit"]:active {
+    transform: scale(0.95);
+}
+a { color: #22c55e; text-decoration: none; transition: color 0.2s; }
+a:hover { color: #16a34a; }
+.transition-colors { transition: color 0.2s; }
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fade-in 0.3s ease-out; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-gray-50 via-white to-green-50">
+    <div class="max-w-md w-full">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-green-600 mb-4 shadow-lg">
+                <i class="fas fa-sign-in-alt text-white text-2xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-900">Login</h2>
+            <p class="text-gray-600 mt-2">Masuk ke akun RangBot Anda</p>
+            <p class="text-sm text-gray-500 mt-1">(Member atau Admin)</p>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+            <div class="mb-4 p-4 rounded-lg {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-700{% else %}bg-green-50 border border-green-200 text-green-700{% endif %} animate-fade-in">
+                <div class="flex items-center gap-2">
+                    <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %}"></i>
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="POST" class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+            {% csrf_token %}
+            
+            <div class="mb-6">
+                <label class="block text-gray-700 mb-2 font-medium flex items-center gap-2">
+                    <i class="fas fa-user text-green-500"></i>
+                    Username
+                </label>
+                <input type="text" name="username" required autocomplete="username"
+                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
+                       placeholder="Masukkan username Anda">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-gray-700 mb-2 font-medium flex items-center gap-2">
+                    <i class="fas fa-lock text-green-500"></i>
+                    Password
+                </label>
+                <input type="password" name="password" required autocomplete="current-password"
+                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
+                       placeholder="Masukkan password Anda">
+            </div>
+            
+            <button type="submit" 
+                    class="w-full py-3 rounded-lg text-white font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95"
+                    style="background: linear-gradient(120deg, #4fc07a 0%, #ff7a9c 100%);">
+                <i class="fas fa-sign-in-alt mr-2"></i>
+                Login
+            </button>
+            
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <p class="text-center text-gray-600 text-sm">
+                    Belum punya akun? 
+                    <a href="{% url 'main:register' %}" class="text-green-500 hover:text-green-600 font-semibold transition-colors">
+                        Daftar Sekarang
+                    </a>
+                </p>
+                <p class="text-center text-gray-500 text-xs mt-2">
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    Admin akan otomatis diarahkan ke dashboard admin
+                </p>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

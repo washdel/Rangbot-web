@@ -104,7 +104,7 @@
             {% else %}
                 <div class="mb-8 p-4 rounded-xl bg-gray-50 border border-gray-200/60 text-center">
                     <p class="text-sm text-gray-600 font-light mb-3">Anda harus login untuk menambahkan komentar</p>
-                    <a href="{% url 'main:forum_login' %}?next={% url 'main:forum_detail' post.id %}" class="inline-block px-6 py-2 rounded-xl text-white font-light text-sm transition-all duration-300 hover:scale-105" 
+                    <a href="{% url 'main:login' %}?next={% url 'main:forum_detail' post.id %}" class="inline-block px-6 py-2 rounded-xl text-white font-light text-sm transition-all duration-300 hover:scale-105" 
                        style="background: linear-gradient(135deg, {% if post.category == 'penyakit' or post.category == 'teknis' %}#f87171 0%, #ef4444 100%{% else %}#86efac 0%, #4ade80 100%{% endif %}); box-shadow: 0 4px 12px {% if post.category == 'penyakit' or post.category == 'teknis' %}rgba(239, 68, 68, 0.3){% else %}rgba(134, 239, 172, 0.3){% endif %};">
                         Login Sekarang
                     </a>

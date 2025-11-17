@@ -40,7 +40,7 @@
                     Logout
                 </a>
                 {% else %}
-                <a href="{% url 'main:forum_login' %}" class="px-6 py-3 rounded-xl text-white font-light text-sm sm:text-base transition-all duration-300 hover:scale-105" style="background: linear-gradient(135deg, #f87171 0%, #ef4444 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
+                <a href="{% url 'main:login' %}?next={% url 'main:forum_list' %}" class="px-6 py-3 rounded-xl text-white font-light text-sm sm:text-base transition-all duration-300 hover:scale-105" style="background: linear-gradient(135deg, #f87171 0%, #ef4444 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
                     Login untuk Posting
                 </a>
                 {% endif %}

@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.db import transaction, models
 from .models import Admin, PurchaseOrder, Member, RangBotDevice
 from .utils import generate_member_id, generate_serial_number, get_next_serial_sequence
-from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.hashers import make_password
 
 
 def get_admin(request):
@@ -23,39 +23,7 @@ def get_admin(request):
     return None
 
 
-def admin_login(request):
-    """
-    View untuk login admin
-    """
-    if request.method == 'POST':
-        username = request.POST.get('username', '').strip()
-        password = request.POST.get('password', '')
-        
-        if username and password:
-            try:
-                admin = Admin.objects.get(username=username, is_active=True)
-                if check_password(password, admin.password):
-                    # Login successful
-                    request.session['admin_id'] = admin.id
-                    request.session['admin_username'] = admin.username
-                    request.session['admin_name'] = admin.full_name
-                    
-                    # Update last login
-                    admin.last_login = timezone.now()
-                    admin.save(update_fields=['last_login'])
-                    
-                    messages.success(request, f'Selamat datang, {admin.full_name}!')
-                    return redirect('main:admin_dashboard')
-                else:
-                    messages.error(request, 'Password salah.')
-            except Admin.DoesNotExist:
-                messages.error(request, 'Username tidak ditemukan atau tidak aktif.')
-        else:
-            messages.error(request, 'Mohon lengkapi username dan password.')
-    
-    return render(request, 'admin/login.html', {
-        'page_title': 'Login Admin - RangBot'
-    })
+# admin_login function removed - now using unified login at /login/
 
 
 def admin_logout(request):
@@ -64,7 +32,7 @@ def admin_logout(request):
     """
     request.session.flush()
     messages.success(request, 'Anda telah logout.')
-    return redirect('main:admin_login')
+    return redirect('main:login')
 
 
 def admin_dashboard(request):
@@ -72,9 +40,10 @@ def admin_dashboard(request):
     View untuk dashboard admin
     """
     admin = get_admin(request)
+    
     if not admin:
         messages.warning(request, 'Anda harus login terlebih dahulu.')
-        return redirect('main:admin_login')
+        return redirect('main:login')
     
     # Get statistics
     pending_orders = PurchaseOrder.objects.filter(status='pending').count()
@@ -103,7 +72,7 @@ def purchase_orders_list(request):
     admin = get_admin(request)
     if not admin:
         messages.warning(request, 'Anda harus login terlebih dahulu.')
-        return redirect('main:admin_login')
+        return redirect('main:login')
     
     # Get filter parameters
     status_filter = request.GET.get('status', '')
@@ -144,7 +113,7 @@ def purchase_order_detail(request, order_id):
     admin = get_admin(request)
     if not admin:
         messages.warning(request, 'Anda harus login terlebih dahulu.')
-        return redirect('main:admin_login')
+        return redirect('main:login')
     
     order = get_object_or_404(PurchaseOrder, id=order_id)
     
@@ -178,7 +147,7 @@ def verify_purchase(request, order_id):
     admin = get_admin(request)
     if not admin:
         messages.warning(request, 'Anda harus login terlebih dahulu.')
-        return redirect('main:admin_login')
+        return redirect('main:login')
     
     order = get_object_or_404(PurchaseOrder, id=order_id)
     
@@ -285,7 +254,7 @@ def reject_purchase(request, order_id):
     admin = get_admin(request)
     if not admin:
         messages.warning(request, 'Anda harus login terlebih dahulu.')
-        return redirect('main:admin_login')
+        return redirect('main:login')
     
     order = get_object_or_404(PurchaseOrder, id=order_id)
     

@@ -9,7 +9,57 @@ from .models import ForumUser, ForumPost, ForumComment, Admin, PurchaseOrder, Me
 from .forms import ForumLoginForm, ForumPostForm, ForumCommentForm
 from django.contrib.auth.hashers import check_password, make_password
 from django.utils import timezone
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.decorators import login_required, user_passes_test
 
+
+# Helper function untuk check admin
+def is_staff_user(user):
+    return user.is_staff or user.is_superuser
+
+
+def member_login(request):
+    """Login tunggal: Admin atau Member, diarahkan sesuai peran."""
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+
+        if not username or not password:
+            messages.error(request, 'Mohon lengkapi username dan password.')
+            return render(request, 'login.html', { 'page_title': 'Login - RangBot' })
+
+        # 1) Coba sebagai Admin
+        try:
+            admin = Admin.objects.get(username=username, is_active=True)
+            if admin.password and check_password(password, admin.password):
+                request.session['admin_id'] = admin.id
+                request.session['admin_username'] = admin.username
+                request.session['admin_name'] = admin.full_name
+                admin.last_login = timezone.now()
+                admin.save(update_fields=['last_login'])
+                messages.success(request, f'Selamat datang, {admin.full_name}!')
+                return redirect('main:admin_dashboard')
+        except Admin.DoesNotExist:
+            pass
+
+        # 2) Coba sebagai Member terdaftar
+        try:
+            member = Member.objects.get(username=username, is_registered=True)
+            if member.password and check_password(password, member.password):
+                request.session['member_id'] = member.member_id
+                request.session['member_username'] = member.username
+                request.session['member_name'] = member.full_name
+                member.last_login = timezone.now()
+                member.save(update_fields=['last_login'])
+                messages.success(request, f'Selamat datang, {member.full_name}!')
+                return redirect('main:member_dashboard')
+        except Member.DoesNotExist:
+            pass
+
+        # Jika gagal keduanya
+        messages.error(request, 'Username atau password salah.')
+
+    return render(request, 'login.html', { 'page_title': 'Login - RangBot' })
 
 def landing_page(request):
     """
@@ -20,7 +70,7 @@ def landing_page(request):
         'features': [
             {
                 'icon': '🤖',
-                'title': 'Deteksi Penyakit AI',
+                'title': 'Deteksi Penyakit Machine Learning',
                 'description': 'Menggunakan teknologi R-CNN untuk mendeteksi penyakit stroberi secara akurat dan real-time.'
             },
             {
@@ -551,49 +601,11 @@ def get_forum_user(request):
 
 def forum_login(request):
     """
-    View untuk login forum sederhana dengan email
+    Redirect forum login ke unified login system
     """
-    if request.method == 'POST':
-        form = ForumLoginForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            name = form.cleaned_data['name']
-            role = form.cleaned_data['role']
-            
-            # Cari atau buat user
-            user, created = ForumUser.objects.get_or_create(
-                email=email,
-                defaults={'name': name, 'role': role}
-            )
-            
-            # Update jika user sudah ada
-            if not created:
-                user.name = name
-                user.role = role
-                user.save()
-            
-            # Update last login
-            user.last_login = datetime.now()
-            user.save()
-            
-            # Set session
-            request.session['forum_user_id'] = user.id
-            request.session['forum_user_name'] = user.name
-            request.session['forum_user_email'] = user.email
-            
-            messages.success(request, f'Selamat datang, {user.name}!')
-            
-            # Redirect ke halaman sebelumnya atau forum list
-            next_url = request.GET.get('next', reverse('main:forum_list'))
-            return redirect(next_url)
-    else:
-        form = ForumLoginForm()
-    
-    context = {
-        'page_title': 'Login Forum - RangBot',
-        'form': form,
-    }
-    return render(request, 'forum_login.html', context)
+    next_url = request.GET.get('next', reverse('main:forum_list'))
+    messages.info(request, 'Silakan login melalui sistem login utama untuk mengakses forum.')
+    return redirect(f"{reverse('main:login')}?next={next_url}")
 
 
 def forum_logout(request):
@@ -682,7 +694,7 @@ def forum_create(request):
     
     if not forum_user:
         messages.warning(request, 'Anda harus login terlebih dahulu untuk membuat postingan.')
-        return redirect(f"{reverse('main:forum_login')}?next={reverse('main:forum_create')}")
+        return redirect(f"{reverse('main:login')}?next={reverse('main:forum_create')}")
     
     if request.method == 'POST':
         form = ForumPostForm(request.POST)
@@ -712,7 +724,7 @@ def forum_edit(request, post_id):
     
     if not forum_user:
         messages.warning(request, 'Anda harus login terlebih dahulu.')
-        return redirect(f"{reverse('main:forum_login')}?next={reverse('main:forum_edit', args=[post_id])}")
+        return redirect(f"{reverse('main:login')}?next={reverse('main:forum_edit', args=[post_id])}")
     
     if post.author != forum_user:
         messages.error(request, 'Anda tidak memiliki izin untuk mengedit postingan ini.')
@@ -745,7 +757,7 @@ def forum_delete(request, post_id):
     
     if not forum_user:
         messages.warning(request, 'Anda harus login terlebih dahulu.')
-        return redirect('main:forum_login')
+        return redirect('main:login')
     
     if post.author != forum_user:
         messages.error(request, 'Anda tidak memiliki izin untuk menghapus postingan ini.')
@@ -1043,7 +1055,7 @@ def member_notifications(request):
 
 def member_logout(request):
     """
-    View untuk logout member
+    Logout member
     """
     request.session.flush()
     messages.success(request, 'Anda telah logout.')
