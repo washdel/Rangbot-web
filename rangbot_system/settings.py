@@ -4,7 +4,19 @@ Django settings for rangbot_system project.
 
 from pathlib import Path
 import os
-from decouple import config
+
+# Try to import decouple, fallback if not available
+try:
+    from decouple import config
+except ImportError:
+    # Fallback jika decouple tidak terinstall
+    def config(key, default=None, cast=None):
+        value = os.environ.get(key, default)
+        if cast and value is not None:
+            if cast == bool:
+                return str(value).lower() in ('true', '1', 'yes', 'on')
+            return cast(value)
+        return value
 
 # Database MySQL untuk Docker
 DATABASES = {

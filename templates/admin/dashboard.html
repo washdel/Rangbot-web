@@ -3,133 +3,521 @@
 
 {% block title %}{{ page_title }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+    
+    @keyframes glow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(134, 239, 172, 0.3);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(134, 239, 172, 0.5);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .slide-in-right {
+        animation: slideInRight 0.6s ease-out;
+    }
+    
+    .scale-in {
+        animation: scaleIn 0.5s ease-out;
+    }
+    
+    .stat-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.5s;
+    }
+    
+    .stat-card:hover::before {
+        left: 100%;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(134, 239, 172, 0.2);
+    }
+    
+    .stat-icon {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+    
+    .stat-card:hover .stat-icon {
+        transform: scale(1.15) rotate(10deg);
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-glow {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            transform: scale(1.05);
+        }
+    }
+    
+    .pulse-glow {
+        animation: pulse-glow 2s infinite;
+    }
+    
+    .table-row {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .table-row:hover {
+        transform: translateX(6px);
+        background: rgba(134, 239, 172, 0.05) !important;
+    }
+    
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    /* Glass morphism effect for cards */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .glass-card:hover {
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 12px 48px rgba(134, 239, 172, 0.2);
+    }
+    
+    /* Gradient text effect */
+    .gradient-text {
+        background: linear-gradient(135deg, #22c55e 0%, #86efac 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    /* Animated background gradient */
+    .animated-bg {
+        background: linear-gradient(-45deg, #f0fdf4, #ffffff, #f0fdf4, #ffffff);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+    }
+    
+    @keyframes gradientShift {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+    
+    /* Section header with underline animation */
+    .section-header {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .section-header::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #22c55e, #86efac);
+        transition: width 0.5s ease;
+    }
+    
+    .section-header:hover::after {
+        width: 100%;
+    }
+    
+    /* Number counter animation */
+    .number-counter {
+        font-variant-numeric: tabular-nums;
+        transition: all 0.3s ease;
+    }
+    
+    /* Status badge with glow */
+    .status-badge {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .status-badge::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+        animation: rotate 3s linear infinite;
+    }
+    
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="min-h-screen bg-white pb-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-3xl sm:text-4xl font-light text-gray-900 tracking-tight mb-2">
-                Dashboard Admin
+<div class="min-h-screen animated-bg pb-12 fade-in-up">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Welcome Header -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2 gradient-text">
+                        Dashboard
             </h1>
             <p class="text-gray-600 font-light text-sm sm:text-base">
-                Selamat datang, <span class="font-medium">{{ admin.full_name }}</span>
-            </p>
+                        Selamat datang, <span class="font-semibold text-gray-900">{{ admin.username }}</span>
+                    </p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-xl glass-card border shadow-lg hover:shadow-xl transition-all duration-300" style="border-color: rgba(134, 239, 172, 0.3);">
+                        <div class="w-2.5 h-2.5 rounded-full animate-pulse" style="background: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.6);"></div>
+                        <span class="text-xs font-medium" style="color: #22c55e;">System Online</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Messages -->
         {% if messages %}
-        <div class="mb-6 space-y-2">
+        <div class="mb-8 space-y-2 fade-in-up" style="animation-delay: 0.2s;">
             {% for message in messages %}
-            <div class="p-4 rounded-xl border font-light text-sm {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50 border-yellow-200 text-yellow-800{% else %}bg-green-50 border-green-200 text-green-800{% endif %}">
-                {{ message }}
+            {% if "Selamat datang" not in message|stringformat:"s" %}
+            <div class="p-4 rounded-xl border font-light text-sm backdrop-blur-sm transition-all duration-300 {% if message.tags == 'error' %}bg-red-50/80 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50/80 border-yellow-200 text-yellow-800{% else %}bg-green-50/80 border-green-200 text-green-800{% endif %}">
+                <div class="flex items-center gap-2">
+                    {% if message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% else %}
+                    <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
             </div>
+            {% endif %}
             {% endfor %}
         </div>
         {% endif %}
 
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Pending Orders -->
-            <div class="bg-white rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg" style="border-color: rgba(239, 68, 68, 0.3);">
+        <!-- Section: Purchase Orders Statistics -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.2s;">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 px-1 section-header">Statistik Pembelian</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                <!-- Pending Orders Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(239, 68, 68, 0.2); min-height: 180px; display: flex; flex-direction: column;">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: rgba(239, 68, 68, 0.1);">
-                        <i class="fas fa-clock text-xl" style="color: #ef4444;"></i>
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);">
+                            <i class="fas fa-clock text-xl sm:text-2xl" style="color: #ef4444;"></i>
+                        </div>
+                        {% if pending_orders > 0 %}
+                        <span class="px-2.5 py-1 rounded-full text-xs font-medium pulse-glow" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                            {{ pending_orders }}
+                        </span>
+                        {% endif %}
                     </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Menunggu Verifikasi</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #ef4444;">{{ pending_orders }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">Pembelian masuk</p>
                 </div>
-                <h3 class="text-sm font-light text-gray-600 mb-1">Menunggu Verifikasi</h3>
-                <p class="text-3xl font-light mb-2" style="color: #ef4444;">{{ pending_orders }}</p>
-                <p class="text-xs text-gray-500 font-light">Purchase orders pending</p>
+                    <a href="{% url 'main:purchase_orders_list' %}?status=pending" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Verifikasi <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
             </div>
 
-            <!-- Verified Orders -->
-            <div class="bg-white rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg" style="border-color: rgba(134, 239, 172, 0.4);">
+                <!-- Verified Orders Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(34, 197, 94, 0.2); min-height: 180px; display: flex; flex-direction: column;">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: rgba(134, 239, 172, 0.1);">
-                        <i class="fas fa-check-circle text-xl" style="color: #86efac;"></i>
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);">
+                            <i class="fas fa-check-circle text-xl sm:text-2xl" style="color: #22c55e;"></i>
                     </div>
                 </div>
-                <h3 class="text-sm font-light text-gray-600 mb-1">Terverifikasi</h3>
-                <p class="text-3xl font-light mb-2" style="color: #86efac;">{{ verified_orders }}</p>
-                <p class="text-xs text-gray-500 font-light">Purchase orders verified</p>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Terverifikasi</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #22c55e;">{{ verified_orders }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">Pembelian selesai</p>
+                    </div>
+                    <a href="{% url 'main:purchase_orders_list' %}?status=verified" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Lihat detail <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
             </div>
 
-            <!-- Total Members -->
-            <div class="bg-white rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg" style="border-color: rgba(229, 231, 235, 0.6);">
+                <!-- Rejected Orders Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(156, 163, 175, 0.2); min-height: 180px; display: flex; flex-direction: column;">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: rgba(239, 68, 68, 0.1);">
-                        <i class="fas fa-users text-xl" style="color: #ef4444;"></i>
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(156, 163, 175, 0.1) 0%, rgba(156, 163, 175, 0.05) 100%);">
+                            <i class="fas fa-times-circle text-xl sm:text-2xl" style="color: #9ca3af;"></i>
                     </div>
                 </div>
-                <h3 class="text-sm font-light text-gray-600 mb-1">Total Members</h3>
-                <p class="text-3xl font-light mb-2" style="color: #1f2937;">{{ total_members }}</p>
-                <p class="text-xs text-gray-500 font-light">Registered members</p>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Ditolak</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #9ca3af;">{{ rejected_orders }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">Pembelian ditolak</p>
+                    </div>
+                    <a href="{% url 'main:purchase_orders_list' %}?status=rejected" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Lihat detail <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
             </div>
 
-            <!-- Total Devices -->
-            <div class="bg-white rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg" style="border-color: rgba(229, 231, 235, 0.6);">
+                <!-- Total Orders Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(99, 102, 241, 0.2); min-height: 180px; display: flex; flex-direction: column;">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: rgba(134, 239, 172, 0.1);">
-                        <i class="fas fa-robot text-xl" style="color: #86efac;"></i>
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);">
+                            <i class="fas fa-shopping-bag text-xl sm:text-2xl" style="color: #6366f1;"></i>
                     </div>
                 </div>
-                <h3 class="text-sm font-light text-gray-600 mb-1">Total Devices</h3>
-                <p class="text-3xl font-light mb-2" style="color: #1f2937;">{{ total_devices }}</p>
-                <p class="text-xs text-gray-500 font-light">RangBot devices</p>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Total Orders</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #6366f1;">{{ pending_orders|add:verified_orders|add:rejected_orders }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">Semua pembelian</p>
+                    </div>
+                    <a href="{% url 'main:purchase_orders_list' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Lihat semua <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
             </div>
         </div>
 
-        <!-- Recent Orders -->
-        <div class="bg-white rounded-2xl border p-6 sm:p-8" style="border-color: rgba(229, 231, 235, 0.6);">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl sm:text-2xl font-light text-gray-900 tracking-tight">Purchase Orders Terbaru</h2>
-                <a href="{% url 'main:purchase_orders_list' %}" class="text-sm font-light text-gray-600 hover:text-gray-900 transition-colors">
-                    Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
+        <!-- Section: System Statistics -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.3s;">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 px-1 section-header">Statistik Sistem</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                <!-- Total Members Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(34, 197, 94, 0.2); min-height: 180px; display: flex; flex-direction: column;">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);">
+                            <i class="fas fa-users text-xl sm:text-2xl" style="color: #22c55e;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Total Members</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #22c55e;">{{ total_members }}</p>
+                        <div class="flex flex-wrap gap-1.5 text-xs text-gray-500 font-light mb-4">
+                            <span>{{ registered_members }} terdaftar</span>
+                            <span>•</span>
+                            <span>{{ unregistered_members }} belum</span>
+                        </div>
+                    </div>
+                    <a href="{% url 'main:members_list' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Kelola member <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+            </div>
+
+                <!-- Total Devices Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(168, 85, 247, 0.2); min-height: 180px; display: flex; flex-direction: column;">
+                <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);">
+                            <i class="fas fa-robot text-xl sm:text-2xl" style="color: #a855f7;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Total Devices</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #a855f7;">{{ total_devices }}</p>
+                        <div class="flex flex-wrap gap-1.5 text-xs text-gray-500 font-light mb-4">
+                            <span>{{ active_devices }} aktif</span>
+                            <span>•</span>
+                            <span>{{ inactive_devices }} nonaktif</span>
+                        </div>
+                    </div>
+                    <a href="{% url 'main:serial_numbers_list' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Kelola nomor seri <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Total Admins Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(59, 130, 246, 0.2); min-height: 180px; display: flex; flex-direction: column;">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);">
+                            <i class="fas fa-user-shield text-xl sm:text-2xl" style="color: #3b82f6;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Total Admins</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #3b82f6;">{{ total_admins }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">Admin aktif</p>
+                    </div>
+                    <a href="{% url 'main:admin_list' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Kelola admin <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
                 </a>
             </div>
 
+                <!-- Total CS Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(251, 146, 60, 0.2); min-height: 180px; display: flex; flex-direction: column;">
+                <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(251, 146, 60, 0.1) 0%, rgba(251, 146, 60, 0.05) 100%);">
+                            <i class="fas fa-headset text-xl sm:text-2xl" style="color: #fb923c;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Customer Service</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #fb923c;">{{ total_cs }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">CS aktif</p>
+                    </div>
+                    <a href="{% url 'main:cs_list' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Kelola CS <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Recent Activity -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.4s;">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 px-1 section-header">Aktivitas Terkini</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+        <!-- Recent Orders -->
+                <div class="glass-card rounded-2xl border shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 scale-in" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.5s;">
+                    <div class="p-5 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.6);">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                            <div>
+                                <h3 class="text-lg sm:text-xl font-light text-gray-900 tracking-tight">Purchase Orders Terbaru</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 font-light mt-1">5 pembelian terakhir</p>
+                            </div>
+                            <a href="{% url 'main:purchase_orders_list' %}" class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-light text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200" style="border: 1px solid rgba(229, 231, 235, 0.6);">
+                                Lihat Semua <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+            </div>
+
             {% if recent_orders %}
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="border-b" style="border-color: rgba(229, 231, 235, 0.6);">
-                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">ID</th>
-                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Customer</th>
-                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Email</th>
-                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Total Unit</th>
-                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Total Harga</th>
-                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Status</th>
-                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Tanggal</th>
-                            <th class="text-left py-3 px-4 text-sm font-light text-gray-600">Aksi</th>
+                    <div class="overflow-x-auto overflow-y-auto max-h-96 green-scrollbar" style="border: 1px solid rgba(229, 231, 235, 0.6); border-radius: 0.75rem;">
+                        <table class="w-full border-collapse">
+                            <thead class="sticky top-0 z-10" style="background: rgba(249, 250, 251, 0.95); backdrop-filter: blur(10px);">
+                                <tr style="border-bottom: 2px solid rgba(229, 231, 235, 0.6);">
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 100px;">
+                                        Order ID
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 120px;">
+                                        Status
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 150px;">
+                                        Nama Customer
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 180px;">
+                                        Email
+                                    </th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 100px;">
+                                        Jumlah Unit
+                                    </th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider" style="min-width: 120px;">
+                                        Tanggal
+                                    </th>
                         </tr>
                     </thead>
-                    <tbody>
+                            <tbody class="divide-y" style="border-color: rgba(229, 231, 235, 0.3);">
                         {% for order in recent_orders %}
-                        <tr class="border-b hover:bg-gray-50 transition-colors" style="border-color: rgba(229, 231, 235, 0.3);">
-                            <td class="py-4 px-4 text-sm font-light text-gray-900">#{{ order.id }}</td>
-                            <td class="py-4 px-4 text-sm font-light text-gray-900">{{ order.customer_name|truncatewords:3 }}</td>
-                            <td class="py-4 px-4 text-sm font-light text-gray-600">{{ order.customer_email|truncatewords:1 }}</td>
-                            <td class="py-4 px-4 text-sm font-light text-gray-900">{{ order.get_total_units }}</td>
-                            <td class="py-4 px-4 text-sm font-light text-gray-900">Rp {{ order.total_price|floatformat:0 }}</td>
-                            <td class="py-4 px-4">
+                                <tr class="hover:bg-gray-50/50 transition-colors cursor-pointer" data-href="{% url 'main:purchase_order_detail' order.id %}">
+                                    <td class="px-4 py-3 text-sm font-semibold text-gray-900 whitespace-nowrap" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
+                                        #{{ order.id }}
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
                                 {% if order.status == 'pending' %}
-                                <span class="px-3 py-1 rounded-full text-xs font-light" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
-                                    Menunggu
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                                            <span class="w-1.5 h-1.5 rounded-full mr-1.5" style="background: #ef4444;"></span>
+                                            Pending
                                 </span>
                                 {% elif order.status == 'verified' %}
-                                <span class="px-3 py-1 rounded-full text-xs font-light" style="background: rgba(134, 239, 172, 0.1); color: #86efac;">
-                                    Terverifikasi
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                                            <span class="w-1.5 h-1.5 rounded-full mr-1.5" style="background: #22c55e;"></span>
+                                            Verified
                                 </span>
                                 {% else %}
-                                <span class="px-3 py-1 rounded-full text-xs font-light" style="background: rgba(156, 163, 175, 0.1); color: #6b7280;">
-                                    Ditolak
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" style="background: rgba(156, 163, 175, 0.1); color: #6b7280;">
+                                            <span class="w-1.5 h-1.5 rounded-full mr-1.5" style="background: #6b7280;"></span>
+                                            Rejected
                                 </span>
                                 {% endif %}
                             </td>
-                            <td class="py-4 px-4 text-sm font-light text-gray-600">{{ order.created_at|date:"d M Y" }}</td>
-                            <td class="py-4 px-4">
-                                <a href="{% url 'main:purchase_order_detail' order.id %}" class="text-sm font-light text-gray-600 hover:text-gray-900 transition-colors">
-                                    Detail <i class="fas fa-arrow-right ml-1"></i>
-                                </a>
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-900" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
+                                        {{ order.customer_name }}
+                                    </td>
+                                    <td class="px-4 py-3 text-xs text-gray-600" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
+                                        {{ order.customer_email }}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm font-semibold text-gray-900 text-center whitespace-nowrap" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
+                                        {{ order.get_total_units }} unit
+                                    </td>
+                                    <td class="px-4 py-3 text-xs text-gray-600 text-center whitespace-nowrap">
+                                        {{ order.created_at|date:"d M Y" }}
                             </td>
                         </tr>
                         {% endfor %}
@@ -137,13 +525,188 @@
                 </table>
             </div>
             {% else %}
-            <div class="text-center py-12">
-                <i class="fas fa-inbox text-4xl text-gray-300 mb-4"></i>
-                <p class="text-gray-500 font-light">Belum ada purchase orders</p>
+                    <div class="text-center py-10 sm:py-12">
+                        <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full mb-4" style="background: rgba(229, 231, 235, 0.3);">
+                            <i class="fas fa-inbox text-xl sm:text-2xl text-gray-400"></i>
+                        </div>
+                        <p class="text-sm text-gray-500 font-light">Belum ada purchase orders</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Recent Activities -->
+                <div class="glass-card rounded-2xl border shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 scale-in" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.6s;">
+                    <div class="p-5 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.6);">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                            <div>
+                                <h3 class="text-lg sm:text-xl font-light text-gray-900 tracking-tight">Aktivitas Terbaru</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 font-light mt-1">10 aktivitas terakhir</p>
+                            </div>
+                            <a href="{% url 'main:activity_log_list' %}" class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-light text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200" style="border: 1px solid rgba(229, 231, 235, 0.6);">
+                                Lihat Semua <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    {% if recent_activities %}
+                    <div class="divide-y max-h-96 overflow-y-auto overflow-x-auto green-scrollbar" style="border-color: rgba(229, 231, 235, 0.3);">
+                        {% for activity in recent_activities %}
+                        <div class="p-4 sm:p-5 hover:bg-gray-50/50 transition-colors">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style="background: rgba(134, 239, 172, 0.1);">
+                                    {% if activity.action_type == 'order_verified' %}
+                                    <i class="fas fa-check-circle text-sm" style="color: #22c55e;"></i>
+                                    {% elif activity.action_type == 'order_rejected' %}
+                                    <i class="fas fa-times-circle text-sm" style="color: #ef4444;"></i>
+                                    {% elif activity.action_type == 'member_created' %}
+                                    <i class="fas fa-user-plus text-sm" style="color: #6366f1;"></i>
+                                    {% elif activity.action_type == 'serial_created' %}
+                                    <i class="fas fa-barcode text-sm" style="color: #a855f7;"></i>
+                                    {% else %}
+                                    <i class="fas fa-history text-sm" style="color: #86efac;"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 mb-1">{{ activity.get_action_type_display }}</p>
+                                    <p class="text-xs text-gray-600 font-light mb-2 line-clamp-2">{{ activity.description|truncatewords:15 }}</p>
+                                    <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 font-light">
+                                        {% if activity.performed_by %}
+                                        <span>{{ activity.performed_by.full_name }}</span>
+                                        <span>•</span>
+                                        {% endif %}
+                                        <span>{{ activity.created_at|date:"d M Y H:i" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-10 sm:py-12">
+                        <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full mb-4" style="background: rgba(229, 231, 235, 0.3);">
+                            <i class="fas fa-history text-xl sm:text-2xl text-gray-400"></i>
+                        </div>
+                        <p class="text-sm text-gray-500 font-light">Belum ada aktivitas</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        <!-- Section: Recent Members -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.5s;">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 px-1 section-header">Members Terbaru</h2>
+            <div class="glass-card rounded-2xl border shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 scale-in" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.7s;">
+                <div class="p-5 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.6);">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                        <div>
+                            <h3 class="text-lg sm:text-xl font-light text-gray-900 tracking-tight">Members Terbaru</h3>
+                            <p class="text-xs sm:text-sm text-gray-500 font-light mt-1">5 member terakhir</p>
+                        </div>
+                        <a href="{% url 'main:members_list' %}" class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-light text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200" style="border: 1px solid rgba(229, 231, 235, 0.6);">
+                            Lihat Semua <i class="fas fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                {% if recent_members %}
+                <div class="overflow-x-auto overflow-y-auto max-h-96 green-scrollbar" style="border: 1px solid rgba(229, 231, 235, 0.6); border-radius: 0.75rem;">
+                    <table class="w-full border-collapse">
+                        <thead class="sticky top-0 z-10" style="background: rgba(249, 250, 251, 0.95); backdrop-filter: blur(10px);">
+                            <tr style="border-bottom: 2px solid rgba(229, 231, 235, 0.6);">
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 60px;">
+                                    Avatar
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 120px;">
+                                    Member ID
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 180px;">
+                                    Nama Lengkap
+                                </th>
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 140px;">
+                                    Status
+                                </th>
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 100px;">
+                                    Jumlah Device
+                                </th>
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider" style="min-width: 120px;">
+                                    Tanggal
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y" style="border-color: rgba(229, 231, 235, 0.3);">
+                            {% for member in recent_members %}
+                            <tr class="hover:bg-gray-50/50 transition-colors cursor-pointer" data-href="{% url 'main:member_detail' member.member_id %}">
+                                <td class="px-4 py-3 whitespace-nowrap" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: rgba(34, 197, 94, 0.1);">
+                                        <span class="text-sm font-medium" style="color: #22c55e;">{{ member.full_name|first|upper }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm font-semibold text-gray-900 whitespace-nowrap" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
+                                    {{ member.member_id }}
+                                </td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
+                                    {{ member.full_name }}
+                                </td>
+                                <td class="px-4 py-3 text-center whitespace-nowrap" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
+                                    {% if member.is_registered %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                                        <span class="w-1.5 h-1.5 rounded-full mr-1.5" style="background: #22c55e;"></span>
+                                        Terdaftar
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                                        <span class="w-1.5 h-1.5 rounded-full mr-1.5" style="background: #ef4444;"></span>
+                                        Belum Registrasi
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-sm font-semibold text-gray-900 text-center whitespace-nowrap" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
+                                    {{ member.get_device_count }} device
+                                </td>
+                                <td class="px-4 py-3 text-xs text-gray-600 text-center whitespace-nowrap">
+                                    {{ member.created_at|date:"d M Y" }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <div class="text-center py-10 sm:py-12">
+                    <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full mb-4" style="background: rgba(229, 231, 235, 0.3);">
+                        <i class="fas fa-users text-xl sm:text-2xl text-gray-400"></i>
+                    </div>
+                    <p class="text-sm text-gray-500 font-light">Belum ada member</p>
             </div>
             {% endif %}
         </div>
     </div>
 </div>
+
+</div>
+
+{% block extra_js %}
+<script>
+    // Add stagger animation to cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.stat-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${0.2 + (index * 0.1)}s`;
+        });
+        
+        // Make table rows clickable
+        const tableRows = document.querySelectorAll('tr[data-href]');
+        tableRows.forEach(row => {
+            row.addEventListener('click', function() {
+                const href = this.getAttribute('data-href');
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+
 {% endblock %}
 

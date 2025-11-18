@@ -5,7 +5,7 @@ from django.urls import reverse
 from urllib.parse import urlencode
 from datetime import datetime
 from django.db import models
-from .models import ForumUser, ForumPost, ForumComment, Admin, PurchaseOrder, Member, RangBotDevice, DetectionHistory, Notification
+from .models import ForumUser, ForumPost, ForumComment, Admin, CustomerService, PurchaseOrder, Member, RangBotDevice, DetectionHistory, Notification
 from .forms import ForumLoginForm, ForumPostForm, ForumCommentForm
 from django.contrib.auth.hashers import check_password, make_password
 from django.utils import timezone
@@ -19,7 +19,7 @@ def is_staff_user(user):
 
 
 def member_login(request):
-    """Login tunggal: Admin atau Member, diarahkan sesuai peran."""
+    """Login tunggal: Admin, Member, atau CS - diarahkan sesuai peran."""
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
@@ -35,20 +35,38 @@ def member_login(request):
                 request.session['admin_id'] = admin.id
                 request.session['admin_username'] = admin.username
                 request.session['admin_name'] = admin.full_name
+                request.session['user_role'] = 'admin'
                 admin.last_login = timezone.now()
                 admin.save(update_fields=['last_login'])
-                messages.success(request, f'Selamat datang, {admin.full_name}!')
+                # Tidak menampilkan pesan welcome untuk admin
                 return redirect('main:admin_dashboard')
         except Admin.DoesNotExist:
             pass
 
-        # 2) Coba sebagai Member terdaftar
+        # 2) Coba sebagai Customer Service (CS)
+        try:
+            cs = CustomerService.objects.get(username=username, is_active=True)
+            if cs.password and check_password(password, cs.password):
+                request.session['cs_id'] = cs.id
+                request.session['cs_username'] = cs.username
+                request.session['cs_name'] = cs.full_name
+                request.session['user_role'] = 'cs'
+                cs.last_login = timezone.now()
+                cs.save(update_fields=['last_login'])
+                messages.success(request, f'Selamat datang, {cs.full_name}!')
+                # TODO: Redirect ke dashboard CS (belum dibuat)
+                return redirect('main:admin_dashboard')  # Temporary redirect
+        except CustomerService.DoesNotExist:
+            pass
+
+        # 3) Coba sebagai Member terdaftar
         try:
             member = Member.objects.get(username=username, is_registered=True)
             if member.password and check_password(password, member.password):
                 request.session['member_id'] = member.member_id
                 request.session['member_username'] = member.username
                 request.session['member_name'] = member.full_name
+                request.session['user_role'] = 'member'
                 member.last_login = timezone.now()
                 member.save(update_fields=['last_login'])
                 messages.success(request, f'Selamat datang, {member.full_name}!')
@@ -56,7 +74,7 @@ def member_login(request):
         except Member.DoesNotExist:
             pass
 
-        # Jika gagal keduanya
+        # Jika gagal semua
         messages.error(request, 'Username atau password salah.')
 
     return render(request, 'login.html', { 'page_title': 'Login - RangBot' })
@@ -460,6 +478,8 @@ def login_view(request):
 def register_view(request):
     """
     View untuk halaman Register
+    Member ID harus sudah ada di database (dibuat saat admin verifikasi purchase order)
+    Customer tidak bisa membuat Member ID sendiri
     """
     if request.method == 'POST':
         member_id = request.POST.get('member_id', '').strip().upper()
@@ -478,26 +498,46 @@ def register_view(request):
         elif len(password) < 8:
             messages.error(request, 'Password minimal 8 karakter.')
         else:
-            # Check if member_id or username already exists
-            if Member.objects.filter(member_id=member_id).exists():
-                messages.error(request, 'ID Member sudah terdaftar.')
-            elif Member.objects.filter(username=username).exists():
-                messages.error(request, 'Username sudah digunakan.')
-            elif Member.objects.filter(email=email).exists():
-                messages.error(request, 'Email sudah terdaftar.')
-            else:
-                # Create new member
-                member = Member.objects.create(
-                    member_id=member_id,
-                    username=username,
-                    full_name=full_name,
-                    email=email,
-                    phone=phone or None,
-                    password=make_password(password),
-                )
+            # Validasi Member ID: harus sudah ada di database dan belum terdaftar
+            try:
+                member = Member.objects.get(member_id=member_id)
                 
-                messages.success(request, 'Registrasi berhasil! Silakan login.')
-                return redirect('main:login')
+                # Cek apakah sudah terdaftar
+                if member.is_registered:
+                    messages.error(request, 'ID Member ini sudah terdaftar. Silakan login.')
+                    return redirect('main:login')
+                
+                # Validasi email harus sesuai dengan email di purchase order
+                if member.email.lower() != email.lower():
+                    messages.error(request, f'Email tidak sesuai dengan email yang terdaftar di pembelian. Email yang benar: {member.email}')
+                    return render(request, 'register.html', {
+                        'page_title': 'Register - RangBot',
+                        'member_id': member_id,
+                        'username': username,
+                        'full_name': full_name,
+                        'email': email,
+                        'phone': phone,
+                    })
+                
+                # Cek username dan email tidak digunakan oleh member lain
+                if Member.objects.filter(username=username).exclude(member_id=member_id).exists():
+                    messages.error(request, 'Username sudah digunakan.')
+                elif Member.objects.filter(email=email).exclude(member_id=member_id).exists():
+                    messages.error(request, 'Email sudah terdaftar.')
+                else:
+                    # Update member dengan data registrasi
+                    member.username = username
+                    member.full_name = full_name
+                    member.phone = phone or member.phone
+                    member.password = make_password(password)
+                    member.is_registered = True
+                    member.save()
+                    
+                    messages.success(request, 'Registrasi berhasil! Silakan login.')
+                    return redirect('main:login')
+                    
+            except Member.DoesNotExist:
+                messages.error(request, 'ID Member tidak valid atau tidak ditemukan. Pastikan Anda menggunakan Member ID yang diberikan oleh admin setelah verifikasi pembelian.')
     
     context = {
         'page_title': 'Register - RangBot',

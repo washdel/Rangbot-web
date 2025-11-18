@@ -105,6 +105,7 @@
         <!-- Main Form Wrapper -->
         <form method="post" action="{% url 'main:purchase' %}" id="main-purchase-form">
             {% csrf_token %}
+            <input type="hidden" name="payment_method" id="payment_method_input" value="">
         
         <div class="grid lg:grid-cols-3 gap-8">
             <!-- Left Column - Package Selection -->
@@ -802,6 +803,12 @@
 
     function selectPayment(method) {
         selectedPayment = method;
+        
+        // Update hidden input
+        const paymentInput = document.getElementById('payment_method_input');
+        if (paymentInput) {
+            paymentInput.value = method;
+        }
         
         // Update UI with proper styling
         document.querySelectorAll('.payment-btn').forEach(btn => {

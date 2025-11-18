@@ -108,6 +108,27 @@ class Admin(models.Model):
         return f"{self.full_name} ({self.username})"
 
 
+class CustomerService(models.Model):
+    """
+    Model untuk Customer Service (CS)
+    """
+    username = models.CharField(max_length=100, unique=True, verbose_name='Username')
+    email = models.EmailField(unique=True, verbose_name='Email')
+    password = models.CharField(max_length=255, verbose_name='Password')  # Hashed password
+    full_name = models.CharField(max_length=200, verbose_name='Nama Lengkap')
+    is_active = models.BooleanField(default=True, verbose_name='Aktif')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Dibuat pada')
+    last_login = models.DateTimeField(null=True, blank=True, verbose_name='Login terakhir')
+    
+    class Meta:
+        verbose_name = 'Customer Service'
+        verbose_name_plural = 'Customer Services'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.full_name} ({self.username})"
+
+
 class PurchaseOrder(models.Model):
     """
     Model untuk order pembelian RangBot
@@ -135,6 +156,15 @@ class PurchaseOrder(models.Model):
     qty_professional = models.IntegerField(default=0, verbose_name='Jumlah Paket Professional')
     total_price = models.DecimalField(max_digits=15, decimal_places=2, verbose_name='Total Harga')
     notes = models.TextField(blank=True, null=True, verbose_name='Catatan')
+    
+    # Payment Information
+    PAYMENT_METHOD_CHOICES = [
+        ('transfer', 'Transfer Bank'),
+        ('credit', 'Kartu Kredit'),
+        ('installment', 'Cicilan'),
+        ('leasing', 'Leasing'),
+    ]
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, blank=True, null=True, verbose_name='Metode Pembayaran')
     
     # Status & Tracking
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='Status')
@@ -286,3 +316,124 @@ class Notification(models.Model):
     
     def __str__(self):
         return f"{self.title} - {self.member.member_id}"
+
+
+class ProductInfo(models.Model):
+    """
+    Model untuk informasi produk dan landing page
+    Dapat dikelola oleh admin
+    """
+    PACKAGE_CHOICES = [
+        ('basic', 'Basic'),
+        ('professional', 'Professional'),
+    ]
+    
+    package_type = models.CharField(max_length=20, choices=PACKAGE_CHOICES, unique=True, verbose_name='Tipe Paket')
+    name = models.CharField(max_length=200, verbose_name='Nama Paket')
+    price = models.DecimalField(max_digits=15, decimal_places=2, verbose_name='Harga')
+    description = models.TextField(blank=True, null=True, verbose_name='Deskripsi')
+    features = models.TextField(blank=True, null=True, verbose_name='Fitur', help_text='Satu fitur per baris')
+    is_active = models.BooleanField(default=True, verbose_name='Aktif')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Diperbarui pada')
+    updated_by = models.ForeignKey(Admin, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Diperbarui oleh')
+    
+    class Meta:
+        verbose_name = 'Informasi Produk'
+        verbose_name_plural = 'Informasi Produk'
+        ordering = ['package_type']
+    
+    def __str__(self):
+        return f"{self.name} - Rp {self.price:,.0f}"
+    
+    def get_features_list(self):
+        """Mengembalikan list fitur"""
+        if self.features:
+            return [f.strip() for f in self.features.split('\n') if f.strip()]
+        return []
+
+
+class FAQ(models.Model):
+    """
+    Model untuk FAQ (Frequently Asked Questions)
+    Dapat dikelola oleh admin
+    """
+    question = models.CharField(max_length=500, verbose_name='Pertanyaan')
+    answer = models.TextField(verbose_name='Jawaban')
+    order = models.IntegerField(default=0, verbose_name='Urutan', help_text='Urutan tampil (0 = pertama)')
+    is_active = models.BooleanField(default=True, verbose_name='Aktif')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Dibuat pada')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Diperbarui pada')
+    
+    class Meta:
+        verbose_name = 'FAQ'
+        verbose_name_plural = 'FAQ'
+        ordering = ['order', 'created_at']
+    
+    def __str__(self):
+        return self.question[:50] + ('...' if len(self.question) > 50 else '')
+
+
+class Article(models.Model):
+    """
+    Model untuk artikel/tips harian tentang stroberi
+    Dapat dikelola oleh admin
+    """
+    title = models.CharField(max_length=200, verbose_name='Judul')
+    content = models.TextField(verbose_name='Isi Artikel')
+    image_url = models.URLField(blank=True, null=True, verbose_name='URL Gambar')
+    is_published = models.BooleanField(default=False, verbose_name='Dipublikasikan')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Dibuat pada')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Diperbarui pada')
+    created_by = models.ForeignKey(Admin, on_delete=models.SET_NULL, null=True, blank=True, related_name='articles', verbose_name='Dibuat oleh')
+    
+    class Meta:
+        verbose_name = 'Artikel'
+        verbose_name_plural = 'Artikel'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return self.title
+
+
+class ActivityLog(models.Model):
+    """
+    Model untuk log aktivitas sistem
+    Mencatat semua aktivitas penting yang dilakukan admin
+    """
+    ACTION_TYPES = [
+        ('order_verified', 'Verifikasi Pembelian'),
+        ('order_rejected', 'Pembelian Ditolak'),
+        ('member_created', 'Member ID Dibuat'),
+        ('serial_created', 'Nomor Seri Dibuat'),
+        ('member_updated', 'Data Member Diperbarui'),
+        ('member_deactivated', 'Member Dinonaktifkan'),
+        ('member_activated', 'Member Diaktifkan'),
+        ('serial_updated', 'Nomor Seri Diperbarui'),
+        ('product_updated', 'Produk Diperbarui'),
+        ('admin_created', 'Admin Dibuat'),
+        ('admin_deactivated', 'Admin Dinonaktifkan'),
+        ('cs_created', 'Customer Service Dibuat'),
+        ('cs_deleted', 'Customer Service Dihapus'),
+        ('system_error', 'Error Sistem'),
+    ]
+    
+    action_type = models.CharField(max_length=50, choices=ACTION_TYPES, verbose_name='Tipe Aksi')
+    description = models.TextField(verbose_name='Deskripsi')
+    performed_by = models.ForeignKey(Admin, on_delete=models.SET_NULL, null=True, blank=True, related_name='activity_logs', verbose_name='Dilakukan oleh')
+    related_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True, related_name='activity_logs', verbose_name='Purchase Order Terkait')
+    related_member = models.ForeignKey(Member, on_delete=models.SET_NULL, null=True, blank=True, related_name='activity_logs', verbose_name='Member Terkait')
+    related_device = models.ForeignKey(RangBotDevice, on_delete=models.SET_NULL, null=True, blank=True, related_name='activity_logs', verbose_name='Device Terkait')
+    metadata = models.JSONField(default=dict, blank=True, verbose_name='Metadata', help_text='Data tambahan dalam format JSON')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Waktu')
+    
+    class Meta:
+        verbose_name = 'Log Aktivitas'
+        verbose_name_plural = 'Log Aktivitas'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['action_type']),
+        ]
+    
+    def __str__(self):
+        return f"{self.get_action_type_display()} - {self.created_at.strftime('%d %b %Y %H:%M')}"

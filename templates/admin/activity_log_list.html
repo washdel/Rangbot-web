@@ -1,0 +1,433 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .activity-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+    }
+    
+    .activity-card:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(134, 239, 172, 0.15);
+    }
+    
+    .activity-icon {
+        transition: all 0.3s ease;
+    }
+    
+    .activity-card:hover .activity-icon {
+        transform: scale(1.1);
+    }
+    
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 9998;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .modal-overlay.show {
+        display: flex;
+        opacity: 1;
+    }
+    
+    .modal-box {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        max-width: 90%;
+        width: 500px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        transform: scale(0.9) translateY(20px);
+        transition: transform 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .modal-overlay.show .modal-box {
+        transform: scale(1) translateY(0);
+    }
+    
+    .modal-icon {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen animated-bg pb-12 fade-in-up">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Header -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2 gradient-text">
+                        Riwayat Aktivitas Sistem
+                    </h1>
+                    <p class="text-gray-600 font-light text-sm sm:text-base">
+                        Log semua aktivitas penting yang dilakukan di sistem
+                    </p>
+                </div>
+                {% if logs %}
+                <button type="button" 
+                        onclick="showDeleteAllModal({{ logs.count }})"
+                        class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-white font-light text-xs sm:text-sm transition-all duration-300 flex-shrink-0"
+                        style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);"
+                        onmouseover="this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.4)';"
+                        onmouseout="this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)';">
+                    <i class="fas fa-trash-alt mr-2"></i>Hapus Semua
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2 fade-in-up" style="animation-delay: 0.2s;">
+            {% for message in messages %}
+            <div class="p-4 rounded-xl border font-light text-sm backdrop-blur-sm transition-all duration-300 {% if message.tags == 'error' %}bg-red-50/80 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50/80 border-yellow-200 text-yellow-800{% else %}bg-green-50/80 border-green-200 text-green-800{% endif %}">
+                <div class="flex items-center gap-2">
+                    {% if message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% else %}
+                    <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Filters -->
+        <div class="glass-card rounded-2xl border p-4 sm:p-6 mb-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.2s;">
+            <form method="get" class="flex flex-col sm:flex-row flex-wrap gap-4 items-end">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-xs sm:text-sm font-light text-gray-700 mb-2">Cari</label>
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="Deskripsi, nama admin..." 
+                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border font-light text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all"
+                           style="border-color: rgba(229, 231, 235, 0.6);"
+                           onfocus="this.style.borderColor='rgba(134, 239, 172, 0.5)';"
+                           onblur="this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                </div>
+                <div class="min-w-[150px] sm:min-w-[180px]">
+                    <label class="block text-xs sm:text-sm font-light text-gray-700 mb-2">Tipe Aksi</label>
+                    <select name="action_type" 
+                            class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border font-light text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all"
+                            style="border-color: rgba(229, 231, 235, 0.6);"
+                            onfocus="this.style.borderColor='rgba(134, 239, 172, 0.5)';"
+                            onblur="this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                        <option value="">Semua Tipe</option>
+                        {% for action_code, action_name in action_types %}
+                        <option value="{{ action_code }}" {% if action_filter == action_code %}selected{% endif %}>{{ action_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="min-w-[140px] sm:min-w-[160px]">
+                    <label class="block text-xs sm:text-sm font-light text-gray-700 mb-2">Dari Tanggal</label>
+                    <input type="date" name="date_from" value="{{ date_from }}" 
+                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border font-light text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all"
+                           style="border-color: rgba(229, 231, 235, 0.6);"
+                           onfocus="this.style.borderColor='rgba(134, 239, 172, 0.5)';"
+                           onblur="this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                </div>
+                <div class="min-w-[140px] sm:min-w-[160px]">
+                    <label class="block text-xs sm:text-sm font-light text-gray-700 mb-2">Sampai Tanggal</label>
+                    <input type="date" name="date_to" value="{{ date_to }}" 
+                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border font-light text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all"
+                           style="border-color: rgba(229, 231, 235, 0.6);"
+                           onfocus="this.style.borderColor='rgba(134, 239, 172, 0.5)';"
+                           onblur="this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" 
+                            class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-white font-light text-xs sm:text-sm transition-all duration-300 btn-green"
+                            style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); box-shadow: 0 4px 12px rgba(134, 239, 172, 0.3);">
+                        <i class="fas fa-search mr-2"></i>Cari
+                    </button>
+                    {% if action_filter or search_query or date_from or date_to %}
+                    <a href="{% url 'main:activity_log_list' %}" 
+                       class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl border font-light text-xs sm:text-sm text-gray-700 transition-all duration-300"
+                       style="border-color: rgba(229, 231, 235, 0.6);"
+                       onmouseover="this.style.background='rgba(239, 68, 68, 0.1)';"
+                       onmouseout="this.style.background='transparent';">
+                        Reset
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <!-- Activity Logs List -->
+        <div class="glass-card rounded-2xl border overflow-hidden fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.3s;">
+            {% if logs %}
+            <div class="divide-y max-h-[600px] overflow-y-auto green-scrollbar" style="border-color: rgba(229, 231, 235, 0.3);">
+                {% for log in logs %}
+                <div class="activity-card p-4 sm:p-5">
+                    <div class="flex items-start gap-3 sm:gap-4">
+                        <!-- Icon -->
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 activity-icon" 
+                             style="{% if log.action_type == 'order_verified' or log.action_type == 'member_created' or log.action_type == 'serial_created' or log.action_type == 'member_activated' %}background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%);{% elif log.action_type == 'order_rejected' or log.action_type == 'member_deactivated' or log.action_type == 'admin_deactivated' %}background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%);{% else %}background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);{% endif %}">
+                            {% if log.action_type == 'order_verified' %}
+                            <i class="fas fa-check-circle text-lg sm:text-xl" style="color: #22c55e;"></i>
+                            {% elif log.action_type == 'order_rejected' %}
+                            <i class="fas fa-times-circle text-lg sm:text-xl" style="color: #ef4444;"></i>
+                            {% elif log.action_type == 'member_created' %}
+                            <i class="fas fa-user-plus text-lg sm:text-xl" style="color: #22c55e;"></i>
+                            {% elif log.action_type == 'serial_created' %}
+                            <i class="fas fa-barcode text-lg sm:text-xl" style="color: #22c55e;"></i>
+                            {% elif log.action_type == 'member_updated' %}
+                            <i class="fas fa-user-edit text-lg sm:text-xl" style="color: #3b82f6;"></i>
+                            {% elif log.action_type == 'member_deactivated' %}
+                            <i class="fas fa-user-slash text-lg sm:text-xl" style="color: #ef4444;"></i>
+                            {% elif log.action_type == 'member_activated' %}
+                            <i class="fas fa-user-check text-lg sm:text-xl" style="color: #22c55e;"></i>
+                            {% elif log.action_type == 'serial_updated' %}
+                            <i class="fas fa-edit text-lg sm:text-xl" style="color: #3b82f6;"></i>
+                            {% elif log.action_type == 'product_updated' %}
+                            <i class="fas fa-box text-lg sm:text-xl" style="color: #3b82f6;"></i>
+                            {% elif log.action_type == 'admin_created' %}
+                            <i class="fas fa-user-shield text-lg sm:text-xl" style="color: #22c55e;"></i>
+                            {% elif log.action_type == 'admin_deactivated' %}
+                            <i class="fas fa-ban text-lg sm:text-xl" style="color: #ef4444;"></i>
+                            {% elif log.action_type == 'cs_created' %}
+                            <i class="fas fa-headset text-lg sm:text-xl" style="color: #22c55e;"></i>
+                            {% elif log.action_type == 'cs_deleted' %}
+                            <i class="fas fa-trash text-lg sm:text-xl" style="color: #ef4444;"></i>
+                            {% elif log.action_type == 'system_error' %}
+                            <i class="fas fa-exclamation-triangle text-lg sm:text-xl" style="color: #ef4444;"></i>
+                            {% else %}
+                            <i class="fas fa-info-circle text-lg sm:text-xl" style="color: #3b82f6;"></i>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
+                                <div>
+                                    <h3 class="text-sm sm:text-base font-semibold text-gray-900 mb-1">
+                                        {{ log.get_action_type_display }}
+                                    </h3>
+                                    <p class="text-xs sm:text-sm font-light text-gray-600 line-clamp-2">
+                                        {{ log.description }}
+                                    </p>
+                                </div>
+                                <div class="text-right flex-shrink-0 flex flex-col items-end gap-2">
+                                    <div>
+                                        <p class="text-xs font-light text-gray-500 whitespace-nowrap">
+                                            {{ log.created_at|date:"d M Y" }}
+                                        </p>
+                                        <p class="text-xs font-light text-gray-400 whitespace-nowrap">
+                                            {{ log.created_at|date:"H:i" }}
+                                        </p>
+                                    </div>
+                                    <button type="button" 
+                                            onclick="showDeleteModal({{ log.id }}, '{{ log.get_action_type_display|escapejs }}', '{{ log.description|truncatewords:10|escapejs }}')"
+                                            class="px-2.5 py-1.5 rounded-lg text-xs font-medium text-white transition-all duration-300 hover:scale-105"
+                                            style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);"
+                                            onmouseover="this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.4)';"
+                                            onmouseout="this.style.boxShadow='0 2px 8px rgba(239, 68, 68, 0.3)';"
+                                            title="Hapus log ini">
+                                        <i class="fas fa-trash text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Metadata -->
+                            <div class="flex flex-wrap items-center gap-2 mt-2">
+                                {% if log.performed_by %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-light" style="background: rgba(134, 239, 172, 0.1); color: #22c55e;">
+                                    <i class="fas fa-user text-xs"></i>
+                                    {{ log.performed_by.full_name }}
+                                </span>
+                                {% endif %}
+                                
+                                {% if log.related_order %}
+                                <a href="{% url 'main:purchase_order_detail' log.related_order.id %}" 
+                                   class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-light transition-colors hover:bg-gray-100" 
+                                   style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+                                    <i class="fas fa-shopping-cart text-xs"></i>
+                                    Order #{{ log.related_order.id }}
+                                </a>
+                                {% endif %}
+                                
+                                {% if log.related_member %}
+                                <a href="{% url 'main:member_detail' log.related_member.member_id %}" 
+                                   class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-light transition-colors hover:bg-gray-100" 
+                                   style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
+                                    <i class="fas fa-user text-xs"></i>
+                                    {{ log.related_member.member_id }}
+                                </a>
+                                {% endif %}
+                                
+                                {% if log.related_device %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-light" style="background: rgba(251, 146, 60, 0.1); color: #fb923c;">
+                                    <i class="fas fa-robot text-xs"></i>
+                                    {{ log.related_device.serial_number }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12 sm:py-16">
+                <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full mb-4" style="background: rgba(229, 231, 235, 0.3);">
+                    <i class="fas fa-history text-2xl sm:text-3xl text-gray-400"></i>
+                </div>
+                <p class="text-gray-500 font-light mb-2">Tidak ada aktivitas ditemukan</p>
+                {% if action_filter or search_query or date_from or date_to %}
+                <p class="text-xs text-gray-400 font-light mb-4">Coba ubah filter pencarian Anda</p>
+                <a href="{% url 'main:activity_log_list' %}" 
+                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white font-light text-sm transition-all duration-300"
+                   style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); box-shadow: 0 4px 12px rgba(134, 239, 172, 0.3);">
+                    Reset Filter
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="modal-overlay" onclick="if(event.target === this) closeDeleteModal();">
+    <div class="modal-box">
+        <div class="modal-icon" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%);">
+            <i class="fas fa-exclamation-triangle text-3xl" style="color: #ef4444;"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 text-center mb-2">Konfirmasi Hapus</h3>
+        <p class="text-sm font-light text-gray-600 text-center mb-6" id="deleteModalMessage">
+            Apakah Anda yakin ingin menghapus log aktivitas ini?
+        </p>
+        <form id="deleteForm" method="post" class="flex gap-3">
+            {% csrf_token %}
+            <button type="button" 
+                    onclick="closeDeleteModal()"
+                    class="flex-1 px-4 py-2.5 rounded-xl border font-medium text-sm text-gray-700 transition-all duration-300 hover:bg-gray-50"
+                    style="border-color: rgba(229, 231, 235, 0.6);">
+                Batal
+            </button>
+            <button type="submit" 
+                    class="flex-1 px-4 py-2.5 rounded-xl text-white font-medium text-sm transition-all duration-300"
+                    style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);"
+                    onmouseover="this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.4)';"
+                    onmouseout="this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)';">
+                <i class="fas fa-trash mr-2"></i>Hapus
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Delete All Modal -->
+<div id="deleteAllModal" class="modal-overlay" onclick="if(event.target === this) closeDeleteAllModal();">
+    <div class="modal-box">
+        <div class="modal-icon" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%);">
+            <i class="fas fa-exclamation-triangle text-3xl" style="color: #ef4444;"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 text-center mb-2">Konfirmasi Hapus Semua</h3>
+        <p class="text-sm font-light text-gray-600 text-center mb-6" id="deleteAllModalMessage">
+            Apakah Anda yakin ingin menghapus semua log aktivitas?
+        </p>
+        <form id="deleteAllForm" method="post" action="{% url 'main:activity_log_delete_all' %}" class="flex gap-3">
+            {% csrf_token %}
+            <button type="button" 
+                    onclick="closeDeleteAllModal()"
+                    class="flex-1 px-4 py-2.5 rounded-xl border font-medium text-sm text-gray-700 transition-all duration-300 hover:bg-gray-50"
+                    style="border-color: rgba(229, 231, 235, 0.6);">
+                Batal
+            </button>
+            <button type="submit" 
+                    class="flex-1 px-4 py-2.5 rounded-xl text-white font-medium text-sm transition-all duration-300"
+                    style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);"
+                    onmouseover="this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.4)';"
+                    onmouseout="this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)';">
+                <i class="fas fa-trash-alt mr-2"></i>Hapus Semua
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function showDeleteModal(logId, actionType, description) {
+        const modal = document.getElementById('deleteModal');
+        const form = document.getElementById('deleteForm');
+        const message = document.getElementById('deleteModalMessage');
+        
+        form.action = `/admin/activity-log/${logId}/delete/`;
+        message.innerHTML = `Apakah Anda yakin ingin menghapus log aktivitas <strong>"${actionType}"</strong>?<br><br><span class="text-xs text-gray-500">${description}</span><br><br>Tindakan ini tidak dapat dibatalkan.`;
+        
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeDeleteModal() {
+        const modal = document.getElementById('deleteModal');
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    
+    function showDeleteAllModal(count) {
+        const modal = document.getElementById('deleteAllModal');
+        const message = document.getElementById('deleteAllModalMessage');
+        
+        message.innerHTML = `Apakah Anda yakin ingin menghapus <strong>SEMUA</strong> log aktivitas?<br><br><span class="text-sm font-medium text-red-600">Total: ${count} log</span><br><br>Tindakan ini tidak dapat dibatalkan dan akan menghapus semua riwayat aktivitas sistem.`;
+        
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeDeleteAllModal() {
+        const modal = document.getElementById('deleteAllModal');
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeDeleteModal();
+            closeDeleteAllModal();
+        }
+    });
+</script>
+{% endblock %}
+

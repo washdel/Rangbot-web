@@ -38,9 +38,48 @@ urlpatterns = [
     # Admin URLs (unified login - no separate admin login)
     path('admin/dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),
     path('admin/logout/', admin_views.admin_logout, name='admin_logout'),
+    
+    # Purchase Orders
     path('admin/purchase-orders/', admin_views.purchase_orders_list, name='purchase_orders_list'),
     path('admin/purchase-orders/<int:order_id>/', admin_views.purchase_order_detail, name='purchase_order_detail'),
     path('admin/purchase-orders/<int:order_id>/verify/', admin_views.verify_purchase, name='verify_purchase'),
     path('admin/purchase-orders/<int:order_id>/reject/', admin_views.reject_purchase, name='reject_purchase'),
+    
+    # Member Management
+    path('admin/members/', admin_views.members_list, name='members_list'),
+    path('admin/members/<str:member_id>/', admin_views.member_detail, name='member_detail'),
+    path('admin/members/<str:member_id>/toggle-active/', admin_views.member_toggle_active, name='member_toggle_active'),
+    path('admin/members/<str:member_id>/edit/', admin_views.member_edit, name='member_edit'),
+    
+    # Serial Number Management
+    path('admin/serial-numbers/', admin_views.serial_numbers_list, name='serial_numbers_list'),
+    path('admin/serial-numbers/<int:device_id>/', admin_views.serial_number_detail, name='serial_number_detail'),
+    
+    # Customer Service Management
+    path('admin/customer-service/', admin_views.cs_list, name='cs_list'),
+    path('admin/customer-service/add/', admin_views.cs_add, name='cs_add'),
+    path('admin/customer-service/<int:cs_id>/delete/', admin_views.cs_delete, name='cs_delete'),
+    
+    # Admin Management
+    path('admin/admins/', admin_views.admin_list, name='admin_list'),
+    path('admin/admins/add/', admin_views.admin_add, name='admin_add'),
+    path('admin/admins/<int:admin_id>/toggle-active/', admin_views.admin_toggle_active, name='admin_toggle_active'),
+    
+    # Activity Log
+    path('admin/activity-log/', admin_views.activity_log_list, name='activity_log_list'),
+    path('admin/activity-log/<int:log_id>/delete/', admin_views.activity_log_delete, name='activity_log_delete'),
+    path('admin/activity-log/delete-all/', admin_views.activity_log_delete_all, name='activity_log_delete_all'),
+    
+    # Product & Landing Page Management
+    path('admin/products/', admin_views.product_info_list, name='product_info_list'),
+    path('admin/products/<int:product_id>/edit/', admin_views.product_info_edit, name='product_info_edit'),
+    path('admin/faq/', admin_views.faq_list, name='faq_list'),
+    path('admin/faq/add/', admin_views.faq_add, name='faq_add'),
+    path('admin/faq/<int:faq_id>/edit/', admin_views.faq_edit, name='faq_edit'),
+    path('admin/faq/<int:faq_id>/delete/', admin_views.faq_delete, name='faq_delete'),
+    path('admin/articles/', admin_views.articles_list, name='articles_list'),
+    path('admin/articles/add/', admin_views.article_add, name='article_add'),
+    path('admin/articles/<int:article_id>/edit/', admin_views.article_edit, name='article_edit'),
+    path('admin/articles/<int:article_id>/delete/', admin_views.article_delete, name='article_delete'),
 ]
 
