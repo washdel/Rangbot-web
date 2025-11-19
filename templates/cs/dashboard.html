@@ -1,0 +1,664 @@
+{% extends 'cs/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+    
+    @keyframes glow {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(134, 239, 172, 0.3);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(134, 239, 172, 0.5);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .slide-in-right {
+        animation: slideInRight 0.6s ease-out;
+    }
+    
+    .scale-in {
+        animation: scaleIn 0.5s ease-out;
+    }
+    
+    .stat-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.5s;
+    }
+    
+    .stat-card:hover::before {
+        left: 100%;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(134, 239, 172, 0.2);
+    }
+    
+    .stat-icon {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+    
+    .stat-card:hover .stat-icon {
+        transform: scale(1.15) rotate(10deg);
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-glow {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            transform: scale(1.05);
+        }
+    }
+    
+    .pulse-glow {
+        animation: pulse-glow 2s infinite;
+    }
+    
+    .table-row {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .table-row:hover {
+        transform: translateX(6px);
+        background: rgba(134, 239, 172, 0.05) !important;
+    }
+    
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    /* Glass morphism effect for cards */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .glass-card:hover {
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 12px 48px rgba(134, 239, 172, 0.2);
+    }
+    
+    /* Gradient text effect */
+    .gradient-text {
+        background: linear-gradient(135deg, #22c55e 0%, #86efac 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    /* Animated background gradient */
+    .animated-bg {
+        background: linear-gradient(-45deg, #f0fdf4, #ffffff, #f0fdf4, #ffffff);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+    }
+    
+    @keyframes gradientShift {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+    
+    /* Section header with underline animation */
+    .section-header {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .section-header::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #22c55e, #86efac);
+        transition: width 0.5s ease;
+    }
+    
+    .section-header:hover::after {
+        width: 100%;
+    }
+    
+    /* Table styling for Recent Messages */
+    .recent-messages-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .recent-messages-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(249, 250, 251, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .recent-messages-table th {
+        white-space: nowrap;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.75rem;
+    }
+    
+    .recent-messages-table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid rgba(229, 231, 235, 0.3);
+    }
+    
+    .recent-messages-table tbody tr:hover {
+        background: rgba(249, 250, 251, 0.8) !important;
+        transform: scale(1.01);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .recent-messages-table tbody tr:last-child {
+        border-bottom: none;
+    }
+    
+    .recent-messages-table td {
+        vertical-align: middle;
+        padding: 0.75rem 1rem;
+    }
+    
+    .table-container {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: auto;
+        max-height: 24rem;
+    }
+    
+    /* Responsive table adjustments */
+    @media (max-width: 640px) {
+        .recent-messages-table th,
+        .recent-messages-table td {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .recent-messages-table th {
+            font-size: 0.7rem;
+        }
+    }
+    
+    /* Number counter animation */
+    .number-counter {
+        font-variant-numeric: tabular-nums;
+        transition: all 0.3s ease;
+    }
+    
+    /* Status badge with glow */
+    .status-badge {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .status-badge::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+        animation: rotate 3s linear infinite;
+    }
+    
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen animated-bg pb-12 fade-in-up">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Welcome Header -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2 gradient-text">
+                        Dashboard Customer Service
+                    </h1>
+                    <p class="text-gray-600 font-light text-sm sm:text-base">
+                        Selamat datang, <span class="font-semibold text-gray-900">{{ cs.full_name }}</span>
+                    </p>
+                    <p class="text-xs sm:text-sm text-gray-500 font-light mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Ringkasan aktivitas yang perlu ditangani hari ini
+                    </p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-xl glass-card border shadow-lg hover:shadow-xl transition-all duration-300" style="border-color: rgba(134, 239, 172, 0.3);">
+                        <div class="w-2.5 h-2.5 rounded-full animate-pulse" style="background: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.6);"></div>
+                        <span class="text-xs font-medium" style="color: #22c55e;">CS Online</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Section: Messages Statistics -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.2s;">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 px-1 section-header">Statistik Pesan Customer Service</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                <!-- New Messages Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(59, 130, 246, 0.2); min-height: 180px; display: flex; flex-direction: column;">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);">
+                            <i class="fas fa-envelope text-xl sm:text-2xl" style="color: #3b82f6;"></i>
+                        </div>
+                        {% if new_messages > 0 %}
+                        <span class="px-2.5 py-1 rounded-full text-xs font-medium pulse-glow" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                            {{ new_messages }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Pesan Baru</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #3b82f6;">{{ new_messages }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">Pesan belum dibaca</p>
+                    </div>
+                    <a href="{% url 'main:cs_messages' %}?status=new" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Tangani sekarang <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Unread Messages Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(239, 68, 68, 0.2); min-height: 180px; display: flex; flex-direction: column;">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);">
+                            <i class="fas fa-envelope-open text-xl sm:text-2xl" style="color: #ef4444;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Belum Dibalas</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #ef4444;">{{ unread_messages }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">Pesan menunggu balasan</p>
+                    </div>
+                    <a href="{% url 'main:cs_messages' %}?status=new" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Lihat detail <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Total Messages Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(34, 197, 94, 0.2); min-height: 180px; display: flex; flex-direction: column;">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);">
+                            <i class="fas fa-inbox text-xl sm:text-2xl" style="color: #22c55e;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Total Pesan</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #22c55e;">{{ total_messages }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">Semua pesan masuk</p>
+                    </div>
+                    <a href="{% url 'main:cs_messages' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Lihat semua <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Archived Messages Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(156, 163, 175, 0.2); min-height: 180px; display: flex; flex-direction: column;">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(156, 163, 175, 0.1) 0%, rgba(156, 163, 175, 0.05) 100%);">
+                            <i class="fas fa-archive text-xl sm:text-2xl" style="color: #9ca3af;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Diarsipkan</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #9ca3af;">{{ archived_messages }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">Pesan selesai ditangani</p>
+                    </div>
+                    <a href="{% url 'main:cs_messages' %}?status=archived" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Lihat detail <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Forum & FAQ Statistics -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.3s;">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 px-1 section-header">Statistik Forum & FAQ</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                <!-- New Forum Posts Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(147, 51, 234, 0.2); min-height: 180px; display: flex; flex-direction: column;">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%);">
+                            <i class="fas fa-comments text-xl sm:text-2xl" style="color: #9333ea;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Posting Forum Hari Ini</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #9333ea;">{{ new_forum_posts }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">Posting baru hari ini</p>
+                    </div>
+                    <a href="{% url 'main:cs_forum' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Pantau forum <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Total FAQs Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(34, 197, 94, 0.2); min-height: 180px; display: flex; flex-direction: column;">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);">
+                            <i class="fas fa-question-circle text-xl sm:text-2xl" style="color: #22c55e;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Total FAQ Aktif</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #22c55e;">{{ total_faqs }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">FAQ yang aktif</p>
+                    </div>
+                    <a href="{% url 'main:cs_faq' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Kelola FAQ <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Total Members Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(99, 102, 241, 0.2); min-height: 180px; display: flex; flex-direction: column;">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);">
+                            <i class="fas fa-users text-xl sm:text-2xl" style="color: #6366f1;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Total Members Aktif</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #6366f1;">{{ total_members }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">Member terdaftar</p>
+                    </div>
+                    <a href="{% url 'main:cs_members' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Lihat info <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Total Devices Card -->
+                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(168, 85, 247, 0.2); min-height: 180px; display: flex; flex-direction: column;">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);">
+                            <i class="fas fa-robot text-xl sm:text-2xl" style="color: #a855f7;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Total Devices Aktif</h3>
+                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #a855f7;">{{ total_devices }}</p>
+                        <p class="text-xs text-gray-500 font-light mb-4">Perangkat aktif</p>
+                    </div>
+                    <a href="{% url 'main:cs_members' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
+                        Lihat info <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Recent Activity -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.4s;">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 px-1 section-header">Aktivitas Terkini</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+                <!-- Recent Messages -->
+                <div class="glass-card rounded-2xl border shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 scale-in" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.5s;">
+                    <div class="p-5 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.6);">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                            <div>
+                                <h3 class="text-lg sm:text-xl font-light text-gray-900 tracking-tight">Pesan Terbaru</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 font-light mt-1">5 pesan terakhir yang perlu ditangani</p>
+                            </div>
+                            <a href="{% url 'main:cs_messages' %}" class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-light text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200" style="border: 1px solid rgba(229, 231, 235, 0.6);">
+                                Lihat Semua <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    {% if recent_messages %}
+                    <div class="table-container green-scrollbar">
+                        <table class="recent-messages-table w-full">
+                            <thead class="sticky top-0 z-10" style="background: rgba(249, 250, 251, 0.95); backdrop-filter: blur(10px);">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b" style="border-color: rgba(229, 231, 235, 0.6);">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-user text-xs"></i>
+                                            <span>Pengirim</span>
+                                        </div>
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b" style="border-color: rgba(229, 231, 235, 0.6);">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-envelope text-xs"></i>
+                                            <span>Subjek</span>
+                                        </div>
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b hidden sm:table-cell" style="border-color: rgba(229, 231, 235, 0.6);">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-clock text-xs"></i>
+                                            <span>Waktu</span>
+                                        </div>
+                                    </th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b" style="border-color: rgba(229, 231, 235, 0.6);">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <i class="fas fa-info-circle text-xs"></i>
+                                            <span>Status</span>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y" style="border-color: rgba(229, 231, 235, 0.3);">
+                                {% for message in recent_messages %}
+                                <tr class="hover:bg-gray-50/50 transition-colors cursor-pointer" onclick="window.location.href='{% url 'main:cs_messages' %}?search={{ message.email|urlencode }}'">
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(59, 130, 246, 0.1);">
+                                                {% if message.status == 'new' %}
+                                                <i class="fas fa-envelope text-xs" style="color: #ef4444;"></i>
+                                                {% elif message.status == 'read' %}
+                                                <i class="fas fa-envelope-open text-xs" style="color: #3b82f6;"></i>
+                                                {% elif message.status == 'replied' %}
+                                                <i class="fas fa-reply text-xs" style="color: #22c55e;"></i>
+                                                {% else %}
+                                                <i class="fas fa-archive text-xs" style="color: #9ca3af;"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 truncate">{{ message.name }}</p>
+                                                <p class="text-xs text-gray-500 font-light truncate sm:hidden">{{ message.created_at|date:"d M H:i" }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-semibold text-gray-700 truncate">{{ message.subject }}</p>
+                                            <p class="text-xs text-gray-600 font-light line-clamp-1 mt-0.5">{{ message.message|truncatewords:10 }}</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-600 font-light hidden sm:table-cell">
+                                        <div class="flex items-center gap-1">
+                                            <i class="fas fa-clock text-xs text-gray-400"></i>
+                                            <span>{{ message.created_at|date:"d M Y H:i" }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        {% if message.status == 'new' %}
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white pulse-glow" style="background: #ef4444;">
+                                            Baru
+                                        </span>
+                                        {% elif message.status == 'read' %}
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                                            Dibaca
+                                        </span>
+                                        {% elif message.status == 'replied' %}
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                                            Terbalas
+                                        </span>
+                                        {% else %}
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background: rgba(156, 163, 175, 0.1); color: #6b7280;">
+                                            Diarsipkan
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-10 sm:py-12">
+                        <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full mb-4" style="background: rgba(229, 231, 235, 0.3);">
+                            <i class="fas fa-inbox text-xl sm:text-2xl text-gray-400"></i>
+                        </div>
+                        <p class="text-sm text-gray-500 font-light">Tidak ada pesan baru</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Recent Forum Posts -->
+                <div class="glass-card rounded-2xl border shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 scale-in" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.6s;">
+                    <div class="p-5 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.6);">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                            <div>
+                                <h3 class="text-lg sm:text-xl font-light text-gray-900 tracking-tight">Posting Forum Terbaru</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 font-light mt-1">5 posting terakhir dari pengguna</p>
+                            </div>
+                            <a href="{% url 'main:cs_forum' %}" class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-light text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200" style="border: 1px solid rgba(229, 231, 235, 0.6);">
+                                Lihat Semua <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    {% if recent_forum_posts %}
+                    <div class="divide-y max-h-96 overflow-y-auto overflow-x-auto green-scrollbar" style="border-color: rgba(229, 231, 235, 0.3);">
+                        {% for post in recent_forum_posts %}
+                        <div class="p-4 sm:p-5 hover:bg-gray-50/50 transition-colors table-row">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style="background: rgba(147, 51, 234, 0.1);">
+                                    <i class="fas fa-comments text-sm" style="color: #9333ea;"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-gray-900 mb-1">{{ post.title }}</p>
+                                    <p class="text-xs text-gray-600 font-light mb-2 line-clamp-2">{{ post.content|truncatewords:20 }}</p>
+                                    <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 font-light">
+                                        <span><i class="fas fa-user mr-1"></i>{{ post.author.name }}</span>
+                                        <span>•</span>
+                                        <span><i class="fas fa-tag mr-1"></i>{{ post.get_category_display }}</span>
+                                        <span>•</span>
+                                        <span>{{ post.created_at|date:"d M Y H:i" }}</span>
+                                    </div>
+                                </div>
+                                <a href="{% url 'main:forum_detail' post.id %}" class="text-xs text-green-600 hover:text-green-700 flex-shrink-0 transition-colors" title="Lihat detail">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-10 sm:py-12">
+                        <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full mb-4" style="background: rgba(229, 231, 235, 0.3);">
+                            <i class="fas fa-comments text-xl sm:text-2xl text-gray-400"></i>
+                        </div>
+                        <p class="text-sm text-gray-500 font-light">Tidak ada posting forum baru</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Add stagger animation to cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.stat-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${0.2 + (index * 0.1)}s`;
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

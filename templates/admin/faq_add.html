@@ -1,0 +1,274 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .animated-bg {
+        background: linear-gradient(135deg, rgba(240, 253, 244, 0.3) 0%, rgba(255, 255, 255, 1) 50%, rgba(240, 253, 244, 0.3) 100%);
+        background-size: 200% 200%;
+        animation: gradientShift 8s ease infinite;
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+    }
+    
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .form-input {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(229, 231, 235, 0.6);
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: rgba(34, 197, 94, 0.5);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+    
+    .form-textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        background: rgba(249, 250, 251, 0.5);
+        transition: all 0.3s ease;
+    }
+    
+    .checkbox-wrapper:hover {
+        background: rgba(240, 253, 244, 0.5);
+    }
+    
+    .checkbox-input {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        accent-color: #22c55e;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.8);
+        color: #6b7280;
+        border: 1px solid rgba(229, 231, 235, 0.6);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: rgba(249, 250, 251, 0.9);
+        border-color: rgba(229, 231, 235, 0.8);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen animated-bg pb-12 fade-in-up">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Header -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2 gradient-text">
+                        Tambah FAQ
+                    </h1>
+                    <p class="text-gray-600 font-light text-sm sm:text-base flex items-center gap-2">
+                        <i class="fas fa-sync-alt text-green-500"></i>
+                        FAQ akan otomatis tampil di Landing Page jika status aktif
+                    </p>
+                </div>
+                <a href="{% url 'main:product_info_list' %}" 
+                   class="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl border font-light text-sm text-gray-700 transition-all duration-300"
+                   style="border-color: rgba(229, 231, 235, 0.6);"
+                   onmouseover="this.style.background='rgba(134, 239, 172, 0.1)'; this.style.borderColor='rgba(134, 239, 172, 0.4)';"
+                   onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                    <i class="fas fa-arrow-left"></i>Kembali
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2 fade-in-up" style="animation-delay: 0.2s;">
+            {% for message in messages %}
+            <div class="p-4 rounded-xl border font-light text-sm backdrop-blur-sm transition-all duration-300 {% if message.tags == 'error' %}bg-red-50/80 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50/80 border-yellow-200 text-yellow-800{% else %}bg-green-50/80 border-green-200 text-green-800{% endif %}">
+                <div class="flex items-center gap-2">
+                    {% if message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% else %}
+                    <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Form Card -->
+        <div class="glass-card rounded-2xl border overflow-hidden fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); animation-delay: 0.3s;">
+            <form method="POST" class="p-6 sm:p-8">
+                {% csrf_token %}
+                
+                <!-- Question Field -->
+                <div class="mb-6">
+                    <label for="question" class="block text-sm font-semibold text-gray-900 mb-2">
+                        <i class="fas fa-question-circle text-green-500 mr-2"></i>
+                        Pertanyaan <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="question" 
+                           name="question" 
+                           required
+                           class="w-full px-4 py-3 rounded-xl form-input bg-white/80 backdrop-blur-sm text-gray-900 font-light"
+                           placeholder="Masukkan pertanyaan FAQ..."
+                           value="{{ request.POST.question|default:'' }}">
+                    <p class="mt-2 text-xs text-gray-500">Pertanyaan yang akan ditampilkan di Landing Page</p>
+                </div>
+
+                <!-- Answer Field -->
+                <div class="mb-6">
+                    <label for="answer" class="block text-sm font-semibold text-gray-900 mb-2">
+                        <i class="fas fa-comment-dots text-green-500 mr-2"></i>
+                        Jawaban <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="answer" 
+                              name="answer" 
+                              required
+                              class="w-full px-4 py-3 rounded-xl form-input form-textarea bg-white/80 backdrop-blur-sm text-gray-900 font-light"
+                              placeholder="Masukkan jawaban FAQ...">{{ request.POST.answer|default:'' }}</textarea>
+                    <p class="mt-2 text-xs text-gray-500">Jawaban lengkap yang akan ditampilkan di Landing Page</p>
+                </div>
+
+                <!-- Order Field -->
+                <div class="mb-6">
+                    <label for="order" class="block text-sm font-semibold text-gray-900 mb-2">
+                        <i class="fas fa-sort-numeric-down text-green-500 mr-2"></i>
+                        Urutan Tampil
+                    </label>
+                    <input type="number" 
+                           id="order" 
+                           name="order" 
+                           min="0"
+                           class="w-full px-4 py-3 rounded-xl form-input bg-white/80 backdrop-blur-sm text-gray-900 font-light"
+                           placeholder="0"
+                           value="{{ request.POST.order|default:'0' }}">
+                    <p class="mt-2 text-xs text-gray-500">Urutan tampil di Landing Page (0 = pertama, angka lebih kecil = lebih atas)</p>
+                </div>
+
+                <!-- Active Status -->
+                <div class="mb-6">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" 
+                               id="is_active" 
+                               name="is_active" 
+                               class="checkbox-input"
+                               {% if request.POST.is_active or not request.POST %}checked{% endif %}>
+                        <label for="is_active" class="flex-1 cursor-pointer">
+                            <span class="text-sm font-semibold text-gray-900 block mb-1">
+                                <i class="fas fa-globe text-green-500 mr-2"></i>
+                                Aktifkan FAQ
+                            </span>
+                            <span class="text-xs text-gray-600">FAQ akan tampil di Landing Page jika dicentang</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t" style="border-color: rgba(229, 231, 235, 0.3);">
+                    <button type="submit" 
+                            class="flex-1 px-6 py-3 rounded-xl font-medium text-sm btn-primary">
+                        <i class="fas fa-save mr-2"></i>
+                        Simpan FAQ
+                    </button>
+                    <a href="{% url 'main:product_info_list' %}" 
+                       class="flex-1 px-6 py-3 rounded-xl font-medium text-sm text-center btn-secondary">
+                        <i class="fas fa-times mr-2"></i>
+                        Batal
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Info Card -->
+        <div class="mt-6 glass-card rounded-2xl border p-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.4s;">
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(34, 197, 94, 0.1);">
+                    <i class="fas fa-info-circle text-green-500"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-2">Informasi Sinkronisasi</h3>
+                    <ul class="text-xs text-gray-600 space-y-1">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-500 mt-0.5"></i>
+                            <span>FAQ yang aktif akan otomatis tampil di halaman "Informasi Produk" di Landing Page</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-500 mt-0.5"></i>
+                            <span>Urutan tampil mengikuti field "Urutan Tampil" (angka lebih kecil = lebih atas)</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-500 mt-0.5"></i>
+                            <span>Perubahan langsung tersinkron tanpa perlu refresh manual</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

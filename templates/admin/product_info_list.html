@@ -1,0 +1,806 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes fadeInRow {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .slide-in-right {
+        animation: slideInRight 0.6s ease-out;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .animated-bg {
+        background: linear-gradient(135deg, rgba(240, 253, 244, 0.3) 0%, rgba(255, 255, 255, 1) 50%, rgba(240, 253, 244, 0.3) 100%);
+        background-size: 200% 200%;
+        animation: gradientShift 8s ease infinite;
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+    }
+    
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Tab Navigation */
+    .tab-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid rgba(229, 231, 235, 0.3);
+        overflow-x: auto;
+    }
+    
+    .tab-button {
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+        color: #6b7280;
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .tab-button:hover {
+        color: #22c55e;
+        background: rgba(34, 197, 94, 0.05);
+    }
+    
+    .tab-button.active {
+        color: #22c55e;
+        border-bottom-color: #22c55e;
+        background: rgba(34, 197, 94, 0.1);
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+        animation: fadeInUp 0.4s ease-out;
+    }
+    
+    /* Table Styles */
+    .product-row, .faq-row, .forum-row {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: fadeInRow 0.4s ease-out;
+    }
+    
+    .product-row:hover, .faq-row:hover, .forum-row:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        background: rgba(249, 250, 251, 0.8) !important;
+    }
+    
+    .product-row.inactive, .faq-row.inactive {
+        background: rgba(254, 242, 242, 0.3);
+        border-left: 4px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .product-row.inactive:hover, .faq-row.inactive:hover {
+        background: rgba(254, 242, 242, 0.5) !important;
+        border-left-color: rgba(239, 68, 68, 0.5);
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: 500;
+        font-size: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    
+    .status-badge:hover {
+        transform: scale(1.05);
+    }
+    
+    .table-header {
+        background: linear-gradient(135deg, rgba(249, 250, 251, 0.8) 0%, rgba(240, 253, 244, 0.5) 100%);
+        border-bottom: 2px solid rgba(134, 239, 172, 0.2);
+    }
+    
+    .table-header th {
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.75rem;
+        color: #374151;
+    }
+    
+    .action-link, .action-btn {
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .action-link:hover {
+        color: #22c55e;
+        transform: translateX(4px);
+    }
+    
+    .action-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+    
+    .btn-primary:hover {
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-danger:hover {
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+    }
+    
+    .btn-secondary:hover {
+        box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    /* Modal Styles */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-overlay.active {
+        display: flex;
+    }
+    
+    .modal-box {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .modal-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+    }
+    
+    .modal-icon.danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+    
+    .comment-item {
+        padding: 1rem;
+        border-left: 3px solid rgba(34, 197, 94, 0.3);
+        background: rgba(249, 250, 251, 0.5);
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .comment-item:hover {
+        background: rgba(249, 250, 251, 0.8);
+        border-left-color: rgba(34, 197, 94, 0.5);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen animated-bg pb-12 fade-in-up">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Header -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2 gradient-text">
+                        Manajemen Informasi Produk
+                    </h1>
+                    <p class="text-gray-600 font-light text-sm sm:text-base flex items-center gap-2">
+                        <i class="fas fa-sync-alt text-green-500"></i>
+                        Sinkronisasi otomatis ke Landing Page
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2 fade-in-up" style="animation-delay: 0.2s;">
+            {% for message in messages %}
+            <div class="p-4 rounded-xl border font-light text-sm backdrop-blur-sm transition-all duration-300 {% if message.tags == 'error' %}bg-red-50/80 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50/80 border-yellow-200 text-yellow-800{% else %}bg-green-50/80 border-green-200 text-green-800{% endif %}">
+                <div class="flex items-center gap-2">
+                    {% if message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% else %}
+                    <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Tab Navigation -->
+        <div class="glass-card rounded-2xl border overflow-hidden mb-6" style="border-color: rgba(134, 239, 172, 0.2); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+            <div class="tab-container px-4 sm:px-6">
+                <button class="tab-button active" onclick="switchTab('faq')" data-tab="faq">
+                    <i class="fas fa-question-circle"></i>
+                    <span>FAQ</span>
+                </button>
+                <button class="tab-button" onclick="switchTab('forum')" data-tab="forum">
+                    <i class="fas fa-comments"></i>
+                    <span>Forum</span>
+                </button>
+                <button class="tab-button" onclick="switchTab('harga')" data-tab="harga">
+                    <i class="fas fa-tag"></i>
+                    <span>Harga Produk</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- FAQ Tab -->
+        <div id="tab-faq" class="tab-content active">
+            <div class="glass-card rounded-2xl border overflow-hidden fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+                <div class="p-4 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.3);">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2 mb-2">
+                                <i class="fas fa-question-circle text-green-500"></i>
+                                Frequently Asked Questions
+                            </h2>
+                            <p class="text-xs text-gray-500 flex items-center gap-2">
+                                <i class="fas fa-sync-alt text-green-500"></i>
+                                <span>{{ active_faqs_count }} aktif tampil di Landing Page</span>
+                                <span class="text-gray-300">•</span>
+                                <span>Total: {{ total_faqs_count }} FAQ</span>
+                            </p>
+                        </div>
+                        <a href="{% url 'main:faq_add' %}" class="action-btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            <span>Tambah FAQ</span>
+                        </a>
+                    </div>
+                </div>
+                
+                {% if faqs %}
+                <div class="overflow-x-auto green-scrollbar">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="table-header">
+                                <th class="text-left py-4 px-6">Urutan</th>
+                                <th class="text-left py-4 px-6">Pertanyaan</th>
+                                <th class="text-left py-4 px-6">Jawaban</th>
+                                <th class="text-left py-4 px-6">Status</th>
+                                <th class="text-left py-4 px-6">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for faq in faqs %}
+                            <tr class="faq-row border-b {% if not faq.is_active %}inactive{% endif %}" style="border-color: rgba(229, 231, 235, 0.3);">
+                                <td class="py-4 px-6">
+                                    <span class="text-sm font-semibold text-gray-600">{{ faq.order }}</span>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-semibold text-gray-900 max-w-md">{{ faq.question }}</div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-light text-gray-600 max-w-md truncate">
+                                        {{ faq.answer|truncatewords:20 }}
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    {% if faq.is_active %}
+                                    <span class="status-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);" title="Tampil di Landing Page">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Aktif</span>
+                                        <i class="fas fa-globe text-xs ml-1" title="Tampil di Landing Page"></i>
+                                    </span>
+                                    {% else %}
+                                    <span class="status-badge" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);" title="Tidak tampil di Landing Page">
+                                        <i class="fas fa-ban"></i>
+                                        <span>Nonaktif</span>
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center gap-2">
+                                        <a href="{% url 'main:faq_edit' faq.id %}" class="action-link text-sm font-medium text-gray-600">
+                                            <i class="fas fa-edit"></i>
+                                            <span>Edit</span>
+                                        </a>
+                                        <button onclick="showDeleteFAQModal({{ faq.id }}, '{{ faq.question|escapejs }}')" class="action-link text-sm font-medium text-red-600">
+                                            <i class="fas fa-trash"></i>
+                                            <span>Hapus</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-16">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(134, 239, 172, 0.1);">
+                        <i class="fas fa-question-circle text-4xl text-gray-300"></i>
+                    </div>
+                    <p class="text-gray-500 font-light text-lg">Tidak ada FAQ ditemukan</p>
+                    <p class="text-gray-400 font-light text-sm mt-2">Klik tombol "Tambah FAQ" untuk menambahkan FAQ baru</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Forum Tab -->
+        <div id="tab-forum" class="tab-content">
+            <!-- Forum Posts Section -->
+            <div class="glass-card rounded-2xl border overflow-hidden fade-in-up mb-6" style="border-color: rgba(134, 239, 172, 0.2); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+                <div class="p-4 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.3);">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2 mb-2">
+                            <i class="fas fa-comments text-green-500"></i>
+                            Postingan Forum
+                        </h2>
+                        <p class="text-xs text-gray-500 flex items-center gap-2">
+                            <i class="fas fa-sync-alt text-green-500"></i>
+                            <span>Semua postingan tersinkron dengan Landing Page</span>
+                        </p>
+                    </div>
+                </div>
+                
+                {% if forum_posts %}
+                <div class="overflow-x-auto green-scrollbar">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="table-header">
+                                <th class="text-left py-4 px-6">Judul Postingan</th>
+                                <th class="text-left py-4 px-6">Penulis</th>
+                                <th class="text-left py-4 px-6">Kategori</th>
+                                <th class="text-left py-4 px-6">Komentar</th>
+                                <th class="text-left py-4 px-6">Dibuat</th>
+                                <th class="text-left py-4 px-6">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for post in forum_posts %}
+                            <tr class="forum-row border-b" style="border-color: rgba(229, 231, 235, 0.3);">
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-semibold text-gray-900 max-w-md">{{ post.title }}</div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-sm text-gray-600">{{ post.author.name }}</div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">{{ post.get_category_display }}</span>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <span class="text-sm text-gray-600">{{ post.get_comment_count }}</span>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-light text-gray-600">{{ post.created_at|date:"d M Y" }}</div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <button onclick="showDeletePostModal({{ post.id }}, '{{ post.title|escapejs }}')" class="action-link text-sm font-medium text-red-600">
+                                        <i class="fas fa-trash"></i>
+                                        <span>Hapus</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-16">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(134, 239, 172, 0.1);">
+                        <i class="fas fa-comments text-4xl text-gray-300"></i>
+                    </div>
+                    <p class="text-gray-500 font-light text-lg">Tidak ada postingan forum ditemukan</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Forum Comments Section -->
+            <div class="glass-card rounded-2xl border overflow-hidden fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+                <div class="p-4 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.3);">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2 mb-2">
+                            <i class="fas fa-reply text-green-500"></i>
+                            Komentar Forum
+                        </h2>
+                        <p class="text-xs text-gray-500 flex items-center gap-2">
+                            <i class="fas fa-sync-alt text-green-500"></i>
+                            <span>Semua komentar tersinkron dengan Landing Page</span>
+                        </p>
+                    </div>
+                </div>
+                
+                {% if forum_comments %}
+                <div class="p-4 sm:p-6">
+                    <div class="space-y-3">
+                        {% for comment in forum_comments %}
+                        <div class="comment-item">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-sm font-semibold text-gray-900">{{ comment.author.name }}</span>
+                                        <span class="text-xs text-gray-500">•</span>
+                                        <span class="text-xs text-gray-500">{{ comment.created_at|date:"d M Y H:i" }}</span>
+                                    </div>
+                                    <p class="text-sm text-gray-700 mb-2">{{ comment.content|truncatewords:30 }}</p>
+                                    <div class="text-xs text-gray-500">
+                                        <i class="fas fa-comment-dots"></i>
+                                        Pada: <span class="font-medium">{{ comment.post.title }}</span>
+                                    </div>
+                                </div>
+                                <button onclick="showDeleteCommentModal({{ comment.id }}, '{{ comment.content|truncatewords:10|escapejs }}')" class="action-link text-sm font-medium text-red-600 flex-shrink-0">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Hapus</span>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-16">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(134, 239, 172, 0.1);">
+                        <i class="fas fa-reply text-4xl text-gray-300"></i>
+                    </div>
+                    <p class="text-gray-500 font-light text-lg">Tidak ada komentar ditemukan</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Harga Produk Tab -->
+        <div id="tab-harga" class="tab-content">
+            <div class="glass-card rounded-2xl border overflow-hidden fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+                <div class="p-4 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.3);">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2 mb-2">
+                                <i class="fas fa-tag text-green-500"></i>
+                                Harga Produk RangBot
+                            </h2>
+                            <p class="text-xs text-gray-500 flex items-center gap-2">
+                                <i class="fas fa-sync-alt text-green-500"></i>
+                                <span>{{ active_products_count }} aktif tampil di Landing Page</span>
+                                <span class="text-gray-300">•</span>
+                                <span>Total: {{ total_products_count }} produk</span>
+                            </p>
+                        </div>
+                        <a href="{% url 'main:product_add' %}" class="action-btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            <span>Tambah Produk</span>
+                        </a>
+                    </div>
+                </div>
+                
+                {% if products %}
+                <div class="overflow-x-auto green-scrollbar">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="table-header">
+                                <th class="text-left py-4 px-6">Nama Paket</th>
+                                <th class="text-left py-4 px-6">Harga</th>
+                                <th class="text-left py-4 px-6">Deskripsi</th>
+                                <th class="text-left py-4 px-6">Status</th>
+                                <th class="text-left py-4 px-6">Diupdate</th>
+                                <th class="text-left py-4 px-6">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr class="product-row border-b {% if not product.is_active %}inactive{% endif %}" style="border-color: rgba(229, 231, 235, 0.3);">
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-semibold text-gray-900">{{ product.name }}</div>
+                                    <div class="text-xs text-gray-500 mt-1">{{ product.get_package_type_display }}</div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <span class="text-sm font-bold text-gray-900">Rp {{ product.price|floatformat:0 }}</span>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-light text-gray-600 max-w-xs truncate">
+                                        {% if product.description %}
+                                            {{ product.description|truncatewords:15 }}
+                                        {% else %}
+                                            <span class="text-gray-400 italic">-</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    {% if product.is_active %}
+                                    <span class="status-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);" title="Tampil di Landing Page">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Aktif</span>
+                                        <i class="fas fa-globe text-xs ml-1" title="Tampil di Landing Page"></i>
+                                    </span>
+                                    {% else %}
+                                    <span class="status-badge" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);" title="Tidak tampil di Landing Page">
+                                        <i class="fas fa-ban"></i>
+                                        <span>Nonaktif</span>
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-light text-gray-600 flex items-center gap-2">
+                                        <i class="fas fa-edit text-xs text-gray-400"></i>
+                                        {% if product.updated_at %}
+                                            {{ product.updated_at|date:"d M Y" }}
+                                        {% else %}
+                                            <span class="text-gray-400 italic">-</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <a href="{% url 'main:product_info_edit' product.id %}" class="action-link text-sm font-medium text-gray-600">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Edit</span>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-16">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(134, 239, 172, 0.1);">
+                        <i class="fas fa-tag text-4xl text-gray-300"></i>
+                    </div>
+                    <p class="text-gray-500 font-light text-lg">Tidak ada produk ditemukan</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete FAQ Modal -->
+<div id="deleteFAQModal" class="modal-overlay" onclick="if(event.target === this) closeDeleteFAQModal()">
+    <div class="modal-box">
+        <div class="modal-icon danger">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 text-center mb-2">Hapus FAQ</h3>
+        <p class="text-gray-600 text-center mb-6">Apakah Anda yakin ingin menghapus FAQ ini?</p>
+        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+            <p class="text-sm font-medium text-gray-900" id="deleteFAQQuestion"></p>
+        </div>
+        <form method="POST" action="" id="deleteFAQForm" class="flex gap-3">
+            {% csrf_token %}
+            <button type="button" onclick="closeDeleteFAQModal()" class="flex-1 action-btn btn-secondary">
+                <i class="fas fa-times"></i>
+                <span>Batal</span>
+            </button>
+            <button type="submit" class="flex-1 action-btn btn-danger">
+                <i class="fas fa-trash"></i>
+                <span>Hapus</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Post Modal -->
+<div id="deletePostModal" class="modal-overlay" onclick="if(event.target === this) closeDeletePostModal()">
+    <div class="modal-box">
+        <div class="modal-icon danger">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 text-center mb-2">Hapus Postingan Forum</h3>
+        <p class="text-gray-600 text-center mb-6">Apakah Anda yakin ingin menghapus postingan ini?</p>
+        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+            <p class="text-sm font-medium text-gray-900" id="deletePostTitle"></p>
+        </div>
+        <form method="POST" action="" id="deletePostForm" class="flex gap-3">
+            {% csrf_token %}
+            <button type="button" onclick="closeDeletePostModal()" class="flex-1 action-btn btn-secondary">
+                <i class="fas fa-times"></i>
+                <span>Batal</span>
+            </button>
+            <button type="submit" class="flex-1 action-btn btn-danger">
+                <i class="fas fa-trash"></i>
+                <span>Hapus</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Comment Modal -->
+<div id="deleteCommentModal" class="modal-overlay" onclick="if(event.target === this) closeDeleteCommentModal()">
+    <div class="modal-box">
+        <div class="modal-icon danger">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 text-center mb-2">Hapus Komentar Forum</h3>
+        <p class="text-gray-600 text-center mb-6">Apakah Anda yakin ingin menghapus komentar ini?</p>
+        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+            <p class="text-sm font-medium text-gray-900" id="deleteCommentContent"></p>
+        </div>
+        <form method="POST" action="" id="deleteCommentForm" class="flex gap-3">
+            {% csrf_token %}
+            <button type="button" onclick="closeDeleteCommentModal()" class="flex-1 action-btn btn-secondary">
+                <i class="fas fa-times"></i>
+                <span>Batal</span>
+            </button>
+            <button type="submit" class="flex-1 action-btn btn-danger">
+                <i class="fas fa-trash"></i>
+                <span>Hapus</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function switchTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+    
+    // Add active class to selected button
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+}
+
+function showDeleteFAQModal(faqId, question) {
+    document.getElementById('deleteFAQQuestion').textContent = question;
+    document.getElementById('deleteFAQForm').action = `{% url 'main:faq_delete' 0 %}`.replace('0', faqId);
+    document.getElementById('deleteFAQModal').classList.add('active');
+}
+
+function closeDeleteFAQModal() {
+    document.getElementById('deleteFAQModal').classList.remove('active');
+}
+
+function showDeletePostModal(postId, title) {
+    document.getElementById('deletePostTitle').textContent = title;
+    document.getElementById('deletePostForm').action = `{% url 'main:forum_post_delete' 0 %}`.replace('0', postId);
+    document.getElementById('deletePostModal').classList.add('active');
+}
+
+function closeDeletePostModal() {
+    document.getElementById('deletePostModal').classList.remove('active');
+}
+
+function showDeleteCommentModal(commentId, content) {
+    document.getElementById('deleteCommentContent').textContent = content;
+    document.getElementById('deleteCommentForm').action = `{% url 'main:forum_comment_delete' 0 %}`.replace('0', commentId);
+    document.getElementById('deleteCommentModal').classList.add('active');
+}
+
+function closeDeleteCommentModal() {
+    document.getElementById('deleteCommentModal').classList.remove('active');
+}
+
+// Close modals on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeDeleteFAQModal();
+        closeDeletePostModal();
+        closeDeleteCommentModal();
+    }
+});
+</script>
+{% endblock %}

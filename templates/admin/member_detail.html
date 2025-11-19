@@ -1,0 +1,468 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .detail-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+    }
+    
+    .detail-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .info-item {
+        transition: all 0.2s ease;
+    }
+    
+    .info-item:hover {
+        background: rgba(134, 239, 172, 0.05);
+        border-radius: 0.5rem;
+        padding-left: 0.5rem;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .status-badge:hover {
+        transform: scale(1.05);
+    }
+    
+    .action-btn {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+    
+    .modal-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px) saturate(180%);
+        margin: 10% auto;
+        padding: 0;
+        border-radius: 1.5rem;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+    
+    .close:hover {
+        color: #000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen animated-bg pb-12 fade-in-up">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Header -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2 gradient-text">
+                        Detail Member {{ member.member_id }}
+                    </h1>
+                    <p class="text-gray-600 font-light text-sm sm:text-base">
+                        <i class="fas fa-calendar-alt mr-2"></i>{{ member.created_at|date:"d F Y, H:i" }}
+                    </p>
+                </div>
+                <a href="{% url 'main:members_list' %}" 
+                   class="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl border font-light text-sm text-gray-700 transition-all duration-300 action-btn"
+                   style="border-color: rgba(229, 231, 235, 0.6);"
+                   onmouseover="this.style.background='rgba(134, 239, 172, 0.1)'; this.style.borderColor='rgba(134, 239, 172, 0.4)';"
+                   onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                    <i class="fas fa-arrow-left"></i>Kembali
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2 fade-in-up" style="animation-delay: 0.2s;">
+            {% for message in messages %}
+            <div class="p-4 rounded-xl border font-light text-sm backdrop-blur-sm transition-all duration-300 {% if message.tags == 'error' %}bg-red-50/80 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50/80 border-yellow-200 text-yellow-800{% else %}bg-green-50/80 border-green-200 text-green-800{% endif %}">
+                <div class="flex items-center gap-2">
+                    {% if message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% else %}
+                    <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Left Column - Member Details -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Member Information -->
+                <div class="glass-card detail-card rounded-2xl border p-5 sm:p-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.2s;">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);">
+                            <i class="fas fa-user text-xl" style="color: #3b82f6;"></i>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 tracking-tight">Informasi Member</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="info-item p-2 -m-2">
+                            <label class="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Member ID</label>
+                            <p class="text-base sm:text-lg font-bold text-gray-900 mt-1.5 flex items-center gap-2">
+                                <i class="fas fa-id-card text-sm" style="color: #22c55e;"></i>
+                                {{ member.member_id }}
+                            </p>
+                        </div>
+                        <div class="info-item p-2 -m-2">
+                            <label class="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Nama Lengkap</label>
+                            <p class="text-base sm:text-lg font-semibold text-gray-900 mt-1.5">{{ member.full_name }}</p>
+                        </div>
+                        {% if member.username %}
+                        <div class="info-item p-2 -m-2">
+                            <label class="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Username</label>
+                            <p class="text-base font-medium text-gray-900 mt-1.5 flex items-center gap-2">
+                                <i class="fas fa-user text-sm" style="color: #6b7280;"></i>
+                                {{ member.username }}
+                            </p>
+                        </div>
+                        {% endif %}
+                        <div class="info-item p-2 -m-2">
+                            <label class="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Email</label>
+                            <p class="text-base font-medium text-gray-900 mt-1.5 flex items-center gap-2">
+                                <i class="fas fa-envelope text-sm" style="color: #6b7280;"></i>
+                                {{ member.email }}
+                            </p>
+                        </div>
+                        {% if member.phone %}
+                        <div class="info-item p-2 -m-2">
+                            <label class="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Nomor Telepon</label>
+                            <p class="text-base font-medium text-gray-900 mt-1.5 flex items-center gap-2">
+                                <i class="fas fa-phone text-sm" style="color: #6b7280;"></i>
+                                {{ member.phone }}
+                            </p>
+                        </div>
+                        {% endif %}
+                        <div class="info-item p-2 -m-2">
+                            <label class="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Status Registrasi</label>
+                            <p class="text-base font-medium text-gray-900 mt-1.5">
+                                {% if member.is_registered %}
+                                <span class="status-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">
+                                    <i class="fas fa-check-circle"></i>Terdaftar
+                                </span>
+                                {% else %}
+                                <span class="status-badge" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                    <i class="fas fa-clock"></i>Belum Terdaftar
+                                </span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Devices -->
+                {% if devices %}
+                <div class="glass-card detail-card rounded-2xl border p-5 sm:p-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.3s;">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%);">
+                            <i class="fas fa-microchip text-xl" style="color: #22c55e;"></i>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 tracking-tight">Perangkat RangBot</h2>
+                    </div>
+                    <div class="space-y-3">
+                        {% for device in devices %}
+                        <div class="px-4 py-3 rounded-xl border font-medium text-sm transition-all duration-300 hover:scale-105" style="border-color: rgba(134, 239, 172, 0.3); background: rgba(134, 239, 172, 0.05);">
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-barcode text-sm" style="color: #22c55e;"></i>
+                                    <span class="font-semibold">{{ device.serial_number }}</span>
+                                    {% if device.device_name %}
+                                    <span class="text-gray-500">- {{ device.device_name }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if device.status == 'active' %}
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">
+                                    Aktif
+                                </span>
+                                {% else %}
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+                                    Nonaktif
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Purchase Orders -->
+                {% if purchase_orders %}
+                <div class="glass-card detail-card rounded-2xl border p-5 sm:p-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.4s;">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.1) 100%);">
+                            <i class="fas fa-shopping-bag text-xl" style="color: #a855f7;"></i>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 tracking-tight">Purchase Orders</h2>
+                    </div>
+                    <div class="space-y-3">
+                        {% for order in purchase_orders %}
+                        <a href="{% url 'main:purchase_order_detail' order.id %}" 
+                           class="block px-4 py-3 rounded-xl border font-medium text-sm transition-all duration-300 hover:scale-105" 
+                           style="border-color: rgba(168, 85, 247, 0.3); background: rgba(168, 85, 247, 0.05);">
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-file-invoice text-sm" style="color: #a855f7;"></i>
+                                    <span class="font-semibold">Order #{{ order.id }}</span>
+                                    <span class="text-gray-500">- {{ order.customer_name }}</span>
+                                </div>
+                                {% if order.status == 'verified' %}
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">
+                                    Terverifikasi
+                                </span>
+                                {% elif order.status == 'pending' %}
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+                                    Pending
+                                </span>
+                                {% else %}
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold" style="background: rgba(156, 163, 175, 0.15); color: #6b7280;">
+                                    Ditolak
+                                </span>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Column - Actions -->
+            <div class="space-y-6">
+                <!-- Status Card -->
+                <div class="glass-card detail-card rounded-2xl border p-5 sm:p-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.3s;">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%);">
+                            <i class="fas fa-info-circle text-xl" style="color: #ef4444;"></i>
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight">Status</h2>
+                    </div>
+                    <div class="mb-6">
+                        {% if member.is_active %}
+                        <div class="status-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Aktif</span>
+                        </div>
+                        {% else %}
+                        <div class="status-badge" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
+                            <i class="fas fa-ban"></i>
+                            <span>Nonaktif</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="space-y-3">
+                        <form method="post" action="{% url 'main:member_toggle_active' member.member_id %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" 
+                                    class="block w-full px-6 py-3 rounded-xl text-white font-medium text-sm text-center transition-all duration-300 action-btn"
+                                    style="{% if member.is_active %}background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);{% else %}background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); box-shadow: 0 4px 12px rgba(134, 239, 172, 0.3);{% endif %}"
+                                    onmouseover="this.style.boxShadow='{% if member.is_active %}0 6px 16px rgba(239, 68, 68, 0.4){% else %}0 6px 16px rgba(134, 239, 172, 0.4){% endif %}';"
+                                    onmouseout="this.style.boxShadow='{% if member.is_active %}0 4px 12px rgba(239, 68, 68, 0.3){% else %}0 4px 12px rgba(134, 239, 172, 0.3){% endif %}';">
+                                {% if member.is_active %}
+                                <i class="fas fa-ban mr-2"></i>Nonaktifkan Member
+                                {% else %}
+                                <i class="fas fa-check-circle mr-2"></i>Aktifkan Member
+                                {% endif %}
+                            </button>
+                        </form>
+                        <button onclick="showDeleteModal()" 
+                                class="block w-full px-6 py-3 rounded-xl border font-medium text-sm text-center text-white transition-all duration-300 action-btn"
+                                style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); border-color: rgba(239, 68, 68, 0.3);"
+                                onmouseover="this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.4)';"
+                                onmouseout="this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)';">
+                            <i class="fas fa-trash mr-2"></i>Hapus Member
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Member Info -->
+                <div class="glass-card detail-card rounded-2xl border p-5 sm:p-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.4s;">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%);">
+                            <i class="fas fa-file-invoice text-xl" style="color: #6366f1;"></i>
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight">Informasi Member</h2>
+                    </div>
+                    <div class="space-y-4 text-sm">
+                        <div class="flex justify-between items-center p-2 rounded-lg hover:bg-gray-50/50 transition-colors">
+                            <span class="font-medium text-gray-600 flex items-center gap-2">
+                                <i class="fas fa-microchip text-xs"></i>Jumlah Device
+                            </span>
+                            <span class="font-bold text-gray-900">{{ member.get_device_count }}</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded-lg hover:bg-gray-50/50 transition-colors">
+                            <span class="font-medium text-gray-600 flex items-center gap-2">
+                                <i class="fas fa-calendar text-xs"></i>Tanggal & Waktu
+                            </span>
+                            <span class="font-medium text-gray-900">{{ member.created_at|date:"d M Y, H:i" }}</span>
+                        </div>
+                        {% if member.last_login %}
+                        <div class="flex justify-between items-center p-2 rounded-lg hover:bg-gray-50/50 transition-colors">
+                            <span class="font-medium text-gray-600 flex items-center gap-2">
+                                <i class="fas fa-sign-in-alt text-xs"></i>Login Terakhir
+                            </span>
+                            <span class="font-medium text-gray-900">{{ member.last_login|date:"d M Y, H:i" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold text-gray-900">Konfirmasi Hapus Member</h3>
+                <span class="close" onclick="closeDeleteModal()">&times;</span>
+            </div>
+            <div class="mb-6">
+                <div class="flex items-center justify-center w-16 h-16 rounded-full mx-auto mb-4" style="background: rgba(239, 68, 68, 0.1);">
+                    <i class="fas fa-exclamation-triangle text-3xl" style="color: #ef4444;"></i>
+                </div>
+                <p class="text-center text-gray-700 mb-2">
+                    Apakah Anda yakin ingin menghapus member <strong>{{ member.member_id }}</strong>?
+                </p>
+                <p class="text-center text-sm text-gray-500">
+                    <strong>{{ member.full_name }}</strong>
+                </p>
+                <p class="text-center text-xs text-red-600 mt-3 font-medium">
+                    <i class="fas fa-exclamation-circle"></i> Tindakan ini tidak dapat dibatalkan!
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" 
+                        class="flex-1 px-4 py-2.5 rounded-xl border font-medium text-sm text-gray-700 transition-all duration-300"
+                        style="border-color: rgba(229, 231, 235, 0.6);"
+                        onmouseover="this.style.background='rgba(229, 231, 235, 0.3)';"
+                        onmouseout="this.style.background='transparent';">
+                    Batal
+                </button>
+                <form method="post" action="{% url 'main:member_delete' member.member_id %}" class="flex-1">
+                    {% csrf_token %}
+                    <button type="submit" 
+                            class="w-full px-4 py-2.5 rounded-xl text-white font-medium text-sm transition-all duration-300"
+                            style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);"
+                            onmouseover="this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.4)';"
+                            onmouseout="this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)';">
+                        <i class="fas fa-trash mr-2"></i>Hapus
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'block';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('deleteModal');
+    if (event.target == modal) {
+        closeDeleteModal();
+    }
+}
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeDeleteModal();
+    }
+});
+</script>
+{% endblock %}
+
+

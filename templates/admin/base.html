@@ -79,57 +79,40 @@
             display: none;
         }
         
-        /* Custom Green Scrollbar - Same as Landing Page */
+        /* Custom scrollbar - Exact same as Landing Page */
         ::-webkit-scrollbar {
             width: 10px;
-            height: 10px;
         }
         
         ::-webkit-scrollbar-track {
             background: #f1f1f1;
-            border-radius: 5px;
         }
         
         ::-webkit-scrollbar-thumb {
             background: #72d596;
             border-radius: 5px;
-            transition: background 0.3s ease;
         }
         
         ::-webkit-scrollbar-thumb:hover {
             background: #4fc07a;
         }
         
-        /* Firefox scrollbar */
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: #72d596 #f1f1f1;
-        }
-        
-        /* Custom scrollbar for specific containers */
+        /* Apply same styling to all scrollable containers */
         .green-scrollbar::-webkit-scrollbar {
             width: 10px;
-            height: 10px;
         }
         
         .green-scrollbar::-webkit-scrollbar-track {
-            background: rgba(241, 241, 241, 0.5);
-            border-radius: 5px;
+            background: #f1f1f1;
         }
         
         .green-scrollbar::-webkit-scrollbar-thumb {
             background: #72d596;
             border-radius: 5px;
-            transition: background 0.3s ease;
         }
         
         .green-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #4fc07a;
-        }
-        
-        .green-scrollbar {
-            scrollbar-width: thin;
-            scrollbar-color: #72d596 rgba(241, 241, 241, 0.5);
         }
         
         .admin-nav-link {
@@ -249,6 +232,55 @@
         /* Sidebar header styling */
         #sidebar > div:first-child {
             min-height: 3.5rem;
+        }
+        
+        /* Hide all Django messages/notifications/toast alerts */
+        /* Hide message containers */
+        div[class*="bg-green-50"][class*="border"],
+        div[class*="bg-red-50"][class*="border"],
+        div[class*="bg-yellow-50"][class*="border"],
+        div[class*="border-green"],
+        div[class*="border-red"],
+        div[class*="border-yellow"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+        
+        /* Hide all message boxes with specific patterns - using class selectors */
+        div[class*="bg-green-50"],
+        div[class*="bg-red-50"],
+        div[class*="bg-yellow-50"],
+        div[class*="border-green"],
+        div[class*="border-red"],
+        div[class*="border-yellow"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+        
+        /* Hide message containers that contain check/exclamation icons */
+        div.rounded-xl.border:has(.fa-check-circle),
+        div.rounded-xl.border:has(.fa-exclamation-circle),
+        div.rounded-xl.border:has(.fa-exclamation-triangle),
+        div.rounded-lg.border:has(.fa-check-circle),
+        div.rounded-lg.border:has(.fa-exclamation-circle),
+        div.rounded-lg.border:has(.fa-exclamation-triangle) {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
         }
     </style>
     
@@ -374,15 +406,9 @@
             </div>
 
             <!-- Products -->
-            <a href="{% url 'main:product_info_list' %}" class="admin-nav-link flex items-center gap-3 px-4 py-3 rounded-xl font-light text-sm transition-all duration-300 group" style="color: #6b7280;" data-page="products" title="Products">
+            <a href="{% url 'main:product_info_list' %}" class="admin-nav-link flex items-center gap-3 px-4 py-3 rounded-xl font-light text-sm transition-all duration-300 group" style="color: #6b7280;" data-page="products" title="Products Information">
                 <i class="fas fa-box w-5 text-center flex-shrink-0"></i>
-                <span class="sidebar-text">Products</span>
-            </a>
-
-            <!-- FAQ -->
-            <a href="{% url 'main:faq_list' %}" class="admin-nav-link flex items-center gap-3 px-4 py-3 rounded-xl font-light text-sm transition-all duration-300 group" style="color: #6b7280;" data-page="faq" title="FAQ">
-                <i class="fas fa-question-circle w-5 text-center flex-shrink-0"></i>
-                <span class="sidebar-text">FAQ</span>
+                <span class="sidebar-text">Products Information</span>
             </a>
 
             <!-- Divider -->
@@ -550,13 +576,64 @@
                     (currentPath.includes('members') && linkPage === 'members') ||
                     (currentPath.includes('serial-numbers') && linkPage === 'serial') ||
                     (currentPath.includes('products') && linkPage === 'products') ||
-                    (currentPath.includes('faq') && linkPage === 'faq') ||
                     (currentPath.includes('customer-service') && linkPage === 'cs') ||
                     (currentPath.includes('admin/admins') && linkPage === 'admins') ||
                     (currentPath.includes('activity-log') && linkPage === 'activity')) {
                     link.classList.add('active');
                 }
             });
+        });
+        
+        // Remove all Django messages/notifications/toast alerts
+        function removeAllMessages() {
+            // Remove message containers
+            const messageContainers = document.querySelectorAll('div[class*="bg-green-50"], div[class*="bg-red-50"], div[class*="bg-yellow-50"], div[class*="border-green"], div[class*="border-red"], div[class*="border-yellow"]');
+            messageContainers.forEach(container => {
+                // Check if it contains message icons
+                const hasMessageIcon = container.querySelector('.fa-check-circle, .fa-exclamation-circle, .fa-exclamation-triangle');
+                if (hasMessageIcon || container.textContent.trim().length < 200) {
+                    container.remove();
+                }
+            });
+            
+            // Remove containers with message icons
+            const iconContainers = document.querySelectorAll('div:has(.fa-check-circle), div:has(.fa-exclamation-circle), div:has(.fa-exclamation-triangle)');
+            iconContainers.forEach(container => {
+                // Only remove if it looks like a message box (has border, rounded, etc.)
+                if (container.classList.contains('rounded-xl') || container.classList.contains('rounded-lg') || 
+                    container.classList.contains('border') || container.textContent.trim().length < 200) {
+                    container.remove();
+                }
+            });
+            
+            // Remove message wrapper divs
+            const messageWrappers = document.querySelectorAll('div.mb-6.space-y-2, div.mb-8.space-y-2');
+            messageWrappers.forEach(wrapper => {
+                const hasMessages = wrapper.querySelector('div[class*="bg-green"], div[class*="bg-red"], div[class*="bg-yellow"]');
+                if (hasMessages) {
+                    wrapper.remove();
+                }
+            });
+        }
+        
+        // Run on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            removeAllMessages();
+            
+            // Also run after a short delay to catch dynamically added messages
+            setTimeout(removeAllMessages, 100);
+            setTimeout(removeAllMessages, 500);
+            setTimeout(removeAllMessages, 1000);
+        });
+        
+        // Run on any DOM changes (MutationObserver)
+        const observer = new MutationObserver(function(mutations) {
+            removeAllMessages();
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
         });
     </script>
     

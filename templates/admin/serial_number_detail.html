@@ -1,0 +1,352 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .animated-bg {
+        background: linear-gradient(135deg, rgba(240, 253, 244, 0.3) 0%, rgba(255, 255, 255, 1) 50%, rgba(240, 253, 244, 0.3) 100%);
+        background-size: 200% 200%;
+        animation: gradientShift 8s ease infinite;
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+    }
+    
+    .serial-badge {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+    }
+    
+    .device-row {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .device-row:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        background: rgba(249, 250, 251, 0.8) !important;
+    }
+    
+    .device-row.inactive {
+        background: rgba(254, 242, 242, 0.3);
+        border-left: 4px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: 500;
+        font-size: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    
+    .table-header {
+        background: linear-gradient(135deg, rgba(249, 250, 251, 0.8) 0%, rgba(240, 253, 244, 0.5) 100%);
+        border-bottom: 2px solid rgba(134, 239, 172, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen animated-bg pb-12 fade-in-up">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Header -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2 gradient-text">
+                        Detail Nomor Seri - {{ member.member_id }}
+                    </h1>
+                    <p class="text-gray-600 font-light text-sm sm:text-base flex items-center gap-2">
+                        <i class="fas fa-user text-green-500"></i>
+                        {{ member.full_name }}
+                    </p>
+                </div>
+                <a href="{% url 'main:serial_numbers_list' %}" 
+                   class="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl border font-light text-sm text-gray-700 transition-all duration-300"
+                   style="border-color: rgba(229, 231, 235, 0.6);"
+                   onmouseover="this.style.background='rgba(134, 239, 172, 0.1)'; this.style.borderColor='rgba(134, 239, 172, 0.4)';"
+                   onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                    <i class="fas fa-arrow-left"></i>Kembali
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2 fade-in-up" style="animation-delay: 0.2s;">
+            {% for message in messages %}
+            <div class="p-4 rounded-xl border font-light text-sm backdrop-blur-sm transition-all duration-300 {% if message.tags == 'error' %}bg-red-50/80 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50/80 border-yellow-200 text-yellow-800{% else %}bg-green-50/80 border-green-200 text-green-800{% endif %}">
+                <div class="flex items-center gap-2">
+                    {% if message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% else %}
+                    <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Member Info Summary -->
+        <div class="glass-card rounded-2xl border p-6 mb-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.2s; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+            <div class="flex flex-wrap items-center gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-center w-12 h-12 rounded-full" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%);">
+                        <i class="fas fa-user text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-light text-gray-500 mb-1">Member ID</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ member.member_id }}</p>
+                    </div>
+                </div>
+                <div class="h-12 w-px bg-gray-200"></div>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-center w-12 h-12 rounded-full" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(147, 51, 234, 0.1) 100%);">
+                        <i class="fas fa-crown text-purple-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-light text-gray-500 mb-1">Professional (PRO)</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ pro_count }} device(s)</p>
+                    </div>
+                </div>
+                <div class="h-12 w-px bg-gray-200"></div>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-center w-12 h-12 rounded-full" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%);">
+                        <i class="fas fa-check-circle text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-light text-gray-500 mb-1">Basic</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ basic_count }} device(s)</p>
+                    </div>
+                </div>
+                <div class="h-12 w-px bg-gray-200"></div>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-center w-12 h-12 rounded-full" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);">
+                        <i class="fas fa-barcode text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-light text-gray-500 mb-1">Total Serial Numbers</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ total_devices }} device(s)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRO Devices List -->
+        {% if pro_devices %}
+        <div class="mb-6 fade-in-up" style="animation-delay: 0.3s;">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(147, 51, 234, 0.1) 100%);">
+                    <i class="fas fa-crown text-purple-600"></i>
+                </div>
+                <h2 class="text-2xl font-light text-gray-900">Professional (PRO)</h2>
+                <span class="px-3 py-1 rounded-full text-xs font-medium" style="background: rgba(147, 51, 234, 0.1); color: #9333ea;">
+                    {{ pro_count }} device(s)
+                </span>
+            </div>
+            <div class="glass-card rounded-2xl border overflow-hidden" style="border-color: rgba(147, 51, 234, 0.2); box-shadow: 0 4px 20px rgba(147, 51, 234, 0.1);">
+                <div class="overflow-x-auto green-scrollbar">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="table-header" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.05) 0%, rgba(147, 51, 234, 0.02) 100%);">
+                                <th class="text-left py-4 px-6">Serial Number</th>
+                                <th class="text-left py-4 px-6">Device Name</th>
+                                <th class="text-left py-4 px-6">Covered Blocks</th>
+                                <th class="text-left py-4 px-6">Aktif</th>
+                                <th class="text-left py-4 px-6">Tanggal Dibuat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for device in pro_devices %}
+                            <tr class="device-row border-b {% if not device.is_active %}inactive{% endif %}" style="border-color: rgba(229, 231, 235, 0.3); border-left: 4px solid rgba(147, 51, 234, 0.3);">
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-barcode" style="color: #9333ea;"></i>
+                                        <span class="text-sm font-semibold text-gray-900 serial-badge">{{ device.serial_number }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {% if device.device_name %}
+                                            {{ device.device_name }}
+                                        {% else %}
+                                            <span class="text-gray-400 italic">-</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    {% if device.covered_blocks %}
+                                    <div class="text-sm font-light text-gray-600 flex items-center gap-2">
+                                        <i class="fas fa-map-marked-alt text-xs text-gray-400"></i>
+                                        {{ device.covered_blocks }}
+                                    </div>
+                                    {% else %}
+                                    <span class="text-gray-400 italic text-sm">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-4 px-6">
+                                    {% if device.is_active %}
+                                    <span class="status-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">
+                                        <i class="fas fa-check"></i>
+                                        <span>Ya</span>
+                                    </span>
+                                    {% else %}
+                                    <span class="status-badge" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                        <i class="fas fa-ban"></i>
+                                        <span>Tidak</span>
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-light text-gray-600 flex items-center gap-2">
+                                        <i class="fas fa-calendar-alt text-xs text-gray-400"></i>
+                                        {{ device.created_at|date:"d M Y H:i" }}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- BASIC Devices List -->
+        {% if basic_devices %}
+        <div class="fade-in-up" style="animation-delay: 0.4s;">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%);">
+                    <i class="fas fa-check-circle text-green-600"></i>
+                </div>
+                <h2 class="text-2xl font-light text-gray-900">Basic</h2>
+                <span class="px-3 py-1 rounded-full text-xs font-medium" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                    {{ basic_count }} device(s)
+                </span>
+            </div>
+            <div class="glass-card rounded-2xl border overflow-hidden" style="border-color: rgba(134, 239, 172, 0.2); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+                <div class="overflow-x-auto green-scrollbar">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="table-header">
+                                <th class="text-left py-4 px-6">Serial Number</th>
+                                <th class="text-left py-4 px-6">Device Name</th>
+                                <th class="text-left py-4 px-6">Covered Blocks</th>
+                                <th class="text-left py-4 px-6">Aktif</th>
+                                <th class="text-left py-4 px-6">Tanggal Dibuat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for device in basic_devices %}
+                            <tr class="device-row border-b {% if not device.is_active %}inactive{% endif %}" style="border-color: rgba(229, 231, 235, 0.3); border-left: 4px solid rgba(34, 197, 94, 0.3);">
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-barcode text-green-500"></i>
+                                        <span class="text-sm font-semibold text-gray-900 serial-badge">{{ device.serial_number }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {% if device.device_name %}
+                                            {{ device.device_name }}
+                                        {% else %}
+                                            <span class="text-gray-400 italic">-</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    {% if device.covered_blocks %}
+                                    <div class="text-sm font-light text-gray-600 flex items-center gap-2">
+                                        <i class="fas fa-map-marked-alt text-xs text-gray-400"></i>
+                                        {{ device.covered_blocks }}
+                                    </div>
+                                    {% else %}
+                                    <span class="text-gray-400 italic text-sm">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-4 px-6">
+                                    {% if device.is_active %}
+                                    <span class="status-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">
+                                        <i class="fas fa-check"></i>
+                                        <span>Ya</span>
+                                    </span>
+                                    {% else %}
+                                    <span class="status-badge" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                        <i class="fas fa-ban"></i>
+                                        <span>Tidak</span>
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-light text-gray-600 flex items-center gap-2">
+                                        <i class="fas fa-calendar-alt text-xs text-gray-400"></i>
+                                        {{ device.created_at|date:"d M Y H:i" }}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Empty State -->
+        {% if not pro_devices and not basic_devices %}
+        <div class="glass-card rounded-2xl border p-12 text-center fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.3s;">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(134, 239, 172, 0.1);">
+                <i class="fas fa-barcode text-4xl text-gray-300"></i>
+            </div>
+            <p class="text-gray-500 font-light text-lg">Tidak ada nomor seri ditemukan untuk member ini</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,457 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .animated-bg {
+        background: linear-gradient(135deg, rgba(240, 253, 244, 0.3) 0%, rgba(255, 255, 255, 1) 50%, rgba(240, 253, 244, 0.3) 100%);
+        background-size: 200% 200%;
+        animation: gradientShift 8s ease infinite;
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+    }
+    
+    /* Pricing Box Style */
+    .pricing-box {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 2px solid;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        transition: all 0.5s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .pricing-box.basic {
+        border-color: rgba(239, 68, 68, 0.3);
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.2);
+    }
+    
+    .pricing-box.professional {
+        border-color: rgba(134, 239, 172, 0.4);
+        box-shadow: 0 10px 30px rgba(134, 239, 172, 0.3);
+        ring: 2px;
+        ring-offset: 2px;
+        ring-color: rgba(134, 239, 172, 0.2);
+    }
+    
+    .pricing-box:hover {
+        transform: translateY(-8px) scale(1.02);
+    }
+    
+    .pricing-box.basic:hover {
+        border-color: rgba(239, 68, 68, 0.6);
+        box-shadow: 0 20px 40px rgba(239, 68, 68, 0.4);
+    }
+    
+    .pricing-box.professional:hover {
+        border-color: rgba(134, 239, 172, 0.7);
+        box-shadow: 0 20px 40px rgba(134, 239, 172, 0.5);
+    }
+    
+    .form-input {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(229, 231, 235, 0.6);
+        background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: rgba(34, 197, 94, 0.5);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+    
+    .form-textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .price-input-wrapper {
+        position: relative;
+    }
+    
+    .price-input-wrapper::before {
+        content: 'Rp';
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        font-size: 1.25rem;
+        font-weight: 300;
+        pointer-events: none;
+    }
+    
+    .price-input-wrapper input {
+        padding-left: 3.5rem;
+    }
+    
+    .features-input {
+        font-family: monospace;
+        font-size: 0.875rem;
+    }
+    
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        background: rgba(249, 250, 251, 0.5);
+        transition: all 0.3s ease;
+    }
+    
+    .checkbox-wrapper:hover {
+        background: rgba(240, 253, 244, 0.5);
+    }
+    
+    .checkbox-input {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        accent-color: #22c55e;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.8);
+        color: #6b7280;
+        border: 1px solid rgba(229, 231, 235, 0.6);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: rgba(249, 250, 251, 0.9);
+        border-color: rgba(229, 231, 235, 0.8);
+    }
+    
+    .package-type-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen animated-bg pb-12 fade-in-up">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Header -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2 gradient-text">
+                        Tambah Produk
+                    </h1>
+                    <p class="text-gray-600 font-light text-sm sm:text-base flex items-center gap-2">
+                        <i class="fas fa-sync-alt text-green-500"></i>
+                        Produk akan otomatis tampil di Landing Page jika status aktif
+                    </p>
+                </div>
+                <a href="{% url 'main:product_info_list' %}" 
+                   class="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl border font-light text-sm text-gray-700 transition-all duration-300"
+                   style="border-color: rgba(229, 231, 235, 0.6);"
+                   onmouseover="this.style.background='rgba(134, 239, 172, 0.1)'; this.style.borderColor='rgba(134, 239, 172, 0.4)';"
+                   onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                    <i class="fas fa-arrow-left"></i>Kembali
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2 fade-in-up" style="animation-delay: 0.2s;">
+            {% for message in messages %}
+            <div class="p-4 rounded-xl border font-light text-sm backdrop-blur-sm transition-all duration-300 {% if message.tags == 'error' %}bg-red-50/80 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50/80 border-yellow-200 text-yellow-800{% else %}bg-green-50/80 border-green-200 text-green-800{% endif %}">
+                <div class="flex items-center gap-2">
+                    {% if message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% else %}
+                    <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Pricing Box Form -->
+        <form method="POST" id="productForm" class="fade-in-up" style="animation-delay: 0.3s;">
+            {% csrf_token %}
+            
+            <!-- Package Type Selection -->
+            <div class="mb-6">
+                <label for="package_type" class="block text-sm font-semibold text-gray-900 mb-2">
+                    <i class="fas fa-box text-green-500 mr-2"></i>
+                    Tipe Paket <span class="text-red-500">*</span>
+                </label>
+                <select id="package_type" 
+                        name="package_type" 
+                        required
+                        class="w-full px-4 py-3 rounded-xl form-input package-type-select bg-white/90 backdrop-blur-sm text-gray-900 font-light"
+                        onchange="updateBoxStyle()">
+                    <option value="">Pilih Tipe Paket</option>
+                    <option value="basic" {% if request.POST.package_type == 'basic' %}selected{% endif %}>Basic</option>
+                    <option value="professional" {% if request.POST.package_type == 'professional' %}selected{% endif %}>Professional</option>
+                </select>
+                <p class="mt-2 text-xs text-gray-500">Pilih tipe paket (Basic atau Professional). Setiap tipe paket hanya bisa dibuat sekali.</p>
+            </div>
+
+            <!-- Pricing Box Preview -->
+            <div id="pricingBoxPreview" class="pricing-box mb-8 fade-in-up" style="animation-delay: 0.4s;">
+                <!-- Animated Background Gradient -->
+                <div class="absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500" id="boxGradient"></div>
+                
+                <!-- Badge for Professional -->
+                <div id="popularBadge" class="relative inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-medium mb-6 shadow-lg hidden" 
+                     style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); color: white; box-shadow: 0 4px 15px rgba(134, 239, 172, 0.2);">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span>Paling Populer</span>
+                </div>
+                
+                <div class="relative">
+                    <!-- Plan Name -->
+                    <div class="mb-3">
+                        <label for="name" class="block text-sm font-semibold text-gray-700 mb-1">
+                            Nama Paket <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="name" 
+                               name="name" 
+                               required
+                               class="w-full px-4 py-2 rounded-xl form-input text-2xl sm:text-3xl font-light tracking-tight"
+                               placeholder="Nama Paket"
+                               value="{{ request.POST.name|default:'' }}"
+                               style="color: #ef4444;"
+                               oninput="updatePreview()">
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-6">
+                        <label for="description" class="block text-sm font-semibold text-gray-700 mb-1">
+                            Deskripsi
+                        </label>
+                        <input type="text" 
+                               id="description" 
+                               name="description" 
+                               class="w-full px-4 py-2 rounded-xl form-input text-sm sm:text-base font-light"
+                               placeholder="Paket lengkap untuk kebutuhan Anda"
+                               value="{{ request.POST.description|default:'' }}"
+                               oninput="updatePreview()">
+                    </div>
+                    
+                    <!-- Price Box -->
+                    <div class="mb-8 px-6 py-6 sm:px-8 sm:py-7 rounded-2xl transition-all duration-300" 
+                         id="priceBox"
+                         style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.2) 100%); border: 1px solid rgba(239, 68, 68, 0.3);">
+                        <label for="price" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Harga <span class="text-red-500">*</span>
+                        </label>
+                        <div class="price-input-wrapper">
+                            <input type="text" 
+                                   id="price" 
+                                   name="price" 
+                                   required
+                                   class="w-full px-4 py-3 rounded-xl form-input text-2xl sm:text-3xl lg:text-4xl font-light tracking-tight"
+                                   placeholder="0"
+                                   value="{{ request.POST.price|default:'' }}"
+                                   style="color: #ef4444;"
+                                   oninput="formatPrice(this); updatePreview()">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Masukkan harga tanpa titik atau koma (contoh: 5000000)</p>
+                    </div>
+
+                    <!-- Features List -->
+                    <div class="mb-8">
+                        <label for="features" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-list-check text-green-500 mr-2"></i>
+                            Fitur (Satu per baris)
+                        </label>
+                        <textarea id="features" 
+                                  name="features" 
+                                  class="w-full px-4 py-3 rounded-xl form-input form-textarea features-input bg-white/90 backdrop-blur-sm text-gray-900 font-light"
+                                  placeholder="Fitur 1&#10;Fitur 2&#10;Fitur 3">{{ request.POST.features|default:'' }}</textarea>
+                        <p class="mt-2 text-xs text-gray-500">Masukkan setiap fitur dalam baris terpisah</p>
+                    </div>
+
+                    <!-- Active Status -->
+                    <div class="mb-6">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" 
+                                   id="is_active" 
+                                   name="is_active" 
+                                   class="checkbox-input"
+                                   {% if request.POST.is_active or not request.POST %}checked{% endif %}>
+                            <label for="is_active" class="flex-1 cursor-pointer">
+                                <span class="text-sm font-semibold text-gray-900 block mb-1">
+                                    <i class="fas fa-globe text-green-500 mr-2"></i>
+                                    Aktifkan Produk
+                                </span>
+                                <span class="text-xs text-gray-600">Produk akan tampil di Landing Page jika dicentang</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t" style="border-color: rgba(229, 231, 235, 0.3);">
+                <button type="submit" 
+                        class="flex-1 px-6 py-3 rounded-xl font-medium text-sm btn-primary">
+                    <i class="fas fa-save mr-2"></i>
+                    Simpan Produk
+                </button>
+                <a href="{% url 'main:product_info_list' %}" 
+                   class="flex-1 px-6 py-3 rounded-xl font-medium text-sm text-center btn-secondary">
+                    <i class="fas fa-times mr-2"></i>
+                    Batal
+                </a>
+            </div>
+        </form>
+
+        <!-- Info Card -->
+        <div class="mt-6 bg-white/80 backdrop-blur-sm rounded-2xl border p-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.5s;">
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(34, 197, 94, 0.1);">
+                    <i class="fas fa-info-circle text-green-500"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-2">Informasi Sinkronisasi</h3>
+                    <ul class="text-xs text-gray-600 space-y-1">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-500 mt-0.5"></i>
+                            <span>Produk yang aktif akan otomatis tampil di halaman "Informasi Produk" → "Harga" di Landing Page</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-500 mt-0.5"></i>
+                            <span>Setiap tipe paket (Basic/Professional) hanya bisa dibuat sekali</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-500 mt-0.5"></i>
+                            <span>Perubahan langsung tersinkron tanpa perlu refresh manual</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateBoxStyle() {
+    const packageType = document.getElementById('package_type').value;
+    const box = document.getElementById('pricingBoxPreview');
+    const gradient = document.getElementById('boxGradient');
+    const popularBadge = document.getElementById('popularBadge');
+    const nameInput = document.getElementById('name');
+    const priceInput = document.getElementById('price');
+    const priceBox = document.getElementById('priceBox');
+    
+    if (packageType === 'basic') {
+        box.className = 'pricing-box basic mb-8 fade-in-up';
+        box.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+        box.style.boxShadow = '0 10px 30px rgba(239, 68, 68, 0.2)';
+        gradient.style.background = 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)';
+        popularBadge.classList.add('hidden');
+        nameInput.style.color = '#ef4444';
+        priceInput.style.color = '#ef4444';
+        priceBox.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.2) 100%)';
+        priceBox.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+    } else if (packageType === 'professional') {
+        box.className = 'pricing-box professional mb-8 fade-in-up';
+        box.style.borderColor = 'rgba(134, 239, 172, 0.4)';
+        box.style.boxShadow = '0 10px 30px rgba(134, 239, 172, 0.3)';
+        box.style.ring = '2px';
+        box.style.ringOffset = '2px';
+        box.style.ringColor = 'rgba(134, 239, 172, 0.2)';
+        gradient.style.background = 'linear-gradient(135deg, #86efac 0%, #4ade80 100%)';
+        popularBadge.classList.remove('hidden');
+        nameInput.style.color = '#86efac';
+        priceInput.style.color = '#86efac';
+        priceBox.style.background = 'linear-gradient(135deg, rgba(134, 239, 172, 0.1) 0%, rgba(134, 239, 172, 0.2) 100%)';
+        priceBox.style.borderColor = 'rgba(134, 239, 172, 0.4)';
+    } else {
+        box.className = 'pricing-box mb-8 fade-in-up';
+        box.style.borderColor = 'rgba(229, 231, 235, 0.6)';
+        box.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.08)';
+        popularBadge.classList.add('hidden');
+        nameInput.style.color = '#6b7280';
+        priceInput.style.color = '#6b7280';
+        priceBox.style.background = 'rgba(249, 250, 251, 0.5)';
+        priceBox.style.borderColor = 'rgba(229, 231, 235, 0.6)';
+    }
+}
+
+function formatPrice(input) {
+    // Remove all non-digit characters
+    let value = input.value.replace(/\D/g, '');
+    // Format with dots as thousand separators
+    if (value) {
+        value = parseInt(value).toLocaleString('id-ID');
+    }
+    input.value = value;
+}
+
+function updatePreview() {
+    // This function can be used to update live preview if needed
+    // Currently the preview updates automatically via CSS
+}
+
+// Initialize box style on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateBoxStyle();
+});
+</script>
+{% endblock %}
+

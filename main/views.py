@@ -5,7 +5,7 @@ from django.urls import reverse
 from urllib.parse import urlencode
 from datetime import datetime
 from django.db import models
-from .models import ForumUser, ForumPost, ForumComment, Admin, CustomerService, PurchaseOrder, Member, RangBotDevice, DetectionHistory, Notification
+from .models import ForumUser, ForumPost, ForumComment, Admin, CustomerService, PurchaseOrder, Member, RangBotDevice, DetectionHistory, Notification, FAQ, ProductInfo, ContactMessage
 from .forms import ForumLoginForm, ForumPostForm, ForumCommentForm
 from django.contrib.auth.hashers import check_password, make_password
 from django.utils import timezone
@@ -54,14 +54,16 @@ def member_login(request):
                 cs.last_login = timezone.now()
                 cs.save(update_fields=['last_login'])
                 messages.success(request, f'Selamat datang, {cs.full_name}!')
-                # TODO: Redirect ke dashboard CS (belum dibuat)
-                return redirect('main:admin_dashboard')  # Temporary redirect
+                return redirect('main:cs_dashboard')
         except CustomerService.DoesNotExist:
             pass
 
         # 3) Coba sebagai Member terdaftar
         try:
             member = Member.objects.get(username=username, is_registered=True)
+            if not member.is_active:
+                messages.error(request, 'Akun Anda telah dinonaktifkan. Silakan hubungi admin untuk informasi lebih lanjut.')
+                return render(request, 'login.html', { 'page_title': 'Login - RangBot' })
             if member.password and check_password(password, member.password):
                 request.session['member_id'] = member.member_id
                 request.session['member_username'] = member.username
@@ -244,7 +246,16 @@ def product_info(request):
     """
     View untuk halaman Informasi Produk (FAQ, Harga, Forum)
     """
-    # Check for success notification from contact support
+    # Check for success notification from contact support (from session)
+    contact_form_name = request.session.get('contact_form_name', '')
+    contact_form_email = request.session.get('contact_form_email', '')
+    
+    # Clear session data after reading (one-time use)
+    if contact_form_name or contact_form_email:
+        request.session.pop('contact_form_name', None)
+        request.session.pop('contact_form_email', None)
+    
+    # Check for success notification from contact support (legacy GET params)
     show_success = request.GET.get('success') == '1'
     success_name = request.GET.get('name', '')
     success_ticket = request.GET.get('ticket', '')
@@ -252,6 +263,36 @@ def product_info(request):
     # Check for success notification from sales
     show_sales_success = request.GET.get('sales_success') == '1'
     sales_success_name = request.GET.get('sales_name', '')
+    
+    # Get FAQ from database (only active ones)
+    try:
+        faqs_queryset = FAQ.objects.filter(is_active=True).order_by('order', 'created_at')
+        faqs_list = []
+        for faq in faqs_queryset:
+            faqs_list.append({
+                'question': faq.question,
+                'answer': faq.answer,
+            })
+    except:
+        # If database tables don't exist yet, use empty list
+        faqs_list = []
+    
+    # Get pricing plans from database (only active ones)
+    try:
+        products_queryset = ProductInfo.objects.filter(is_active=True).order_by('package_type')
+        pricing_plans_list = []
+        for product in products_queryset:
+            features = product.get_features_list() if hasattr(product, 'get_features_list') else []
+            pricing_plans_list.append({
+                'name': product.name,
+                'price': f"{product.price:,.0f}".replace(',', '.'),
+                'description': product.description or 'Paket untuk kebutuhan Anda',
+                'features': features if features else [],
+                'highlight': product.package_type == 'professional',  # Professional is highlighted
+            })
+    except:
+        # If database tables don't exist yet, use empty list
+        pricing_plans_list = []
     
     # Get latest forum posts (limit 3)
     try:
@@ -275,60 +316,12 @@ def product_info(request):
         'show_success_notification': show_success,
         'success_name': success_name,
         'success_ticket': success_ticket,
+        'contact_form_name': contact_form_name,
+        'contact_form_email': contact_form_email,
         'show_sales_success': show_sales_success,
         'sales_success_name': sales_success_name,
-        'faqs': [
-            {
-                'question': 'Apa itu RangBot dan bagaimana cara kerjanya?',
-                'answer': 'RangBot adalah robot pintar yang bergerak otomatis di rel greenhouse menggunakan sistem AI untuk mendeteksi penyakit tanaman stroberi. Robot dilengkapi dengan kamera HD, sensor IoT untuk suhu dan kelembaban, serta terhubung ke cloud untuk monitoring real-time.'
-            },
-            {
-                'question': 'Berapa tingkat akurasi deteksi penyakit RangBot?',
-                'answer': 'RangBot menggunakan teknologi R-CNN dengan tingkat akurasi hingga 98% untuk mendeteksi berbagai jenis penyakit pada tanaman stroberi. Sistem terus belajar dan meningkatkan akurasi melalui machine learning.'
-            },
-            {
-                'question': 'Apakah RangBot bisa dipasang di greenhouse yang sudah ada?',
-                'answer': 'Ya, RangBot dirancang modular dan dapat dipasang di greenhouse existing. Sistem rel dapat disesuaikan dengan ukuran greenhouse Anda. Tim teknisi kami akan melakukan survei dan instalasi profesional.'
-            },
-            {
-                'question': 'Bagaimana cara mengakses data dan dashboard?',
-                'answer': 'Setelah pembelian, Anda akan mendapatkan ID Member yang memberikan akses ke dashboard web dan mobile app. Dashboard dapat diakses dari browser atau smartphone untuk melihat data real-time dan histori.'
-            },
-            {
-                'question': 'Apakah perlu koneksi internet?',
-                'answer': 'Ya, RangBot memerlukan koneksi internet untuk sinkronisasi data ke cloud. Robot tetap dapat beroperasi secara lokal jika koneksi terputus sementara, dan akan melakukan sinkronisasi otomatis ketika koneksi kembali.'
-            },
-            {
-                'question': 'Berapa lama masa garansi RangBot?',
-                'answer': 'RangBot dilengkapi dengan garansi 2 tahun untuk hardware dan lifetime support untuk software. Garansi mencakup perbaikan atau penggantian komponen yang rusak.'
-            },
-        ],
-        'pricing_plans': [
-            {
-                'name': 'Basic',
-                'price': '10.000.000',
-                'description': 'Paket dasar untuk kebutuhan Anda',
-                'features': [
-                    '1 Unit RangBot',
-                    'Garansi 1 tahun',
-                    'Training Lengkap',
-                    'Customer support'
-                ],
-                'highlight': False
-            },
-            {
-                'name': 'Professional',
-                'price': '15.000.000',
-                'description': 'Paket profesional dengan dukungan prioritas',
-                'features': [
-                    '1 Unit RangBot Pro',
-                    'Garansi 2 tahun',
-                    'Training Lengkap',
-                    'Priority customer support'
-                ],
-                'highlight': True
-            },
-        ],
+        'faqs': faqs_list,
+        'pricing_plans': pricing_plans_list,
         'forum_posts': forum_posts_list
     }
     
@@ -339,11 +332,34 @@ def purchase(request):
     """
     View untuk halaman Pembelian/Pemesanan
     """
-    from .models import PurchaseOrder
     from decimal import Decimal
     
     # Get selected package from URL parameter
     selected_package = request.GET.get('paket', '').lower()
+    
+    # Get pricing plans from database (only active ones)
+    try:
+        products_queryset = ProductInfo.objects.filter(is_active=True).order_by('package_type')
+        pricing_plans_list = []
+        products_dict = {}  # Store products by package_type for price calculation
+        
+        for product in products_queryset:
+            features = product.get_features_list() if hasattr(product, 'get_features_list') else []
+            pricing_plans_list.append({
+                'name': product.name,
+                'package_type': product.package_type,  # Add package_type for reference
+                'price': f"{product.price:,.0f}".replace(',', '.'),
+                'price_decimal': product.price,  # Store decimal for calculation
+                'description': product.description or 'Paket untuk kebutuhan Anda',
+                'features': features if features else [],
+                'highlight': product.package_type == 'professional',  # Professional is highlighted
+            })
+            # Store product for price lookup
+            products_dict[product.package_type] = product
+    except:
+        # If database tables don't exist yet, use empty list
+        pricing_plans_list = []
+        products_dict = {}
     
     # Handle form submission
     if request.method == 'POST':
@@ -371,9 +387,15 @@ def purchase(request):
                 messages.error(request, 'Mohon pilih minimal 1 paket (Basic atau Professional).')
                 return redirect('main:purchase')
             
-            # Calculate total price
-            price_basic = Decimal('10000000')  # 10.000.000
-            price_professional = Decimal('15000000')  # 15.000.000
+            # Calculate total price from database
+            price_basic = Decimal('0')
+            price_professional = Decimal('0')
+            
+            if 'basic' in products_dict:
+                price_basic = Decimal(str(products_dict['basic'].price))
+            if 'professional' in products_dict:
+                price_professional = Decimal(str(products_dict['professional'].price))
+            
             total_price = (qty_basic * price_basic) + (qty_professional * price_professional)
             
             # Create PurchaseOrder
@@ -400,32 +422,7 @@ def purchase(request):
     context = {
         'page_title': 'Pemesanan RangBot',
         'selected_package': selected_package,
-        'pricing_plans': [
-            {
-                'name': 'Basic',
-                'price': '10.000.000',
-                'description': 'Paket dasar untuk kebutuhan Anda',
-                'features': [
-                    '1 Unit RangBot',
-                    'Garansi 1 tahun',
-                    'Training Lengkap',
-                    'Customer support'
-                ],
-                'highlight': False
-            },
-            {
-                'name': 'Professional',
-                'price': '15.000.000',
-                'description': 'Paket profesional dengan dukungan prioritas',
-                'features': [
-                    '1 Unit RangBot Pro',
-                    'Garansi 2 tahun',
-                    'Training Lengkap',
-                    'Priority customer support'
-                ],
-                'highlight': True
-            },
-        ]
+        'pricing_plans': pricing_plans_list,
     }
     
     return render(request, 'purchase.html', context)
@@ -549,39 +546,52 @@ def register_view(request):
 def contact_support(request):
     """
     View untuk halaman Hubungi Support
-    Menangani form submission dari guest dan mengarahkan ke dashboard customer service
+    Menyimpan pesan ke database untuk ditangani oleh Customer Service
     """
     if request.method == 'POST':
-        # Handle form submission
-        # In production, you would save to database and redirect to customer service dashboard
-        # For now, we'll redirect to FAQ page with success notification
+        name = request.POST.get('name', '').strip()
+        email = request.POST.get('email', '').strip()
+        subject = request.POST.get('subject', '').strip()
+        message = request.POST.get('message', '').strip()
         
-        # Generate ticket number (in production, this would come from database)
-        ticket_number = f"RBT-{datetime.now().strftime('%Y%m%d')}-{datetime.now().strftime('%H%M%S')[:4]}"
+        if not all([name, email, subject, message]):
+            messages.error(request, 'Mohon lengkapi semua field yang wajib diisi.')
+            return redirect('main:contact_support')
         
-        # TODO: In production, save to database:
-        # SupportTicket.objects.create(
-        #     ticket_number=ticket_number,
-        #     name=request.POST.get('name', ''),
-        #     email=request.POST.get('email', ''),
-        #     subject=request.POST.get('subject', ''),
-        #     category=request.POST.get('category', ''),
-        #     message=request.POST.get('message', ''),
-        #     status='pending',
-        #     created_at=datetime.now()
-        # )
+        # Save to database
+        ContactMessage.objects.create(
+            name=name,
+            email=email,
+            subject=subject,
+            message=message,
+            status='new'
+        )
         
-        # Redirect to product info page with success notification
-        params = urlencode({
-            'success': '1',
-            'name': request.POST.get('name', ''),
-            'ticket': ticket_number,
-        })
-        return redirect(f'/informasi-produk/?{params}')
+        # Set success flag in session for popup
+        request.session['contact_form_success'] = True
+        request.session['contact_form_name'] = name
+        request.session['contact_form_email'] = email
+        
+        # Check if form was submitted from modal (product_info page)
+        if request.POST.get('from_modal') == 'true':
+            messages.success(request, 'Pesan Anda telah dikirim! Tim Customer Service akan menghubungi Anda segera.')
+            # Keep session data for popup
+            return redirect('main:product_info')
+        
+        # For contact_support.html page, redirect to same page to show popup
+        return redirect('main:contact_support')
+    
+    # Check for success flag
+    show_success_popup = request.session.pop('contact_form_success', False)
+    contact_name = request.session.pop('contact_form_name', '')
+    contact_email = request.session.pop('contact_form_email', '')
     
     context = {
         'page_title': 'Hubungi Support - RangBot',
         'submitted': False,
+        'show_success_popup': show_success_popup,
+        'contact_name': contact_name,
+        'contact_email': contact_email,
     }
     
     return render(request, 'contact_support.html', context)

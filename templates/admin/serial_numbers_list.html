@@ -75,23 +75,23 @@
         border: 1px solid rgba(255, 255, 255, 0.3);
     }
     
-    .order-row {
+    .device-row {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         animation: fadeInRow 0.4s ease-out;
     }
     
-    .order-row:hover {
+    .device-row:hover {
         transform: translateX(4px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         background: rgba(249, 250, 251, 0.8) !important;
     }
     
-    .order-row.inactive-member {
+    .device-row.inactive {
         background: rgba(254, 242, 242, 0.3);
         border-left: 4px solid rgba(239, 68, 68, 0.3);
     }
     
-    .order-row.inactive-member:hover {
+    .device-row.inactive:hover {
         background: rgba(254, 242, 242, 0.5) !important;
         border-left-color: rgba(239, 68, 68, 0.5);
     }
@@ -166,17 +166,10 @@
         box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
     }
     
-    .member-warning-badge {
-        animation: pulse 2s ease-in-out infinite;
-    }
-    
-    @keyframes pulse {
-        0%, 100% {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0.8;
-        }
+    .serial-badge {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        letter-spacing: 0.05em;
     }
 </style>
 {% endblock %}
@@ -187,13 +180,33 @@
         <!-- Header -->
         <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
             <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2 gradient-text">
-                Purchase Orders
+                Serial Numbers
             </h1>
             <p class="text-gray-600 font-light text-sm sm:text-base flex items-center gap-2">
-                <i class="fas fa-shopping-bag text-green-500"></i>
-                Kelola semua purchase orders dari customer
+                <i class="fas fa-barcode text-green-500"></i>
+                Kelola semua nomor seri perangkat RangBot
             </p>
         </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2 fade-in-up" style="animation-delay: 0.2s;">
+            {% for message in messages %}
+            <div class="p-4 rounded-xl border font-light text-sm backdrop-blur-sm transition-all duration-300 {% if message.tags == 'error' %}bg-red-50/80 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50/80 border-yellow-200 text-yellow-800{% else %}bg-green-50/80 border-green-200 text-green-800{% endif %}">
+                <div class="flex items-center gap-2">
+                    {% if message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% else %}
+                    <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
         <!-- Filters -->
         <div class="glass-card filter-card rounded-2xl p-6 mb-6 fade-in-up" style="animation-delay: 0.2s;">
@@ -203,23 +216,18 @@
                         <i class="fas fa-search text-green-500 text-xs"></i>
                         Cari
                     </label>
-                    <input type="text" name="search" value="{{ search_query }}" placeholder="Nama, email, atau member ID..." 
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="Serial number, device name, atau member ID..." 
                            class="w-full px-4 py-2.5 rounded-xl border font-light text-sm input-field focus:outline-none focus:ring-2 focus:ring-green-500/20"
                            style="border-color: rgba(134, 239, 172, 0.3);">
                 </div>
                 <div class="min-w-[150px]">
                     <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                        <i class="fas fa-filter text-green-500 text-xs"></i>
-                        Status
+                        <i class="fas fa-user text-green-500 text-xs"></i>
+                        Member ID
                     </label>
-                    <select name="status" 
-                            class="w-full px-4 py-2.5 rounded-xl border font-light text-sm input-field focus:outline-none focus:ring-2 focus:ring-green-500/20 appearance-none bg-white cursor-pointer"
-                            style="border-color: rgba(134, 239, 172, 0.3);">
-                        <option value="">Semua Status</option>
-                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Menunggu</option>
-                        <option value="verified" {% if status_filter == 'verified' %}selected{% endif %}>Terverifikasi</option>
-                        <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Ditolak</option>
-                    </select>
+                    <input type="text" name="member" value="{{ member_filter }}" placeholder="Filter by Member ID..." 
+                           class="w-full px-4 py-2.5 rounded-xl border font-light text-sm input-field focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                           style="border-color: rgba(134, 239, 172, 0.3);">
                 </div>
                 <div>
                     <button type="submit" 
@@ -227,9 +235,9 @@
                         <i class="fas fa-search mr-2"></i>Cari
                     </button>
                 </div>
-                {% if search_query or status_filter %}
+                {% if search_query or member_filter %}
                 <div>
-                    <a href="{% url 'main:purchase_orders_list' %}" 
+                    <a href="{% url 'main:serial_numbers_list' %}" 
                        class="px-6 py-2.5 rounded-xl border font-light text-sm text-gray-700 transition-all duration-300"
                        style="border-color: rgba(229, 231, 235, 0.6);"
                        onmouseover="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.borderColor='rgba(239, 68, 68, 0.3)';"
@@ -241,108 +249,94 @@
             </form>
         </div>
 
-        <!-- Orders Table -->
+        <!-- Members Table - One Row Per Member -->
         <div class="glass-card rounded-2xl border overflow-hidden fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.3s; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
-            {% if orders_with_status %}
+            {% if members_with_stats %}
             <div class="overflow-x-auto green-scrollbar">
                 <table class="w-full">
                     <thead>
                         <tr class="table-header">
-                            <th class="text-left py-4 px-6">ID</th>
-                            <th class="text-left py-4 px-6">Customer</th>
+                            <th class="text-left py-4 px-6">Member ID</th>
+                            <th class="text-left py-4 px-6">Nama Lengkap</th>
                             <th class="text-left py-4 px-6">Email</th>
-                            <th class="text-left py-4 px-6">Phone</th>
-                            <th class="text-left py-4 px-6">Basic</th>
-                            <th class="text-left py-4 px-6">Pro</th>
-                            <th class="text-left py-4 px-6">Total Harga</th>
+                            <th class="text-left py-4 px-6">Jenis Lisensi</th>
+                            <th class="text-left py-4 px-6">Total Devices</th>
                             <th class="text-left py-4 px-6">Status</th>
-                            <th class="text-left py-4 px-6">Tanggal</th>
+                            <th class="text-left py-4 px-6">Tanggal Dibuat</th>
                             <th class="text-left py-4 px-6">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in orders_with_status %}
-                        {% with order=item.order member_exists=item.member_exists member_is_active=item.member_is_active %}
-                        <tr class="order-row border-b {% if order.member_id %}{% if not member_exists %}inactive-member{% elif member_exists and not member_is_active %}inactive-member{% endif %}{% endif %}" style="border-color: rgba(229, 231, 235, 0.3);">
+                        {% for item in members_with_stats %}
+                        <tr class="device-row border-b {% if not item.member.is_active %}inactive{% endif %}" style="border-color: rgba(229, 231, 235, 0.3);">
                             <td class="py-4 px-6">
-                                <span class="text-sm font-semibold text-gray-900 serial-badge">{{ order.get_order_number }}</span>
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-user text-green-500"></i>
+                                    <span class="text-sm font-semibold text-gray-900">{{ item.member.member_id }}</span>
+                                </div>
                             </td>
                             <td class="py-4 px-6">
-                                <div class="text-sm font-semibold text-gray-900">{{ order.customer_name }}</div>
-                                {% if order.company_name %}
-                                <div class="text-xs text-gray-500 font-light mt-1 flex items-center gap-1">
-                                    <i class="fas fa-building text-xs"></i>
-                                    {{ order.company_name }}
+                                <div class="text-sm font-medium text-gray-900">
+                                    {{ item.member.full_name }}
                                 </div>
-                                {% endif %}
-                                {% if order.member_id %}
-                                    {% if not member_exists %}
-                                    <div class="mt-2 flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-medium member-warning-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        <span>Member sudah tidak aktif / sudah tidak terdaftar</span>
-                                    </div>
-                                    {% elif member_exists and not member_is_active %}
-                                    <div class="mt-2 flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-medium member-warning-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        <span>Member sudah tidak aktif / sudah tidak terdaftar</span>
-                                    </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-sm font-light text-gray-600">
+                                    {{ item.member.email }}
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex flex-wrap gap-2">
+                                    {% if item.pro_count > 0 %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium" style="background: rgba(147, 51, 234, 0.1); color: #9333ea;">
+                                        <i class="fas fa-crown"></i>
+                                        <span>PRO: {{ item.pro_count }}</span>
+                                    </span>
                                     {% endif %}
-                                {% endif %}
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="text-sm font-light text-gray-600 flex items-center gap-2">
-                                    <i class="fas fa-envelope text-xs text-gray-400"></i>
-                                    {{ order.customer_email }}
+                                    {% if item.basic_count > 0 %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>BASIC: {{ item.basic_count }}</span>
+                                    </span>
+                                    {% endif %}
+                                    {% if item.pro_count == 0 and item.basic_count == 0 %}
+                                    <span class="text-gray-400 italic text-xs">-</span>
+                                    {% endif %}
                                 </div>
                             </td>
                             <td class="py-4 px-6">
-                                <div class="text-sm font-light text-gray-600 flex items-center gap-2">
-                                    <i class="fas fa-phone text-xs text-gray-400"></i>
-                                    {{ order.customer_phone }}
+                                <div class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                                    <i class="fas fa-barcode text-gray-400"></i>
+                                    {{ item.total_devices }}
                                 </div>
                             </td>
                             <td class="py-4 px-6">
-                                <span class="text-sm font-semibold text-gray-900">{{ order.qty_basic }}</span>
-                            </td>
-                            <td class="py-4 px-6">
-                                <span class="text-sm font-semibold text-gray-900">{{ order.qty_professional }}</span>
-                            </td>
-                            <td class="py-4 px-6">
-                                <span class="text-sm font-bold text-gray-900">Rp {{ order.total_price|floatformat:0 }}</span>
-                            </td>
-                            <td class="py-4 px-6">
-                                {% if order.status == 'pending' %}
-                                <span class="status-badge" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
-                                    <i class="fas fa-clock"></i>
-                                    <span>Menunggu</span>
-                                </span>
-                                {% elif order.status == 'verified' %}
+                                {% if item.member.is_active %}
                                 <span class="status-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>Terverifikasi</span>
+                                    <i class="fas fa-check"></i>
+                                    <span>Aktif</span>
                                 </span>
                                 {% else %}
-                                <span class="status-badge" style="background: linear-gradient(135deg, rgba(156, 163, 175, 0.15) 0%, rgba(156, 163, 175, 0.1) 100%); color: #6b7280; border: 1px solid rgba(156, 163, 175, 0.3);">
-                                    <i class="fas fa-times-circle"></i>
-                                    <span>Ditolak</span>
+                                <span class="status-badge" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                    <i class="fas fa-ban"></i>
+                                    <span>Tidak Aktif</span>
                                 </span>
                                 {% endif %}
                             </td>
                             <td class="py-4 px-6">
                                 <div class="text-sm font-light text-gray-600 flex items-center gap-2">
                                     <i class="fas fa-calendar-alt text-xs text-gray-400"></i>
-                                    {{ order.created_at|date:"d M Y H:i" }}
+                                    {{ item.member.created_at|date:"d M Y H:i" }}
                                 </div>
                             </td>
                             <td class="py-4 px-6">
-                                <a href="{% url 'main:purchase_order_detail' order.id %}" 
+                                <a href="{% url 'main:serial_number_detail' item.member.member_id %}" 
                                    class="action-link text-sm font-medium text-gray-600">
-                                    <span>Detail</span>
+                                    <span>View Details</span>
                                     <i class="fas fa-arrow-right text-xs"></i>
                                 </a>
                             </td>
                         </tr>
-                        {% endwith %}
                         {% endfor %}
                     </tbody>
                 </table>
@@ -350,9 +344,9 @@
             {% else %}
             <div class="text-center py-16 fade-in-up">
                 <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(134, 239, 172, 0.1);">
-                    <i class="fas fa-inbox text-4xl text-gray-300"></i>
+                    <i class="fas fa-barcode text-4xl text-gray-300"></i>
                 </div>
-                <p class="text-gray-500 font-light text-lg">Tidak ada purchase orders ditemukan</p>
+                <p class="text-gray-500 font-light text-lg">Tidak ada member dengan nomor seri ditemukan</p>
                 <p class="text-gray-400 font-light text-sm mt-2">Coba ubah filter atau kata kunci pencarian</p>
             </div>
             {% endif %}
@@ -360,3 +354,4 @@
     </div>
 </div>
 {% endblock %}
+

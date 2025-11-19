@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from . import admin_views
+from . import cs_views
 
 app_name = 'main'
 
@@ -44,16 +45,18 @@ urlpatterns = [
     path('admin/purchase-orders/<int:order_id>/', admin_views.purchase_order_detail, name='purchase_order_detail'),
     path('admin/purchase-orders/<int:order_id>/verify/', admin_views.verify_purchase, name='verify_purchase'),
     path('admin/purchase-orders/<int:order_id>/reject/', admin_views.reject_purchase, name='reject_purchase'),
+    path('admin/purchase-orders/<int:order_id>/delete-data/', admin_views.delete_purchase_order_data, name='delete_purchase_order_data'),
     
     # Member Management
     path('admin/members/', admin_views.members_list, name='members_list'),
     path('admin/members/<str:member_id>/', admin_views.member_detail, name='member_detail'),
     path('admin/members/<str:member_id>/toggle-active/', admin_views.member_toggle_active, name='member_toggle_active'),
+    path('admin/members/<str:member_id>/delete/', admin_views.member_delete, name='member_delete'),
     path('admin/members/<str:member_id>/edit/', admin_views.member_edit, name='member_edit'),
     
     # Serial Number Management
     path('admin/serial-numbers/', admin_views.serial_numbers_list, name='serial_numbers_list'),
-    path('admin/serial-numbers/<int:device_id>/', admin_views.serial_number_detail, name='serial_number_detail'),
+    path('admin/serial-numbers/<str:member_id>/', admin_views.serial_number_detail, name='serial_number_detail'),
     
     # Customer Service Management
     path('admin/customer-service/', admin_views.cs_list, name='cs_list'),
@@ -72,7 +75,11 @@ urlpatterns = [
     
     # Product & Landing Page Management
     path('admin/products/', admin_views.product_info_list, name='product_info_list'),
+    path('admin/products/add/', admin_views.product_add, name='product_add'),
     path('admin/products/<int:product_id>/edit/', admin_views.product_info_edit, name='product_info_edit'),
+    # Forum Management
+    path('admin/forum/post/<int:post_id>/delete/', admin_views.forum_post_delete, name='forum_post_delete'),
+    path('admin/forum/comment/<int:comment_id>/delete/', admin_views.forum_comment_delete, name='forum_comment_delete'),
     path('admin/faq/', admin_views.faq_list, name='faq_list'),
     path('admin/faq/add/', admin_views.faq_add, name='faq_add'),
     path('admin/faq/<int:faq_id>/edit/', admin_views.faq_edit, name='faq_edit'),
@@ -81,5 +88,15 @@ urlpatterns = [
     path('admin/articles/add/', admin_views.article_add, name='article_add'),
     path('admin/articles/<int:article_id>/edit/', admin_views.article_edit, name='article_edit'),
     path('admin/articles/<int:article_id>/delete/', admin_views.article_delete, name='article_delete'),
+    
+    # Customer Service URLs
+    path('cs/dashboard/', cs_views.cs_dashboard, name='cs_dashboard'),
+    path('cs/logout/', cs_views.cs_logout, name='cs_logout'),
+    path('cs/messages/', cs_views.cs_messages, name='cs_messages'),
+    path('cs/faq/', cs_views.cs_faq, name='cs_faq'),
+    path('cs/forum/', cs_views.cs_forum, name='cs_forum'),
+    path('cs/members/', cs_views.cs_members, name='cs_members'),
+    path('cs/notifications/', cs_views.cs_notifications, name='cs_notifications'),
+    path('cs/settings/', cs_views.cs_settings, name='cs_settings'),
 ]
 

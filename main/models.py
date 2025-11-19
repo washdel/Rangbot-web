@@ -192,6 +192,16 @@ class PurchaseOrder(models.Model):
     def is_verified(self):
         """Cek apakah order sudah terverifikasi"""
         return self.status == 'verified'
+    
+    def get_order_number(self):
+        """Generate nomor order unik dengan format: ORD-YYYYMMDD-HHMMSS-ID"""
+        year = self.created_at.strftime('%Y')
+        month = self.created_at.strftime('%m')
+        day = self.created_at.strftime('%d')
+        hour = self.created_at.strftime('%H')
+        minute = self.created_at.strftime('%M')
+        second = self.created_at.strftime('%S')
+        return f"ORD-{year}{month}{day}-{hour}{minute}{second}-{str(self.id).zfill(5)}"
 
 
 class Member(models.Model):
@@ -206,6 +216,7 @@ class Member(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='Nomor Telepon')
     password = models.CharField(max_length=255, blank=True, null=True, verbose_name='Password')  # Hashed password, nullable karena belum registrasi
     is_registered = models.BooleanField(default=False, verbose_name='Sudah Registrasi', help_text='True jika sudah melakukan registrasi dengan Member ID')
+    is_active = models.BooleanField(default=True, verbose_name='Aktif', help_text='False jika member dinonaktifkan dan tidak bisa login')
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True, related_name='members', verbose_name='Purchase Order')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Dibuat pada')
     last_login = models.DateTimeField(null=True, blank=True, verbose_name='Login terakhir')
@@ -437,3 +448,33 @@ class ActivityLog(models.Model):
     
     def __str__(self):
         return f"{self.get_action_type_display()} - {self.created_at.strftime('%d %b %Y %H:%M')}"
+
+
+class ContactMessage(models.Model):
+    """
+    Model untuk pesan dari fitur "Hubungi Customer Service" di landing page
+    """
+    STATUS_CHOICES = [
+        ('new', 'Baru'),
+        ('read', 'Sudah Dibaca'),
+        ('replied', 'Sudah Dibalas'),
+        ('archived', 'Diarsipkan'),
+    ]
+    
+    name = models.CharField(max_length=200, verbose_name='Nama')
+    email = models.EmailField(verbose_name='Email')
+    subject = models.CharField(max_length=200, verbose_name='Subjek')
+    message = models.TextField(verbose_name='Pesan')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new', verbose_name='Status')
+    replied_by = models.ForeignKey(CustomerService, on_delete=models.SET_NULL, null=True, blank=True, related_name='replied_messages', verbose_name='Dibalas oleh')
+    replied_at = models.DateTimeField(null=True, blank=True, verbose_name='Waktu Dibalas')
+    reply_message = models.TextField(blank=True, null=True, verbose_name='Balasan')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Dibuat pada')
+    
+    class Meta:
+        verbose_name = 'Pesan Customer Service'
+        verbose_name_plural = 'Pesan Customer Service'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.name} - {self.subject} ({self.get_status_display()})"

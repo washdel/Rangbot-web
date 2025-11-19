@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.utils import timezone
 from django.db import transaction, models
-from .models import Admin, PurchaseOrder, Member, RangBotDevice, CustomerService, ProductInfo, FAQ, Article, ActivityLog
+from .models import Admin, PurchaseOrder, Member, RangBotDevice, CustomerService, ProductInfo, FAQ, Article, ActivityLog, ForumPost, ForumComment
 from .utils import generate_member_id, generate_serial_number, get_next_serial_sequence
 from django.contrib.auth.hashers import make_password
 
@@ -118,10 +118,31 @@ def purchase_orders_list(request):
     
     orders = orders.order_by('-created_at')
     
+    # Check for each order if member exists
+    # Jika member sudah dihapus, order.member_id akan tetap ada tapi member tidak ada di database
+    orders_with_member_status = []
+    for order in orders:
+        member_exists = False
+        member_is_active = False
+        if order.member_id:
+            try:
+                member = Member.objects.get(member_id=order.member_id)
+                member_exists = True
+                member_is_active = member.is_active
+            except Member.DoesNotExist:
+                # Member sudah dihapus dari database
+                member_exists = False
+                member_is_active = False
+        orders_with_member_status.append({
+            'order': order,
+            'member_exists': member_exists,
+            'member_is_active': member_is_active
+        })
+    
     context = {
         'page_title': 'Daftar Purchase Orders - Admin',
         'admin': admin,
-        'orders': orders,
+        'orders_with_status': orders_with_member_status,
         'status_filter': status_filter,
         'search_query': search_query,
     }
@@ -142,19 +163,27 @@ def purchase_order_detail(request, order_id):
     
     # Get related data
     member = None
+    member_exists = False
+    member_is_active = False
     devices = []
     if order.member_id:
         try:
             member = Member.objects.get(member_id=order.member_id)
+            member_exists = True
+            member_is_active = member.is_active
             devices = RangBotDevice.objects.filter(member=member, purchase_order=order)
         except Member.DoesNotExist:
-            pass
+            # Member sudah dihapus dari database
+            member_exists = False
+            member_is_active = False
     
     context = {
         'page_title': f'Detail Order #{order.id} - Admin',
         'admin': admin,
         'order': order,
         'member': member,
+        'member_exists': member_exists,
+        'member_is_active': member_is_active,
         'devices': devices,
     }
     
@@ -430,25 +459,152 @@ def member_toggle_active(request, member_id):
     member = get_object_or_404(Member, member_id=member_id)
     
     if request.method == 'POST':
-        # Toggle is_registered (freeze/activate)
-        old_status = member.is_registered
-        member.is_registered = not member.is_registered
+        # Toggle is_active (freeze/activate)
+        old_status = member.is_active
+        member.is_active = not member.is_active
         member.save()
         
         # Create activity log
-        action_type = 'member_activated' if member.is_registered else 'member_deactivated'
+        action_type = 'member_activated' if member.is_active else 'member_deactivated'
         ActivityLog.objects.create(
             action_type=action_type,
-            description=f'Member {member.member_id} ({member.full_name}) {"diaktifkan" if member.is_registered else "dinonaktifkan"}',
+            description=f'Member {member.member_id} ({member.full_name}) {"diaktifkan" if member.is_active else "dinonaktifkan"}',
             performed_by=admin,
             related_member=member,
         )
         
-        status = 'diaktifkan' if member.is_registered else 'dibekukan'
+        status = 'diaktifkan' if member.is_active else 'dinonaktifkan'
         messages.success(request, f'Member {member.member_id} berhasil {status}.')
         return redirect('main:member_detail', member_id=member_id)
     
     return redirect('main:members_list')
+
+
+@transaction.atomic
+def member_delete(request, member_id):
+    """
+    View untuk menghapus member secara permanen dari database
+    Data member akan benar-benar dihapus, bukan hanya dinonaktifkan
+    """
+    admin = get_admin(request)
+    if not admin:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    member = get_object_or_404(Member, member_id=member_id)
+    
+    if request.method == 'POST':
+        member_name = member.full_name
+        member_id_str = member.member_id
+        
+        # Hapus semua devices terkait
+        devices = RangBotDevice.objects.filter(member=member)
+        devices_count = devices.count()
+        devices.delete()
+        
+        # Create activity log sebelum menghapus member
+        ActivityLog.objects.create(
+            action_type='member_deleted',
+            description=f'Member {member_id_str} ({member_name}) dihapus secara permanen. {devices_count} device(s) dihapus.',
+            performed_by=admin,
+        )
+        
+        # Hapus member secara permanen
+        member.delete()
+        
+        messages.success(request, f'Member {member_id_str} telah dihapus secara permanen. {devices_count} device(s) juga dihapus.')
+        return redirect('main:members_list')
+    
+    return redirect('main:member_detail', member_id=member_id)
+
+
+def remove_member_from_order(request, order_id):
+    """
+    View untuk menghapus member_id dari purchase order
+    """
+    admin = get_admin(request)
+    if not admin:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    order = get_object_or_404(PurchaseOrder, id=order_id)
+    
+    if request.method == 'POST':
+        old_member_id = order.member_id
+        
+        # Update purchase order - remove member_id and reset status
+        order.member_id = None
+        if order.status == 'verified':
+            order.status = 'pending'
+            order.verified_at = None
+            order.verified_by = None
+        order.save()
+        
+        # Create activity log
+        ActivityLog.objects.create(
+            action_type='order_updated',
+            description=f'Member ID {old_member_id} dihapus dari Order #{order.id} ({order.customer_name})',
+            performed_by=admin,
+            related_order=order,
+        )
+        
+        messages.success(request, f'Member ID telah dihapus dari Order #{order.id}. Status diubah menjadi pending.')
+        return redirect('main:purchase_orders_list')
+    
+    return redirect('main:purchase_order_detail', order_id=order_id)
+
+
+@transaction.atomic
+def delete_purchase_order_data(request, order_id):
+    """
+    View untuk menghapus data purchase order dan menonaktifkan member serta devices
+    Proses final: menghapus purchase order, menonaktifkan member, dan menonaktifkan devices
+    """
+    admin = get_admin(request)
+    if not admin:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    order = get_object_or_404(PurchaseOrder, id=order_id)
+    
+    if request.method == 'POST':
+        customer_name = order.customer_name
+        member_id_str = order.member_id
+        
+        # Nonaktifkan member jika ada
+        member = None
+        if member_id_str:
+            try:
+                member = Member.objects.get(member_id=member_id_str)
+                member.is_active = False
+                member.save()
+            except Member.DoesNotExist:
+                pass
+        
+        # Nonaktifkan semua devices terkait dengan purchase order
+        devices = RangBotDevice.objects.filter(purchase_order=order)
+        devices_count = devices.count()
+        devices.update(is_active=False)
+        
+        # Jika ada member, nonaktifkan semua devices member tersebut juga
+        if member:
+            member_devices = RangBotDevice.objects.filter(member=member)
+            member_devices.update(is_active=False)
+        
+        # Create activity log sebelum menghapus
+        ActivityLog.objects.create(
+            action_type='order_deleted',
+            description=f'Purchase Order #{order.id} ({customer_name}) dihapus. Member {member_id_str or "N/A"} dinonaktifkan. {devices_count} device(s) dinonaktifkan.',
+            performed_by=admin,
+        )
+        
+        # Hapus purchase order
+        order.delete()
+        
+        messages.success(request, f'Data Purchase Order #{order.id} telah dihapus. Member {member_id_str or "N/A"} dan {devices_count} device(s) telah dinonaktifkan.')
+        return redirect('main:purchase_orders_list')
+    
+    return redirect('main:purchase_order_detail', order_id=order_id)
 
 
 def member_edit(request, member_id):
@@ -509,7 +665,8 @@ def member_edit(request, member_id):
 
 def serial_numbers_list(request):
     """
-    View untuk menampilkan daftar semua nomor seri
+    View untuk menampilkan daftar semua member dengan nomor seri
+    Setiap member ditampilkan sebagai satu baris di tabel utama
     """
     admin = get_admin(request)
     if not admin:
@@ -518,56 +675,98 @@ def serial_numbers_list(request):
     
     # Get filter parameters
     search_query = request.GET.get('search', '').strip()
-    status_filter = request.GET.get('status', '')
     member_filter = request.GET.get('member', '').strip()
     
-    # Get devices
-    devices = RangBotDevice.objects.all()
+    # Get all members that have devices
+    members = Member.objects.filter(rangbot_devices__isnull=False).distinct()
     
     # Apply filters
     if search_query:
-        devices = devices.filter(
-            models.Q(serial_number__icontains=search_query) |
-            models.Q(device_name__icontains=search_query) |
-            models.Q(member__member_id__icontains=search_query) |
-            models.Q(member__username__icontains=search_query)
-        )
-    
-    if status_filter:
-        devices = devices.filter(status=status_filter)
+        members = members.filter(
+            models.Q(member_id__icontains=search_query) |
+            models.Q(full_name__icontains=search_query) |
+            models.Q(email__icontains=search_query) |
+            models.Q(username__icontains=search_query) |
+            models.Q(rangbot_devices__serial_number__icontains=search_query) |
+            models.Q(rangbot_devices__device_name__icontains=search_query)
+        ).distinct()
     
     if member_filter:
-        devices = devices.filter(member__member_id__icontains=member_filter)
+        members = members.filter(member_id__icontains=member_filter)
     
-    devices = devices.order_by('-created_at')
+    # Get member statistics (device counts by type)
+    members_with_stats = []
+    for member in members.order_by('-created_at'):
+        all_devices = member.rangbot_devices.all()
+        pro_count = 0
+        basic_count = 0
+        total_count = all_devices.count()
+        
+        for device in all_devices:
+            device_name_lower = (device.device_name or '').lower()
+            if 'pro' in device_name_lower or 'professional' in device_name_lower:
+                pro_count += 1
+            else:
+                basic_count += 1
+        
+        members_with_stats.append({
+            'member': member,
+            'total_devices': total_count,
+            'pro_count': pro_count,
+            'basic_count': basic_count,
+        })
     
     context = {
         'page_title': 'Manajemen Nomor Seri - Admin',
         'admin': admin,
-        'devices': devices,
+        'members_with_stats': members_with_stats,
         'search_query': search_query,
-        'status_filter': status_filter,
         'member_filter': member_filter,
     }
     
     return render(request, 'admin/serial_numbers_list.html', context)
 
 
-def serial_number_detail(request, device_id):
+def serial_number_detail(request, member_id):
     """
-    View untuk detail nomor seri
+    View untuk detail semua nomor seri milik member
+    Dikelompokkan berdasarkan tipe lisensi (PRO dan BASIC)
     """
     admin = get_admin(request)
     if not admin:
         messages.warning(request, 'Anda harus login terlebih dahulu.')
         return redirect('main:login')
     
-    device = get_object_or_404(RangBotDevice, id=device_id)
+    member = get_object_or_404(Member, member_id=member_id)
+    
+    # Get all devices for this member
+    all_devices = member.rangbot_devices.all().order_by('-created_at')
+    
+    # Separate devices by license type
+    pro_devices = []
+    basic_devices = []
+    
+    for device in all_devices:
+        device_name_lower = (device.device_name or '').lower()
+        if 'pro' in device_name_lower or 'professional' in device_name_lower:
+            pro_devices.append(device)
+        else:
+            basic_devices.append(device)
+    
+    # Calculate totals
+    pro_count = len(pro_devices)
+    basic_count = len(basic_devices)
+    total_devices = pro_count + basic_count
     
     context = {
-        'page_title': f'Detail Nomor Seri {device.serial_number} - Admin',
+        'page_title': f'Detail Nomor Seri - {member.member_id} - Admin',
         'admin': admin,
-        'device': device,
+        'member': member,
+        'pro_devices': pro_devices,
+        'basic_devices': basic_devices,
+        'pro_count': pro_count,
+        'basic_count': basic_count,
+        'total_devices': total_devices,
     }
     
     return render(request, 'admin/serial_number_detail.html', context)
@@ -699,22 +898,91 @@ def cs_delete(request, cs_id):
 
 def product_info_list(request):
     """
-    View untuk menampilkan daftar informasi produk
+    View untuk menampilkan manajemen informasi produk (FAQ, Forum, Harga)
     """
     admin = get_admin(request)
     if not admin:
         messages.warning(request, 'Anda harus login terlebih dahulu.')
         return redirect('main:login')
     
-    products = ProductInfo.objects.all()
+    # Get all data (including inactive ones - admin can see everything)
+    # FAQ: Show all, ordered by order field then created_at
+    faqs = FAQ.objects.all().order_by('order', 'created_at')
+    
+    # Forum: Show latest 50 posts and comments
+    forum_posts = ForumPost.objects.all().order_by('-created_at')[:50]
+    forum_comments = ForumComment.objects.all().order_by('-created_at')[:50]
+    
+    # Products: Show all products
+    products = ProductInfo.objects.all().order_by('package_type')
+    
+    # Count active items (for display info)
+    active_faqs_count = FAQ.objects.filter(is_active=True).count()
+    active_products_count = ProductInfo.objects.filter(is_active=True).count()
     
     context = {
-        'page_title': 'Manajemen Produk - Admin',
+        'page_title': 'Manajemen Informasi Produk - Admin',
         'admin': admin,
+        'faqs': faqs,
+        'forum_posts': forum_posts,
+        'forum_comments': forum_comments,
         'products': products,
+        'active_faqs_count': active_faqs_count,
+        'active_products_count': active_products_count,
+        'total_faqs_count': faqs.count(),
+        'total_products_count': products.count(),
     }
     
     return render(request, 'admin/product_info_list.html', context)
+
+
+def product_add(request):
+    """
+    View untuk menambahkan produk baru
+    """
+    admin = get_admin(request)
+    if not admin:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    if request.method == 'POST':
+        package_type = request.POST.get('package_type', '').strip()
+        name = request.POST.get('name', '').strip()
+        price = request.POST.get('price', '').strip()
+        description = request.POST.get('description', '').strip()
+        features = request.POST.get('features', '').strip()
+        is_active = request.POST.get('is_active') == 'on'
+        
+        # Validation
+        if not package_type or not name or not price:
+            messages.error(request, 'Tipe paket, nama, dan harga wajib diisi.')
+        else:
+            # Check if package_type already exists
+            if ProductInfo.objects.filter(package_type=package_type).exists():
+                messages.error(request, f'Paket {package_type} sudah ada. Pilih tipe paket lain atau edit paket yang sudah ada.')
+            else:
+                try:
+                    price_decimal = float(price.replace(',', '').replace('.', ''))
+                    product = ProductInfo.objects.create(
+                        package_type=package_type,
+                        name=name,
+                        price=price_decimal,
+                        description=description or None,
+                        features=features or None,
+                        is_active=is_active,
+                        updated_by=admin
+                    )
+                    messages.success(request, 'Produk berhasil ditambahkan.')
+                    return redirect('main:product_info_list')
+                except ValueError:
+                    messages.error(request, 'Format harga tidak valid.')
+    
+    context = {
+        'page_title': 'Tambah Produk - Admin',
+        'admin': admin,
+    }
+    
+    return render(request, 'admin/product_add.html', context)
 
 
 def product_info_edit(request, product_id):
@@ -810,7 +1078,7 @@ def faq_add(request):
                     is_active=is_active
                 )
                 messages.success(request, 'FAQ berhasil ditambahkan.')
-                return redirect('main:faq_list')
+                return redirect('main:product_info_list')
             except ValueError:
                 messages.error(request, 'Format urutan tidak valid.')
     
@@ -851,7 +1119,7 @@ def faq_edit(request, faq_id):
                 faq.save()
                 
                 messages.success(request, 'FAQ berhasil diperbarui.')
-                return redirect('main:faq_list')
+                return redirect('main:product_info_list')
             except ValueError:
                 messages.error(request, 'Format urutan tidak valid.')
     
@@ -1231,4 +1499,57 @@ def activity_log_delete_all(request):
     
     # If GET request, redirect to list
     return redirect('main:activity_log_list')
+
+
+# ==================== FORUM MANAGEMENT ====================
+
+def forum_post_delete(request, post_id):
+    """
+    View untuk menghapus postingan forum
+    """
+    admin = get_admin(request)
+    if not admin:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    post = get_object_or_404(ForumPost, id=post_id)
+    
+    if request.method == 'POST':
+        post_title = post.title
+        post.delete()
+        messages.success(request, f'Postingan "{post_title}" berhasil dihapus.')
+        return redirect('main:product_info_list')
+    
+    context = {
+        'page_title': 'Hapus Postingan Forum - Admin',
+        'admin': admin,
+        'post': post,
+    }
+    
+    return render(request, 'admin/forum_post_delete.html', context)
+
+
+def forum_comment_delete(request, comment_id):
+    """
+    View untuk menghapus komentar forum
+    """
+    admin = get_admin(request)
+    if not admin:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    comment = get_object_or_404(ForumComment, id=comment_id)
+    
+    if request.method == 'POST':
+        comment.delete()
+        messages.success(request, 'Komentar berhasil dihapus.')
+        return redirect('main:product_info_list')
+    
+    context = {
+        'page_title': 'Hapus Komentar Forum - Admin',
+        'admin': admin,
+        'comment': comment,
+    }
+    
+    return render(request, 'admin/forum_comment_delete.html', context)
 

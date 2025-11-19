@@ -1,0 +1,562 @@
+{% extends 'cs/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .slide-in-right {
+        animation: slideInRight 0.6s ease-out;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #22c55e 0%, #86efac 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .glass-card:hover {
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 12px 48px rgba(134, 239, 172, 0.2);
+    }
+    
+    .message-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+    }
+    
+    .message-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .status-badge {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    @keyframes pulse-glow {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            transform: scale(1.05);
+        }
+    }
+    
+    .pulse-glow {
+        animation: pulse-glow 2s infinite;
+    }
+    
+    .filter-btn {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .filter-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(134, 239, 172, 0.3);
+    }
+    
+    .filter-btn.active {
+        background: linear-gradient(135deg, #86efac 0%, #4ade80 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(134, 239, 172, 0.4);
+    }
+    
+    /* Hide any checkboxes or selection inputs in message cards */
+    .message-card input[type="checkbox"],
+    .message-card input[type="radio"],
+    .message-card label input[type="checkbox"],
+    .message-card label input[type="radio"],
+    input[type="checkbox"],
+    input[type="radio"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        position: absolute !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        pointer-events: none !important;
+    }
+    
+    /* Hide any checkbox-like elements */
+    .message-card [role="checkbox"],
+    .message-card [aria-checked],
+    .message-card .checkbox,
+    .message-card .check,
+    .message-card .select-checkbox,
+    .message-card::before,
+    .message-card::after {
+        display: none !important;
+    }
+    
+    /* Ensure no checkbox appears in message cards */
+    .message-card * {
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+    }
+    
+    /* Hide checkmark icons in message cards */
+    .message-card .fa-check,
+    .message-card .fa-check-circle,
+    .message-card .fa-check-square,
+    .message-card i.fa-check,
+    .message-card i.fa-check-circle,
+    .message-card i.fa-check-square,
+    .message-card svg[class*="check"],
+    .message-card::before,
+    .message-card::after {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+    
+    /* Hide any green checkmark icons */
+    .message-card [class*="check"][style*="green"],
+    .message-card [class*="check"][style*="#22c55e"],
+    .message-card [class*="check"][style*="#86efac"],
+    .message-card i[class*="check"][style*="green"],
+    .message-card i[class*="check"][style*="#22c55e"],
+    .message-card i[class*="check"][style*="#86efac"],
+    .message-card > div:first-child > div:first-child::before,
+    .message-card > div:first-child::before,
+    .message-card::before {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        content: none !important;
+    }
+    
+    /* Hide any icon at the start of message card */
+    .message-card > div:first-child > div:first-child > i:first-child[class*="check"],
+    .message-card > div:first-child > i:first-child[class*="check"],
+    .message-card > i:first-child[class*="check"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen pb-12 fade-in-up">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Header -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2 gradient-text">
+                        Pesan Customer Service
+                    </h1>
+                    <p class="text-gray-600 font-light text-sm sm:text-base">
+                        Kelola dan balas pesan dari pengguna
+                    </p>
+                    {% if new_messages_count and new_messages_count > 0 %}
+                    <p class="text-xs sm:text-sm text-gray-500 font-light mt-1">
+                        <i class="fas fa-exclamation-circle mr-1 text-red-500"></i>
+                        <span class="font-semibold text-red-600">{{ new_messages_count }} pesan baru</span> menunggu untuk ditangani
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search -->
+        <div class="mb-6 fade-in-up" style="animation-delay: 0.2s;">
+            <div class="glass-card rounded-2xl border p-4 sm:p-6" style="border-color: rgba(134, 239, 172, 0.2);">
+                <div class="flex flex-col lg:flex-row gap-4">
+                    <!-- Status Filter -->
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wider">
+                            Filter Status
+                        </label>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="{% url 'main:cs_messages' %}" class="filter-btn px-4 py-2 rounded-lg text-sm font-light border transition-all {% if not status_filter %}active{% else %}bg-white border-gray-300 text-gray-700 hover:bg-gray-50{% endif %}">
+                                Semua
+                            </a>
+                            <a href="{% url 'main:cs_messages' %}?status=new" class="filter-btn px-4 py-2 rounded-lg text-sm font-light border transition-all {% if status_filter == 'new' %}active{% else %}bg-white border-gray-300 text-gray-700 hover:bg-gray-50{% endif %}">
+                                <i class="fas fa-envelope mr-2"></i>Baru
+                            </a>
+                            <a href="{% url 'main:cs_messages' %}?status=read" class="filter-btn px-4 py-2 rounded-lg text-sm font-light border transition-all {% if status_filter == 'read' %}active{% else %}bg-white border-gray-300 text-gray-700 hover:bg-gray-50{% endif %}">
+                                <i class="fas fa-envelope-open mr-2"></i>Sudah Dibaca
+                            </a>
+                            <a href="{% url 'main:cs_messages' %}?status=replied" class="filter-btn px-4 py-2 rounded-lg text-sm font-light border transition-all {% if status_filter == 'replied' %}active{% else %}bg-white border-gray-300 text-gray-700 hover:bg-gray-50{% endif %}">
+                                <i class="fas fa-reply mr-2"></i>Sudah Dibalas
+                            </a>
+                            <a href="{% url 'main:cs_messages' %}?status=archived" class="filter-btn px-4 py-2 rounded-lg text-sm font-light border transition-all {% if status_filter == 'archived' %}active{% else %}bg-white border-gray-300 text-gray-700 hover:bg-gray-50{% endif %}">
+                                <i class="fas fa-archive mr-2"></i>Diarsipkan
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Search -->
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wider">
+                            Cari Pesan
+                        </label>
+                        <form method="get" class="flex gap-2">
+                            <input type="text" name="search" value="{{ search_query }}" placeholder="Cari nama, email, subjek, atau isi pesan..." class="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all">
+                            {% if status_filter %}
+                            <input type="hidden" name="status" value="{{ status_filter }}">
+                            {% endif %}
+                            <button type="submit" class="px-6 py-2 rounded-lg text-white font-light transition-all duration-200" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); box-shadow: 0 4px 12px rgba(134, 239, 172, 0.3);" onmouseover="this.style.boxShadow='0 6px 16px rgba(134, 239, 172, 0.4)';" onmouseout="this.style.boxShadow='0 4px 12px rgba(134, 239, 172, 0.3)';">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            {% if search_query %}
+                            <a href="{% url 'main:cs_messages' %}{% if status_filter %}?status={{ status_filter }}{% endif %}" class="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all">
+                                <i class="fas fa-times"></i>
+                            </a>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages List -->
+        <div class="fade-in-up" style="animation-delay: 0.3s;">
+            {% if messages %}
+            <div class="space-y-4">
+                {% for message in messages %}
+                <div class="message-card rounded-2xl border p-5 sm:p-6 shadow-sm" style="border-color: {% if message.status == 'new' %}rgba(239, 68, 68, 0.3){% elif message.status == 'replied' %}rgba(34, 197, 94, 0.3){% elif message.status == 'archived' %}rgba(156, 163, 175, 0.3){% else %}rgba(59, 130, 246, 0.3){% endif %};">
+                    <div class="flex flex-col lg:flex-row gap-4">
+                        <!-- Message Info -->
+                        <div class="flex-1">
+                            <div class="flex items-start justify-between gap-4 mb-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <h3 class="text-lg sm:text-xl font-semibold text-gray-900">{{ message.subject }}</h3>
+                                        {% if message.status == 'new' %}
+                                        <span class="px-3 py-1 rounded-full text-xs font-medium text-white pulse-glow" style="background: #ef4444;">
+                                            Baru
+                                        </span>
+                                        {% elif message.status == 'read' %}
+                                        <span class="px-3 py-1 rounded-full text-xs font-medium" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                                            <i class="fas fa-envelope-open mr-1"></i>Sudah Dibaca
+                                        </span>
+                                        {% elif message.status == 'replied' %}
+                                        <span class="px-3 py-1 rounded-full text-xs font-medium" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                                            <i class="fas fa-reply mr-1"></i>Sudah Dibalas
+                                        </span>
+                                        {% else %}
+                                        <span class="px-3 py-1 rounded-full text-xs font-medium" style="background: rgba(156, 163, 175, 0.1); color: #6b7280;">
+                                            <i class="fas fa-archive mr-1"></i>Diarsipkan
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-3">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-user text-gray-400"></i>
+                                            <span class="font-medium">{{ message.name }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-envelope text-gray-400"></i>
+                                            <span>{{ message.email }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-clock text-gray-400"></i>
+                                            <span>{{ message.created_at|date:"d M Y, H:i" }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                                        <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{{ message.message }}</p>
+                                    </div>
+                                    {% if message.reply_message %}
+                                    <div class="bg-green-50 rounded-lg p-4 border-l-4" style="border-color: #22c55e;">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <i class="fas fa-reply text-green-600"></i>
+                                            <span class="text-sm font-semibold text-green-800">Balasan:</span>
+                                            {% if message.replied_by %}
+                                            <span class="text-xs text-green-600">oleh {{ message.replied_by.full_name }}</span>
+                                            {% endif %}
+                                            {% if message.replied_at %}
+                                            <span class="text-xs text-green-500">• {{ message.replied_at|date:"d M Y, H:i" }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{{ message.reply_message }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="flex flex-col gap-2 lg:min-w-[200px]">
+                            {% if message.status == 'new' %}
+                            <form method="post" action="{% url 'main:cs_messages' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="message_id" value="{{ message.id }}">
+                                <input type="hidden" name="action" value="mark_read">
+                                <button type="submit" class="w-full px-4 py-2 rounded-lg text-sm font-light text-white transition-all duration-200" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);" onmouseover="this.style.boxShadow='0 6px 16px rgba(59, 130, 246, 0.4)';" onmouseout="this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.3)';">
+                                    <i class="fas fa-envelope-open mr-2"></i>Tandai Dibaca
+                                </button>
+                            </form>
+                            {% endif %}
+                            
+                            {% if message.status != 'replied' %}
+                            <button onclick="openReplyModal({{ message.id }}, '{{ message.name|escapejs }}', '{{ message.email|escapejs }}', '{{ message.subject|escapejs }}')" class="w-full px-4 py-2 rounded-lg text-sm font-light text-white transition-all duration-200" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);" onmouseover="this.style.boxShadow='0 6px 16px rgba(34, 197, 94, 0.4)';" onmouseout="this.style.boxShadow='0 4px 12px rgba(34, 197, 94, 0.3)';">
+                                <i class="fas fa-reply mr-2"></i>Balas Pesan
+                            </button>
+                            {% endif %}
+                            
+                            {% if message.status != 'archived' %}
+                            <form method="post" action="{% url 'main:cs_messages' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="message_id" value="{{ message.id }}">
+                                <input type="hidden" name="action" value="archive">
+                                <button type="submit" class="w-full px-4 py-2 rounded-lg text-sm font-light border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all">
+                                    <i class="fas fa-archive mr-2"></i>Arsipkan
+                                </button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{% url 'main:cs_messages' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="message_id" value="{{ message.id }}">
+                                <input type="hidden" name="action" value="unarchive">
+                                <button type="submit" class="w-full px-4 py-2 rounded-lg text-sm font-light border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all">
+                                    <i class="fas fa-undo mr-2"></i>Kembalikan
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if messages.has_other_pages %}
+            <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-sm text-gray-600">
+                    Menampilkan {{ messages.start_index }} - {{ messages.end_index }} dari {{ messages.paginator.count }} pesan
+                </div>
+                <div class="flex gap-2">
+                    {% if messages.has_previous %}
+                    <a href="?page={{ messages.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all">
+                        <i class="fas fa-chevron-left mr-2"></i>Sebelumnya
+                    </a>
+                    {% endif %}
+                    {% if messages.has_next %}
+                    <a href="?page={{ messages.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all">
+                        Selanjutnya<i class="fas fa-chevron-right ml-2"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="glass-card rounded-2xl border p-12 text-center" style="border-color: rgba(134, 239, 172, 0.2);">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(229, 231, 235, 0.3);">
+                    <i class="fas fa-inbox text-4xl text-gray-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Tidak ada pesan</h3>
+                <p class="text-gray-500 font-light">
+                    {% if search_query or status_filter %}
+                    Tidak ada pesan yang sesuai dengan filter Anda.
+                    {% else %}
+                    Belum ada pesan yang masuk.
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Reply Modal -->
+<div id="replyModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto green-scrollbar">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-semibold text-gray-900">Balas Pesan</h3>
+                <button onclick="closeReplyModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <form id="replyForm" method="post" action="{% url 'main:cs_messages' %}" class="p-6">
+            {% csrf_token %}
+            <input type="hidden" name="message_id" id="reply_message_id">
+            <input type="hidden" name="action" value="reply">
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Kepada</label>
+                <input type="text" id="reply_to_name" readonly class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-700">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input type="email" id="reply_to_email" readonly class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-700">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Subjek</label>
+                <input type="text" id="reply_subject" readonly class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-700">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Balasan</label>
+                <textarea name="reply_message" rows="6" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Tulis balasan Anda di sini..."></textarea>
+            </div>
+            
+            <div class="flex gap-3 justify-end">
+                <button type="button" onclick="closeReplyModal()" class="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all">
+                    Batal
+                </button>
+                <button type="submit" class="px-6 py-2 rounded-lg text-white font-light transition-all duration-200" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); box-shadow: 0 4px 12px rgba(134, 239, 172, 0.3);" onmouseover="this.style.boxShadow='0 6px 16px rgba(134, 239, 172, 0.4)';" onmouseout="this.style.boxShadow='0 4px 12px rgba(134, 239, 172, 0.3)';">
+                    <i class="fas fa-paper-plane mr-2"></i>Kirim Balasan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function openReplyModal(messageId, name, email, subject) {
+        document.getElementById('reply_message_id').value = messageId;
+        document.getElementById('reply_to_name').value = name;
+        document.getElementById('reply_to_email').value = email;
+        document.getElementById('reply_subject').value = 'Re: ' + subject;
+        document.getElementById('replyModal').classList.remove('hidden');
+        document.getElementById('replyModal').classList.add('flex');
+    }
+    
+    function closeReplyModal() {
+        document.getElementById('replyModal').classList.add('hidden');
+        document.getElementById('replyModal').classList.remove('flex');
+        document.getElementById('replyForm').reset();
+    }
+    
+    // Close modal on outside click
+    document.getElementById('replyModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeReplyModal();
+        }
+    });
+    
+    // Remove any checkboxes and checkmark icons that might appear
+    document.addEventListener('DOMContentLoaded', function() {
+        // Remove all checkboxes from message cards
+        const messageCards = document.querySelectorAll('.message-card');
+        messageCards.forEach(card => {
+            // Remove checkboxes
+            const checkboxes = card.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.remove();
+            });
+            
+            // Remove checkbox-like elements
+            const checkboxElements = card.querySelectorAll('[role="checkbox"], [aria-checked], .checkbox, .check, .select-checkbox');
+            checkboxElements.forEach(el => {
+                el.remove();
+            });
+            
+            // Remove checkmark icons (green check icons) - remove ALL check icons
+            const checkIcons = card.querySelectorAll('i.fa-check, i.fa-check-circle, i.fa-check-square, .fa-check, .fa-check-circle, .fa-check-square, [class*="check"], i[class*="check"]');
+            checkIcons.forEach(icon => {
+                // Check if it's green colored or is a check icon
+                const computedStyle = window.getComputedStyle(icon);
+                const color = computedStyle.color;
+                const bgColor = computedStyle.backgroundColor;
+                const hasGreenColor = color.includes('rgb(34, 197, 94)') || 
+                                     color.includes('rgb(134, 239, 172)') ||
+                                     color.includes('#22c55e') ||
+                                     color.includes('#86efac') ||
+                                     bgColor.includes('rgb(34, 197, 94)') ||
+                                     bgColor.includes('rgb(134, 239, 172)') ||
+                                     bgColor.includes('#22c55e') ||
+                                     bgColor.includes('#86efac') ||
+                                     icon.style.color?.includes('green') ||
+                                     icon.style.color?.includes('#22c55e') ||
+                                     icon.style.color?.includes('#86efac') ||
+                                     icon.style.backgroundColor?.includes('green') ||
+                                     icon.style.backgroundColor?.includes('#22c55e') ||
+                                     icon.style.backgroundColor?.includes('#86efac');
+                
+                const isCheckIcon = icon.classList.contains('fa-check') || 
+                                   icon.classList.contains('fa-check-circle') || 
+                                   icon.classList.contains('fa-check-square') ||
+                                   icon.className.includes('check');
+                
+                // Remove if it's green or is a check icon
+                if (hasGreenColor || isCheckIcon) {
+                    icon.remove();
+                }
+            });
+            
+            // Also remove any first icon in the message card if it's a check icon
+            const firstIcon = card.querySelector('i:first-child, .fa-check:first-child, [class*="check"]:first-child');
+            if (firstIcon) {
+                const computedStyle = window.getComputedStyle(firstIcon);
+                const color = computedStyle.color;
+                if (color.includes('rgb(34, 197, 94)') || color.includes('rgb(134, 239, 172)') || 
+                    color.includes('#22c55e') || color.includes('#86efac') ||
+                    firstIcon.classList.contains('fa-check') || firstIcon.classList.contains('fa-check-circle') ||
+                    firstIcon.className.includes('check')) {
+                    firstIcon.remove();
+                }
+            }
+            
+            // Remove any SVG checkmarks
+            const svgChecks = card.querySelectorAll('svg[class*="check"], svg path[d*="M5 13"], svg path[d*="M9 12"]');
+            svgChecks.forEach(svg => {
+                svg.remove();
+            });
+        });
+        
+        // Also remove from entire page (except modals)
+        const allCheckboxes = document.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+        allCheckboxes.forEach(checkbox => {
+            // Only remove if not in reply modal
+            if (!checkbox.closest('#replyModal') && !checkbox.closest('#replyForm')) {
+                checkbox.remove();
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock %}
+
