@@ -723,6 +723,29 @@
 
 {% block extra_js %}
 <script>
+    // Check URL hash FIRST and open corresponding tab immediately (before any default initialization)
+    (function() {
+        const hash = window.location.hash.substring(1);
+        if (hash && (hash === 'forum' || hash === 'faq' || hash === 'pricing')) {
+            // Wait for DOM to be ready, then switch tab
+            function switchToHashTab() {
+                if (typeof showTab === 'function') {
+                    showTab(hash);
+                } else {
+                    // If showTab not yet defined, wait a bit and try again
+                    setTimeout(switchToHashTab, 50);
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', switchToHashTab);
+            } else {
+                // DOM already loaded
+                setTimeout(switchToHashTab, 10);
+            }
+        }
+    })();
+    
     function showTab(tabName) {
         // Hide all content with fade out
         document.querySelectorAll('.tab-content').forEach(content => {
@@ -1247,6 +1270,16 @@
             }
         });
     }
+
+    // Listen for hash changes (when navigating with back/forward button)
+    window.addEventListener('hashchange', function() {
+        const hash = window.location.hash.substring(1);
+        if (hash && (hash === 'forum' || hash === 'faq' || hash === 'pricing')) {
+            if (typeof showTab === 'function') {
+                showTab(hash);
+            }
+        }
+    });
 
     // Initialize modal styles
     const supportModal = document.getElementById('supportModal');

@@ -412,6 +412,23 @@ def purchase(request):
                 status='pending'
             )
             
+            # Create ActivityLog for new purchase order (system notification for admin)
+            from .models import ActivityLog
+            ActivityLog.objects.create(
+                action_type='order_created',
+                description=f'Pembelian baru: Order #{purchase_order.id} dari {customer_name} ({customer_email}). Total: {purchase_order.get_total_units()} unit (Basic: {qty_basic}, Pro: {qty_professional}). Total harga: Rp {total_price:,.0f}',
+                performed_by=None,  # Created by customer, not admin
+                related_order=purchase_order,
+                metadata={
+                    'customer_name': customer_name,
+                    'customer_email': customer_email,
+                    'total_units': purchase_order.get_total_units(),
+                    'qty_basic': qty_basic,
+                    'qty_professional': qty_professional,
+                    'total_price': float(total_price),
+                }
+            )
+            
             messages.success(request, 'Pesanan Anda telah dikirim! Tim kami akan menghubungi Anda dalam 1x24 jam untuk verifikasi.')
             return redirect('main:purchase')
             
@@ -519,19 +536,50 @@ def register_view(request):
                 # Cek username dan email tidak digunakan oleh member lain
                 if Member.objects.filter(username=username).exclude(member_id=member_id).exists():
                     messages.error(request, 'Username sudah digunakan.')
+                    return render(request, 'register.html', {
+                        'page_title': 'Register - RangBot',
+                        'member_id': member_id,
+                        'username': username,
+                        'full_name': full_name,
+                        'email': email,
+                        'phone': phone,
+                    })
                 elif Member.objects.filter(email=email).exclude(member_id=member_id).exists():
                     messages.error(request, 'Email sudah terdaftar.')
-                else:
-                    # Update member dengan data registrasi
-                    member.username = username
-                    member.full_name = full_name
-                    member.phone = phone or member.phone
-                    member.password = make_password(password)
-                    member.is_registered = True
-                    member.save()
-                    
-                    messages.success(request, 'Registrasi berhasil! Silakan login.')
-                    return redirect('main:login')
+                    return render(request, 'register.html', {
+                        'page_title': 'Register - RangBot',
+                        'member_id': member_id,
+                        'username': username,
+                        'full_name': full_name,
+                        'email': email,
+                        'phone': phone,
+                    })
+                
+                # Update member dengan data registrasi
+                member.username = username
+                member.full_name = full_name
+                member.phone = phone or member.phone
+                member.password = make_password(password)
+                member.is_registered = True
+                member.save()
+                
+                # Create ActivityLog for user registration (system notification for admin)
+                from .models import ActivityLog
+                ActivityLog.objects.create(
+                    action_type='member_registered',
+                    description=f'Member {member.member_id} ({full_name}) berhasil terdaftar dengan username: {username}',
+                    performed_by=None,  # Registered by user, not admin
+                    related_member=member,
+                    metadata={
+                        'member_id': member.member_id,
+                        'username': username,
+                        'full_name': full_name,
+                        'email': email,
+                    }
+                )
+                
+                messages.success(request, 'Registrasi berhasil! Silakan login.')
+                return redirect('main:login')
                     
             except Member.DoesNotExist:
                 messages.error(request, 'ID Member tidak valid atau tidak ditemukan. Pastikan Anda menggunakan Member ID yang diberikan oleh admin setelah verifikasi pembelian.')
@@ -649,13 +697,142 @@ def get_forum_user(request):
     return None
 
 
+def forum_register(request):
+    """
+    View untuk registrasi forum user baru
+    Sistem terpisah dari login utama
+    """
+    if request.method == 'POST':
+        from .forms import ForumRegisterForm
+        form = ForumRegisterForm(request.POST)
+        
+        if form.is_valid():
+            username = form.cleaned_data['username'].strip()
+            email = form.cleaned_data['email'].strip().lower()
+            role = form.cleaned_data['role']
+            password = form.cleaned_data['password']
+            
+            # Cek username sudah digunakan (handle if username field doesn't exist yet)
+            username_exists = False
+            try:
+                username_exists = ForumUser.objects.filter(username=username).exists()
+            except Exception:
+                # If username field doesn't exist in database yet, skip this check
+                pass
+            
+            if username_exists:
+                messages.error(request, 'Username sudah digunakan. Silakan pilih username lain.')
+            # Cek email sudah digunakan
+            elif ForumUser.objects.filter(email=email).exists():
+                messages.error(request, 'Email sudah terdaftar. Silakan login atau gunakan email lain.')
+            else:
+                # Buat user baru
+                user_data = {
+                    'email': email,
+                    'name': username,  # Default name = username, bisa diubah nanti
+                    'role': role,
+                    'password': make_password(password)
+                }
+                # Only add username if field exists in database
+                try:
+                    # Test if username field exists by trying to filter
+                    ForumUser.objects.filter(username__isnull=False).exists()
+                    user_data['username'] = username
+                except Exception:
+                    # Username field doesn't exist yet, skip it
+                    pass
+                forum_user = ForumUser.objects.create(**user_data)
+                
+                messages.success(request, 'Registrasi berhasil! Silakan login untuk melanjutkan.')
+                return redirect('main:forum_login')
+    else:
+        from .forms import ForumRegisterForm
+        form = ForumRegisterForm()
+    
+    context = {
+        'page_title': 'Daftar Forum - RangBot',
+        'form': form,
+    }
+    return render(request, 'forum_register.html', context)
+
+
 def forum_login(request):
     """
-    Redirect forum login ke unified login system
+    View untuk login forum
+    Sistem terpisah dari login utama
     """
     next_url = request.GET.get('next', reverse('main:forum_list'))
-    messages.info(request, 'Silakan login melalui sistem login utama untuk mengakses forum.')
-    return redirect(f"{reverse('main:login')}?next={next_url}")
+    
+    if request.method == 'POST':
+        from .forms import ForumLoginForm
+        form = ForumLoginForm(request.POST)
+        
+        if form.is_valid():
+            identifier = form.cleaned_data['identifier'].strip()
+            password = form.cleaned_data['password']
+            
+            # Coba login dengan email atau username
+            try:
+                if '@' in identifier:
+                    forum_user = ForumUser.objects.get(email=identifier.lower())
+                else:
+                    # Try username, but handle if username field doesn't exist yet
+                    try:
+                        forum_user = ForumUser.objects.get(username=identifier)
+                    except Exception:
+                        # Fallback: try by email if username search fails
+                        forum_user = ForumUser.objects.get(email=identifier.lower())
+                
+                # Cek password (handle if password field doesn't exist yet)
+                if forum_user.password and check_password(password, forum_user.password):
+                    # Set session
+                    request.session['forum_user_id'] = forum_user.id
+                    request.session['forum_user_username'] = forum_user.get_display_name()
+                    request.session['forum_user_name'] = forum_user.name
+                    request.session['forum_user_email'] = forum_user.email
+                    request.session['forum_user_role'] = forum_user.role
+                    
+                    # Update last login
+                    forum_user.last_login = timezone.now()
+                    forum_user.save(update_fields=['last_login'])
+                    
+                    messages.success(request, f'Selamat datang kembali, {forum_user.get_display_name()}!')
+                    # Redirect ke forum_list jika next_url tidak valid atau kosong
+                    if next_url and next_url != reverse('main:forum_login'):
+                        return redirect(next_url)
+                    else:
+                        return redirect('main:forum_list')
+                else:
+                    messages.error(request, 'Password salah.')
+            except ForumUser.DoesNotExist:
+                messages.error(request, 'Email/Username tidak ditemukan.')
+    else:
+        from .forms import ForumLoginForm
+        form = ForumLoginForm()
+    
+    context = {
+        'page_title': 'Login Forum - RangBot',
+        'form': form,
+        'next_url': next_url,
+    }
+    return render(request, 'forum_login.html', context)
+
+
+def forum_profile(request):
+    """
+    View untuk menampilkan data diri forum user
+    """
+    forum_user = get_forum_user(request)
+    
+    if not forum_user:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:forum_login')
+    
+    context = {
+        'page_title': 'Data Diri - Forum RangBot',
+        'forum_user': forum_user,
+    }
+    return render(request, 'forum_profile.html', context)
 
 
 def forum_logout(request):
@@ -663,8 +840,10 @@ def forum_logout(request):
     View untuk logout forum
     """
     request.session.pop('forum_user_id', None)
+    request.session.pop('forum_user_username', None)
     request.session.pop('forum_user_name', None)
     request.session.pop('forum_user_email', None)
+    request.session.pop('forum_user_role', None)
     messages.success(request, 'Anda telah logout dari forum.')
     return redirect('main:forum_list')
 
@@ -672,7 +851,29 @@ def forum_logout(request):
 def forum_list(request):
     """
     View untuk menampilkan daftar postingan forum
+    Hanya user yang sudah login yang bisa membuat postingan
     """
+    forum_user = get_forum_user(request)
+    
+    # Handle form submission (hanya untuk user yang login)
+    if request.method == 'POST':
+        if not forum_user:
+            messages.error(request, 'Anda harus login terlebih dahulu untuk membuat postingan.')
+            return redirect('main:forum_login')
+        
+        from .forms import ForumPostForm
+        form = ForumPostForm(request.POST)
+        
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = forum_user
+            post.save()
+            messages.success(request, 'Postingan berhasil dibuat!')
+            return redirect('main:forum_list')
+        else:
+            messages.error(request, 'Mohon lengkapi semua field yang wajib.')
+    
+    # Get posts
     posts = ForumPost.objects.all()
     
     # Filter by category jika ada
@@ -685,7 +886,9 @@ def forum_list(request):
     if search:
         posts = posts.filter(title__icontains=search) | posts.filter(content__icontains=search)
     
-    forum_user = get_forum_user(request)
+    # Form untuk posting (hanya jika user login)
+    from .forms import ForumPostForm
+    post_form = ForumPostForm() if forum_user else None
     
     context = {
         'page_title': 'Forum RangBot',
@@ -693,6 +896,7 @@ def forum_list(request):
         'forum_user': forum_user,
         'current_category': category,
         'search_query': search,
+        'form': post_form,
     }
     return render(request, 'forum_list.html', context)
 
@@ -718,6 +922,22 @@ def forum_detail(request, post_id):
                 comment.post = post
                 comment.author = forum_user
                 comment.save()
+                
+                # Create ActivityLog for new forum comment (system notification for admin)
+                from .models import ActivityLog
+                ActivityLog.objects.create(
+                    action_type='forum_comment_created',
+                    description=f'Komentar baru pada postingan "{post.title}" oleh {forum_user.get_display_name()} ({forum_user.email})',
+                    performed_by=None,  # Created by forum user, not admin
+                    metadata={
+                        'post_id': post.id,
+                        'post_title': post.title,
+                        'comment_id': comment.id,
+                        'author_name': forum_user.get_display_name(),
+                        'author_email': forum_user.email,
+                    }
+                )
+                
                 messages.success(request, 'Komentar berhasil ditambahkan!')
                 return redirect('main:forum_detail', post_id=post_id)
         else:
@@ -752,6 +972,22 @@ def forum_create(request):
             post = form.save(commit=False)
             post.author = forum_user
             post.save()
+            
+            # Create ActivityLog for new forum post (system notification for admin)
+            from .models import ActivityLog
+            ActivityLog.objects.create(
+                action_type='forum_post_created',
+                description=f'Postingan forum baru: "{post.title}" oleh {forum_user.get_display_name()} ({forum_user.email}) di kategori {post.get_category_display()}',
+                performed_by=None,  # Created by forum user, not admin
+                metadata={
+                    'post_id': post.id,
+                    'post_title': post.title,
+                    'author_name': forum_user.get_display_name(),
+                    'author_email': forum_user.email,
+                    'category': post.category,
+                }
+            )
+            
             messages.success(request, 'Postingan berhasil dibuat!')
             return redirect('main:forum_detail', post_id=post.id)
     else:

@@ -16,8 +16,10 @@ urlpatterns = [
     
     # Forum URLs
     path('forum/', views.forum_list, name='forum_list'),
-    path('forum/login/', views.forum_login, name='forum_login'),  # Redirects to unified login
+    path('forum/login/', views.forum_login, name='forum_login'),
+    path('forum/register/', views.forum_register, name='forum_register'),
     path('forum/logout/', views.forum_logout, name='forum_logout'),
+    path('forum/profile/', views.forum_profile, name='forum_profile'),
     path('forum/create/', views.forum_create, name='forum_create'),
     path('forum/<int:post_id>/', views.forum_detail, name='forum_detail'),
     path('forum/<int:post_id>/edit/', views.forum_edit, name='forum_edit'),
@@ -67,6 +69,9 @@ urlpatterns = [
     path('admin/admins/', admin_views.admin_list, name='admin_list'),
     path('admin/admins/add/', admin_views.admin_add, name='admin_add'),
     path('admin/admins/<int:admin_id>/toggle-active/', admin_views.admin_toggle_active, name='admin_toggle_active'),
+    
+    # Notifications
+    path('admin/notifications/', admin_views.admin_notifications_list, name='admin_notifications_list'),
     
     # Activity Log
     path('admin/activity-log/', admin_views.activity_log_list, name='activity_log_list'),

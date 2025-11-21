@@ -182,7 +182,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen animated-bg pb-12 fade-in-up">
+<div class="min-h-screen animated-bg pb-12 fade-in-up" id="purchase-orders-content">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <!-- Header -->
         <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
@@ -192,6 +192,11 @@
             <p class="text-gray-600 font-light text-sm sm:text-base flex items-center gap-2">
                 <i class="fas fa-shopping-bag text-green-500"></i>
                 Kelola semua purchase orders dari customer
+                {% if orders_count is not None %}
+                <span class="ml-2 px-2 py-1 rounded-md text-xs font-medium" style="background: rgba(134, 239, 172, 0.1); color: #22c55e;">
+                    Total: {{ orders_count }} order(s)
+                </span>
+                {% endif %}
             </p>
         </div>
 
@@ -243,119 +248,131 @@
 
         <!-- Orders Table -->
         <div class="glass-card rounded-2xl border overflow-hidden fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.3s; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
-            {% if orders_with_status %}
             <div class="overflow-x-auto green-scrollbar">
                 <table class="w-full">
                     <thead>
                         <tr class="table-header">
-                            <th class="text-left py-4 px-6">ID</th>
-                            <th class="text-left py-4 px-6">Customer</th>
+                            <th class="text-left py-4 px-6">Order ID</th>
+                            <th class="text-left py-4 px-6">Nama Customer</th>
                             <th class="text-left py-4 px-6">Email</th>
-                            <th class="text-left py-4 px-6">Phone</th>
-                            <th class="text-left py-4 px-6">Basic</th>
-                            <th class="text-left py-4 px-6">Pro</th>
-                            <th class="text-left py-4 px-6">Total Harga</th>
+                            <th class="text-left py-4 px-6">Jumlah Unit</th>
+                            <th class="text-left py-4 px-6">Tipe Paket</th>
+                            <th class="text-left py-4 px-6">Tanggal Pembelian</th>
                             <th class="text-left py-4 px-6">Status</th>
-                            <th class="text-left py-4 px-6">Tanggal</th>
                             <th class="text-left py-4 px-6">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in orders_with_status %}
-                        {% with order=item.order member_exists=item.member_exists member_is_active=item.member_is_active %}
-                        <tr class="order-row border-b {% if order.member_id %}{% if not member_exists %}inactive-member{% elif member_exists and not member_is_active %}inactive-member{% endif %}{% endif %}" style="border-color: rgba(229, 231, 235, 0.3);">
-                            <td class="py-4 px-6">
-                                <span class="text-sm font-semibold text-gray-900 serial-badge">{{ order.get_order_number }}</span>
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="text-sm font-semibold text-gray-900">{{ order.customer_name }}</div>
-                                {% if order.company_name %}
-                                <div class="text-xs text-gray-500 font-light mt-1 flex items-center gap-1">
-                                    <i class="fas fa-building text-xs"></i>
-                                    {{ order.company_name }}
-                                </div>
-                                {% endif %}
-                                {% if order.member_id %}
-                                    {% if not member_exists %}
-                                    <div class="mt-2 flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-medium member-warning-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        <span>Member sudah tidak aktif / sudah tidak terdaftar</span>
-                                    </div>
-                                    {% elif member_exists and not member_is_active %}
-                                    <div class="mt-2 flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-medium member-warning-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        <span>Member sudah tidak aktif / sudah tidak terdaftar</span>
+                        {% if orders_with_status and orders_with_status|length > 0 %}
+                            {% for item in orders_with_status %}
+                            {% with order=item.order member_exists=item.member_exists member_is_active=item.member_is_active %}
+                            <tr class="order-row border-b {% if order.member_id %}{% if not member_exists %}inactive-member{% elif member_exists and not member_is_active %}inactive-member{% endif %}{% endif %}" style="border-color: rgba(229, 231, 235, 0.3);">
+                                <td class="py-4 px-6">
+                                    <span class="text-sm font-semibold text-gray-900">#{{ order.id }}</span>
+                                    <div class="text-xs text-gray-500 font-light mt-1">{{ order.get_order_number }}</div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-semibold text-gray-900">{{ order.customer_name }}</div>
+                                    {% if order.company_name %}
+                                    <div class="text-xs text-gray-500 font-light mt-1 flex items-center gap-1">
+                                        <i class="fas fa-building text-xs"></i>
+                                        {{ order.company_name }}
                                     </div>
                                     {% endif %}
-                                {% endif %}
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="text-sm font-light text-gray-600 flex items-center gap-2">
-                                    <i class="fas fa-envelope text-xs text-gray-400"></i>
-                                    {{ order.customer_email }}
-                                </div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="text-sm font-light text-gray-600 flex items-center gap-2">
-                                    <i class="fas fa-phone text-xs text-gray-400"></i>
-                                    {{ order.customer_phone }}
-                                </div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <span class="text-sm font-semibold text-gray-900">{{ order.qty_basic }}</span>
-                            </td>
-                            <td class="py-4 px-6">
-                                <span class="text-sm font-semibold text-gray-900">{{ order.qty_professional }}</span>
-                            </td>
-                            <td class="py-4 px-6">
-                                <span class="text-sm font-bold text-gray-900">Rp {{ order.total_price|floatformat:0 }}</span>
-                            </td>
-                            <td class="py-4 px-6">
-                                {% if order.status == 'pending' %}
-                                <span class="status-badge" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
-                                    <i class="fas fa-clock"></i>
-                                    <span>Menunggu</span>
-                                </span>
-                                {% elif order.status == 'verified' %}
-                                <span class="status-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>Terverifikasi</span>
-                                </span>
-                                {% else %}
-                                <span class="status-badge" style="background: linear-gradient(135deg, rgba(156, 163, 175, 0.15) 0%, rgba(156, 163, 175, 0.1) 100%); color: #6b7280; border: 1px solid rgba(156, 163, 175, 0.3);">
-                                    <i class="fas fa-times-circle"></i>
-                                    <span>Ditolak</span>
-                                </span>
-                                {% endif %}
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="text-sm font-light text-gray-600 flex items-center gap-2">
-                                    <i class="fas fa-calendar-alt text-xs text-gray-400"></i>
-                                    {{ order.created_at|date:"d M Y H:i" }}
-                                </div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <a href="{% url 'main:purchase_order_detail' order.id %}" 
-                                   class="action-link text-sm font-medium text-gray-600">
-                                    <span>Detail</span>
-                                    <i class="fas fa-arrow-right text-xs"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% endwith %}
-                        {% endfor %}
+                                    {% if order.member_id %}
+                                        {% if not member_exists %}
+                                        <div class="mt-2 flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-medium member-warning-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            <span>Member sudah tidak aktif / sudah tidak terdaftar</span>
+                                        </div>
+                                        {% elif member_exists and not member_is_active %}
+                                        <div class="mt-2 flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-medium member-warning-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            <span>Member sudah tidak aktif / sudah tidak terdaftar</span>
+                                        </div>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-light text-gray-600 flex items-center gap-2">
+                                        <i class="fas fa-envelope text-xs text-gray-400"></i>
+                                        {{ order.customer_email }}
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <span class="text-sm font-semibold text-gray-900">{{ order.get_total_units }}</span>
+                                    <div class="text-xs text-gray-500 font-light mt-1">
+                                        {% if order.qty_basic > 0 %}{{ order.qty_basic }} Basic{% endif %}{% if order.qty_basic > 0 and order.qty_professional > 0 %}, {% endif %}{% if order.qty_professional > 0 %}{{ order.qty_professional }} Pro{% endif %}
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="flex flex-col gap-1">
+                                        {% if order.qty_basic > 0 %}
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">
+                                            <i class="fas fa-box text-xs mr-1"></i>Basic
+                                        </span>
+                                        {% endif %}
+                                        {% if order.qty_professional > 0 %}
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium" style="background: rgba(168, 85, 247, 0.1); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3);">
+                                            <i class="fas fa-star text-xs mr-1"></i>Professional
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-sm font-light text-gray-600 flex items-center gap-2">
+                                        <i class="fas fa-calendar-alt text-xs text-gray-400"></i>
+                                        {{ order.created_at|date:"d M Y H:i" }}
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    {% if order.status == 'pending' %}
+                                    <span class="status-badge" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Pending</span>
+                                    </span>
+                                    {% elif order.status == 'verified' %}
+                                    <span class="status-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Verified</span>
+                                    </span>
+                                    {% else %}
+                                    <span class="status-badge" style="background: linear-gradient(135deg, rgba(156, 163, 175, 0.15) 0%, rgba(156, 163, 175, 0.1) 100%); color: #6b7280; border: 1px solid rgba(156, 163, 175, 0.3);">
+                                        <i class="fas fa-times-circle"></i>
+                                        <span>Rejected</span>
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-4 px-6">
+                                    <a href="{% url 'main:purchase_order_detail' order.id %}" 
+                                       class="action-link text-sm font-medium text-gray-600">
+                                        <span>Detail</span>
+                                        <i class="fas fa-arrow-right text-xs"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endwith %}
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center py-16 fade-in-up">
+                                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(134, 239, 172, 0.1);">
+                                        <i class="fas fa-inbox text-4xl text-gray-300"></i>
+                                    </div>
+                                    <p class="text-gray-500 font-light text-lg">Tidak ada purchase orders ditemukan</p>
+                                    <p class="text-gray-400 font-light text-sm mt-2">
+                                        {% if search_query or status_filter %}
+                                        Coba ubah filter atau kata kunci pencarian
+                                        {% else %}
+                                        Belum ada purchase orders yang masuk ke sistem
+                                        {% endif %}
+                                    </p>
+                                </td>
+                            </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
-            {% else %}
-            <div class="text-center py-16 fade-in-up">
-                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(134, 239, 172, 0.1);">
-                    <i class="fas fa-inbox text-4xl text-gray-300"></i>
-                </div>
-                <p class="text-gray-500 font-light text-lg">Tidak ada purchase orders ditemukan</p>
-                <p class="text-gray-400 font-light text-sm mt-2">Coba ubah filter atau kata kunci pencarian</p>
-            </div>
-            {% endif %}
         </div>
     </div>
 </div>

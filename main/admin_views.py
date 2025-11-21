@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.utils import timezone
 from django.db import transaction, models
-from .models import Admin, PurchaseOrder, Member, RangBotDevice, CustomerService, ProductInfo, FAQ, Article, ActivityLog, ForumPost, ForumComment
+from .models import Admin, PurchaseOrder, Member, RangBotDevice, CustomerService, ProductInfo, FAQ, Article, ActivityLog, ForumPost, ForumComment, Notification
 from .utils import generate_member_id, generate_serial_number, get_next_serial_sequence
 from django.contrib.auth.hashers import make_password
 
@@ -49,6 +49,9 @@ def admin_dashboard(request):
     pending_orders = PurchaseOrder.objects.filter(status='pending').count()
     verified_orders = PurchaseOrder.objects.filter(status='verified').count()
     rejected_orders = PurchaseOrder.objects.filter(status='rejected').count()
+    total_orders = PurchaseOrder.objects.count()
+    from django.db.models import Sum
+    total_revenue = PurchaseOrder.objects.filter(status='verified').aggregate(total=Sum('total_price'))['total'] or 0
     total_members = Member.objects.count()
     registered_members = Member.objects.filter(is_registered=True).count()
     unregistered_members = Member.objects.filter(is_registered=False).count()
@@ -58,13 +61,39 @@ def admin_dashboard(request):
     total_admins = Admin.objects.filter(is_active=True).count()
     total_cs = CustomerService.objects.filter(is_active=True).count()
     
-    # Recent data
-    recent_orders = PurchaseOrder.objects.order_by('-created_at')[:5]
+    # Recent data - ensure queries are evaluated properly
     try:
-        recent_activities = ActivityLog.objects.order_by('-created_at')[:10]
+        recent_orders = list(PurchaseOrder.objects.order_by('-created_at')[:5])
+    except Exception:
+        recent_orders = []
+    
+    try:
+        recent_activities = list(ActivityLog.objects.select_related('performed_by', 'related_order', 'related_member').order_by('-created_at')[:10])
     except Exception:
         recent_activities = []
-    recent_members = Member.objects.order_by('-created_at')[:5]
+    
+    try:
+        recent_members = list(Member.objects.order_by('-created_at')[:5])
+    except Exception:
+        recent_members = []
+    
+    # Recent notifications - use ActivityLog as system notifications for admin
+    # These are notifications about purchase orders, forum activities, and user registrations
+    # Show 5 most recent activity logs
+    try:
+        recent_notifications = list(ActivityLog.objects.select_related(
+            'performed_by', 'related_order', 'related_member'
+        ).filter(
+            models.Q(action_type='order_created') |
+            models.Q(action_type='order_verified') |
+            models.Q(action_type='order_rejected') |
+            models.Q(action_type='member_created') |
+            models.Q(action_type='member_registered') |
+            models.Q(action_type='forum_post_created') |
+            models.Q(action_type='forum_comment_created')
+        ).order_by('-created_at')[:5])
+    except Exception:
+        recent_notifications = []
     
     context = {
         'page_title': 'Dashboard Admin - RangBot',
@@ -72,6 +101,8 @@ def admin_dashboard(request):
         'pending_orders': pending_orders,
         'verified_orders': verified_orders,
         'rejected_orders': rejected_orders,
+        'total_orders': total_orders,
+        'total_revenue': total_revenue,
         'total_members': total_members,
         'registered_members': registered_members,
         'unregistered_members': unregistered_members,
@@ -83,6 +114,7 @@ def admin_dashboard(request):
         'recent_orders': recent_orders,
         'recent_activities': recent_activities,
         'recent_members': recent_members,
+        'recent_notifications': recent_notifications,
     }
     
     return render(request, 'admin/dashboard.html', context)
@@ -101,43 +133,58 @@ def purchase_orders_list(request):
     status_filter = request.GET.get('status', '')
     search_query = request.GET.get('search', '').strip()
     
-    # Get orders
-    orders = PurchaseOrder.objects.all()
+    # Get orders - ensure we get all orders with proper error handling
+    try:
+        orders_queryset = PurchaseOrder.objects.all().order_by('-created_at')
+        
+        # Apply filters
+        if status_filter:
+            orders_queryset = orders_queryset.filter(status=status_filter)
+        
+        if search_query:
+            orders_queryset = orders_queryset.filter(
+                models.Q(customer_name__icontains=search_query) |
+                models.Q(customer_email__icontains=search_query) |
+                models.Q(customer_phone__icontains=search_query) |
+                models.Q(member_id__icontains=search_query) |
+                models.Q(id__icontains=search_query)
+            )
+        
+        # Evaluate queryset to list to ensure data is retrieved
+        orders = list(orders_queryset)
+        
+        # Check for each order if member exists
+        # Jika member sudah dihapus, order.member_id akan tetap ada tapi member tidak ada di database
+        orders_with_member_status = []
+        for order in orders:
+            member_exists = False
+            member_is_active = False
+            if order.member_id:
+                try:
+                    member = Member.objects.get(member_id=order.member_id)
+                    member_exists = True
+                    member_is_active = member.is_active
+                except Member.DoesNotExist:
+                    # Member sudah dihapus dari database
+                    member_exists = False
+                    member_is_active = False
+            orders_with_member_status.append({
+                'order': order,
+                'member_exists': member_exists,
+                'member_is_active': member_is_active
+            })
+    except Exception as e:
+        # If there's any error, log it and return empty list
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error fetching purchase orders: {str(e)}")
+        orders_with_member_status = []
+        messages.error(request, f'Terjadi kesalahan saat memuat data purchase orders: {str(e)}')
     
-    # Apply filters
-    if status_filter:
-        orders = orders.filter(status=status_filter)
-    
-    if search_query:
-        orders = orders.filter(
-            models.Q(customer_name__icontains=search_query) |
-            models.Q(customer_email__icontains=search_query) |
-            models.Q(customer_phone__icontains=search_query) |
-            models.Q(member_id__icontains=search_query)
-        )
-    
-    orders = orders.order_by('-created_at')
-    
-    # Check for each order if member exists
-    # Jika member sudah dihapus, order.member_id akan tetap ada tapi member tidak ada di database
-    orders_with_member_status = []
-    for order in orders:
-        member_exists = False
-        member_is_active = False
-        if order.member_id:
-            try:
-                member = Member.objects.get(member_id=order.member_id)
-                member_exists = True
-                member_is_active = member.is_active
-            except Member.DoesNotExist:
-                # Member sudah dihapus dari database
-                member_exists = False
-                member_is_active = False
-        orders_with_member_status.append({
-            'order': order,
-            'member_exists': member_exists,
-            'member_is_active': member_is_active
-        })
+    # Debug: Log the count of orders
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"Purchase Orders List - Total orders: {len(orders_with_member_status)}")
     
     context = {
         'page_title': 'Daftar Purchase Orders - Admin',
@@ -145,6 +192,7 @@ def purchase_orders_list(request):
         'orders_with_status': orders_with_member_status,
         'status_filter': status_filter,
         'search_query': search_query,
+        'orders_count': len(orders_with_member_status),  # Add count for debugging
     }
     
     return render(request, 'admin/purchase_orders.html', context)
@@ -677,8 +725,8 @@ def serial_numbers_list(request):
     search_query = request.GET.get('search', '').strip()
     member_filter = request.GET.get('member', '').strip()
     
-    # Get all members that have devices
-    members = Member.objects.filter(rangbot_devices__isnull=False).distinct()
+    # Get all members that have devices - use prefetch_related for optimization
+    members = Member.objects.filter(rangbot_devices__isnull=False).prefetch_related('rangbot_devices').distinct()
     
     # Apply filters
     if search_query:
@@ -785,6 +833,7 @@ def cs_list(request):
     
     search_query = request.GET.get('search', '').strip()
     
+    # Get all CS - ensure we get all CS
     cs_list = CustomerService.objects.all()
     
     if search_query:
@@ -913,7 +962,7 @@ def product_info_list(request):
     forum_posts = ForumPost.objects.all().order_by('-created_at')[:50]
     forum_comments = ForumComment.objects.all().order_by('-created_at')[:50]
     
-    # Products: Show all products
+    # Products: Show all products - ensure we get all products
     products = ProductInfo.objects.all().order_by('package_type')
     
     # Count active items (for display info)
@@ -1415,8 +1464,8 @@ def activity_log_list(request):
     date_from = request.GET.get('date_from', '').strip()
     date_to = request.GET.get('date_to', '').strip()
     
-    # Get logs
-    logs = ActivityLog.objects.all()
+    # Get logs with related objects
+    logs = ActivityLog.objects.select_related('performed_by', 'related_order', 'related_member', 'related_device').all()
     
     # Apply filters
     if action_filter:
@@ -1520,13 +1569,10 @@ def forum_post_delete(request, post_id):
         messages.success(request, f'Postingan "{post_title}" berhasil dihapus.')
         return redirect('main:product_info_list')
     
-    context = {
-        'page_title': 'Hapus Postingan Forum - Admin',
-        'admin': admin,
-        'post': post,
-    }
-    
-    return render(request, 'admin/forum_post_delete.html', context)
+    # If GET request, show confirmation via POST redirect
+    # For now, just redirect to product_info_list with a message
+    messages.warning(request, f'Konfirmasi penghapusan postingan: {post.title}')
+    return redirect('main:product_info_list')
 
 
 def forum_comment_delete(request, comment_id):
@@ -1545,11 +1591,74 @@ def forum_comment_delete(request, comment_id):
         messages.success(request, 'Komentar berhasil dihapus.')
         return redirect('main:product_info_list')
     
+    # Simple confirmation - redirect to product_info_list
+    messages.warning(request, 'Silakan konfirmasi penghapusan komentar.')
+    return redirect('main:product_info_list')
+
+
+# ==================== NOTIFICATIONS MANAGEMENT ====================
+
+def admin_notifications_list(request):
+    """
+    View untuk menampilkan daftar semua notifikasi member di admin dashboard
+    """
+    admin = get_admin(request)
+    if not admin:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    # Get filter parameters
+    search_query = request.GET.get('search', '').strip()
+    notification_type_filter = request.GET.get('notification_type', '')
+    is_read_filter = request.GET.get('is_read', '')
+    member_filter = request.GET.get('member', '').strip()
+    
+    # Get all notifications
+    notifications = Notification.objects.select_related('member').all()
+    
+    # Apply filters
+    if search_query:
+        notifications = notifications.filter(
+            models.Q(title__icontains=search_query) |
+            models.Q(message__icontains=search_query) |
+            models.Q(member__member_id__icontains=search_query) |
+            models.Q(member__full_name__icontains=search_query)
+        )
+    
+    if notification_type_filter:
+        notifications = notifications.filter(notification_type=notification_type_filter)
+    
+    if is_read_filter == 'yes':
+        notifications = notifications.filter(is_read=True)
+    elif is_read_filter == 'no':
+        notifications = notifications.filter(is_read=False)
+    
+    if member_filter:
+        notifications = notifications.filter(
+            models.Q(member__member_id__icontains=member_filter) |
+            models.Q(member__full_name__icontains=member_filter)
+        )
+    
+    notifications = notifications.order_by('-created_at')
+    
+    # Get statistics
+    total_notifications = Notification.objects.count()
+    unread_notifications = Notification.objects.filter(is_read=False).count()
+    read_notifications = Notification.objects.filter(is_read=True).count()
+    
     context = {
-        'page_title': 'Hapus Komentar Forum - Admin',
+        'page_title': 'Manajemen Notifikasi - Admin',
         'admin': admin,
-        'comment': comment,
+        'notifications': notifications,
+        'search_query': search_query,
+        'notification_type_filter': notification_type_filter,
+        'is_read_filter': is_read_filter,
+        'member_filter': member_filter,
+        'total_notifications': total_notifications,
+        'unread_notifications': unread_notifications,
+        'read_notifications': read_notifications,
+        'notification_types': Notification.NOTIFICATION_TYPES,
     }
     
-    return render(request, 'admin/forum_comment_delete.html', context)
+    return render(request, 'admin/notifications_list.html', context)
 

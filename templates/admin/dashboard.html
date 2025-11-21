@@ -316,7 +316,7 @@
                     <a href="{% url 'main:purchase_orders_list' %}?status=rejected" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
                         Lihat detail <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
                     </a>
-            </div>
+        </div>
 
                 <!-- Total Orders Card -->
                 <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(99, 102, 241, 0.2); min-height: 180px; display: flex; flex-direction: column;">
@@ -343,7 +343,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                 <!-- Total Members Card -->
                 <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(34, 197, 94, 0.2); min-height: 180px; display: flex; flex-direction: column;">
-                    <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-4">
                         <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);">
                             <i class="fas fa-users text-xl sm:text-2xl" style="color: #22c55e;"></i>
                         </div>
@@ -355,8 +355,8 @@
                             <span>{{ registered_members }} terdaftar</span>
                             <span>•</span>
                             <span>{{ unregistered_members }} belum</span>
-                        </div>
                     </div>
+                </div>
                     <a href="{% url 'main:members_list' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
                         Kelola member <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
                     </a>
@@ -376,20 +376,20 @@
                             <span>{{ active_devices }} aktif</span>
                             <span>•</span>
                             <span>{{ inactive_devices }} nonaktif</span>
-                        </div>
                     </div>
+                </div>
                     <a href="{% url 'main:serial_numbers_list' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
                         Kelola nomor seri <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
                     </a>
-                </div>
+            </div>
 
                 <!-- Total Admins Card -->
                 <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(59, 130, 246, 0.2); min-height: 180px; display: flex; flex-direction: column;">
-                    <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-4">
                         <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);">
                             <i class="fas fa-user-shield text-xl sm:text-2xl" style="color: #3b82f6;"></i>
-                        </div>
                     </div>
+                </div>
                     <div class="flex-1">
                         <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Total Admins</h3>
                         <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #3b82f6;">{{ total_admins }}</p>
@@ -405,8 +405,8 @@
                 <div class="flex items-center justify-between mb-4">
                         <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(251, 146, 60, 0.1) 0%, rgba(251, 146, 60, 0.05) 100%);">
                             <i class="fas fa-headset text-xl sm:text-2xl" style="color: #fb923c;"></i>
-                        </div>
                     </div>
+                </div>
                     <div class="flex-1">
                         <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Customer Service</h3>
                         <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #fb923c;">{{ total_cs }}</p>
@@ -423,7 +423,7 @@
         <div class="mb-8 fade-in-up" style="animation-delay: 0.4s;">
             <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 px-1 section-header">Aktivitas Terkini</h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
-        <!-- Recent Orders -->
+                <!-- Recent Orders -->
                 <div class="glass-card rounded-2xl border shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 scale-in" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.5s;">
                     <div class="p-5 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.6);">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
@@ -435,7 +435,7 @@
                                 Lihat Semua <i class="fas fa-arrow-right text-xs"></i>
                             </a>
                         </div>
-            </div>
+                    </div>
 
             {% if recent_orders %}
                     <div class="overflow-x-auto overflow-y-auto max-h-96 green-scrollbar" style="border: 1px solid rgba(229, 231, 235, 0.6); border-radius: 0.75rem;">
@@ -513,13 +513,13 @@
                     {% endif %}
                 </div>
 
-                <!-- Recent Activities -->
-                <div class="glass-card rounded-2xl border shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 scale-in" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.6s;">
+                <!-- Recent Notifications -->
+                <div class="glass-card rounded-2xl border shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 scale-in" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.7s;">
                     <div class="p-5 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.6);">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                             <div>
-                                <h3 class="text-lg sm:text-xl font-light text-gray-900 tracking-tight">Aktivitas Terbaru</h3>
-                                <p class="text-xs sm:text-sm text-gray-500 font-light mt-1">10 aktivitas terakhir</p>
+                                <h3 class="text-lg sm:text-xl font-light text-gray-900 tracking-tight">Notifikasi Sistem</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 font-light mt-1">10 notifikasi terakhir</p>
                             </div>
                             <a href="{% url 'main:activity_log_list' %}" class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-light text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200" style="border: 1px solid rgba(229, 231, 235, 0.6);">
                                 Lihat Semua <i class="fas fa-arrow-right text-xs"></i>
@@ -527,47 +527,90 @@
                         </div>
                     </div>
 
-                    {% if recent_activities %}
-                    <div class="divide-y max-h-96 overflow-y-auto overflow-x-auto green-scrollbar" style="border-color: rgba(229, 231, 235, 0.3);">
-                        {% for activity in recent_activities %}
-                        <div class="p-4 sm:p-5 hover:bg-gray-50/50 transition-colors">
-                            <div class="flex items-start gap-3">
-                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style="background: rgba(134, 239, 172, 0.1);">
-                                    {% if activity.action_type == 'order_verified' %}
-                                    <i class="fas fa-check-circle text-sm" style="color: #22c55e;"></i>
-                                    {% elif activity.action_type == 'order_rejected' %}
-                                    <i class="fas fa-times-circle text-sm" style="color: #ef4444;"></i>
-                                    {% elif activity.action_type == 'member_created' %}
-                                    <i class="fas fa-user-plus text-sm" style="color: #6366f1;"></i>
-                                    {% elif activity.action_type == 'serial_created' %}
-                                    <i class="fas fa-barcode text-sm" style="color: #a855f7;"></i>
-                                    {% else %}
-                                    <i class="fas fa-history text-sm" style="color: #86efac;"></i>
-                                    {% endif %}
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 mb-1">{{ activity.get_action_type_display }}</p>
-                                    <p class="text-xs text-gray-600 font-light mb-2 line-clamp-2">{{ activity.description|truncatewords:15 }}</p>
-                                    <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 font-light">
-                                        {% if activity.performed_by %}
-                                        <span>{{ activity.performed_by.full_name }}</span>
-                                        <span>•</span>
-                                        {% endif %}
-                                        <span>{{ activity.created_at|date:"d M Y H:i" }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
+                    <div class="overflow-x-auto overflow-y-auto max-h-96 green-scrollbar" style="border: 1px solid rgba(229, 231, 235, 0.6); border-radius: 0.75rem;">
+                        <table class="w-full border-collapse">
+                            <thead class="sticky top-0 z-10" style="background: rgba(249, 250, 251, 0.95); backdrop-filter: blur(10px);">
+                                <tr style="border-bottom: 2px solid rgba(229, 231, 235, 0.6);">
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 120px;">
+                                        Tipe Aktivitas
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 200px;">
+                                        Deskripsi
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 100px;">
+                                        Order/Member
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider" style="border-right: 1px solid rgba(229, 231, 235, 0.4); min-width: 120px;">
+                                        Dilakukan Oleh
+                                    </th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider" style="min-width: 120px;">
+                                        Waktu
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y" style="border-color: rgba(229, 231, 235, 0.3);">
+                                {% if recent_notifications and recent_notifications|length > 0 %}
+                                    {% for activity in recent_notifications %}
+                                    <tr class="hover:bg-gray-50/50 transition-colors cursor-pointer" data-href="{% url 'main:activity_log_list' %}">
+                                        <td class="px-4 py-3 whitespace-nowrap" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
+                                            <div class="flex items-center gap-2">
+                                                {% if activity.action_type == 'order_created' %}
+                                                <i class="fas fa-shopping-cart text-sm" style="color: #3b82f6;"></i>
+                                                {% elif activity.action_type == 'order_verified' %}
+                                                <i class="fas fa-check-circle text-sm" style="color: #22c55e;"></i>
+                                                {% elif activity.action_type == 'order_rejected' %}
+                                                <i class="fas fa-times-circle text-sm" style="color: #ef4444;"></i>
+                                                {% elif activity.action_type == 'member_registered' or activity.action_type == 'member_created' %}
+                                                <i class="fas fa-user-plus text-sm" style="color: #a855f7;"></i>
+                                                {% elif activity.action_type == 'forum_post_created' %}
+                                                <i class="fas fa-comment-dots text-sm" style="color: #f59e0b;"></i>
+                                                {% elif activity.action_type == 'forum_comment_created' %}
+                                                <i class="fas fa-reply text-sm" style="color: #f59e0b;"></i>
+                                                {% else %}
+                                                <i class="fas fa-bell text-sm" style="color: #86efac;"></i>
+                                                {% endif %}
+                                                <span class="text-xs font-medium text-gray-900">{{ activity.get_action_type_display }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-xs text-gray-600" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
+                                            <div class="max-w-xs truncate" title="{{ activity.description }}">
+                                                {{ activity.description|truncatewords:10 }}
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-xs text-gray-600" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
+                                            {% if activity.related_order %}
+                                            <span class="font-semibold text-gray-900">Order #{{ activity.related_order.id }}</span>
+                                            {% elif activity.related_member %}
+                                            <span class="font-semibold text-gray-900">{{ activity.related_member.member_id }}</span>
+                                            {% else %}
+                                            <span class="text-gray-400">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-4 py-3 text-xs text-gray-600" style="border-right: 1px solid rgba(229, 231, 235, 0.4);">
+                                            {% if activity.performed_by %}
+                                            <span>{{ activity.performed_by.full_name }}</span>
+                                            {% else %}
+                                            <span class="text-gray-400">Sistem</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-4 py-3 text-xs text-gray-600 text-center whitespace-nowrap">
+                                            {{ activity.created_at|date:"d M Y H:i" }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-10 sm:py-12">
+                                        <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full mb-4" style="background: rgba(229, 231, 235, 0.3);">
+                                            <i class="fas fa-bell text-xl sm:text-2xl text-gray-400"></i>
+                                        </div>
+                                        <p class="text-sm text-gray-500 font-light">Belum ada notifikasi sistem</p>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
                     </div>
-                    {% else %}
-                    <div class="text-center py-10 sm:py-12">
-                        <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full mb-4" style="background: rgba(229, 231, 235, 0.3);">
-                            <i class="fas fa-history text-xl sm:text-2xl text-gray-400"></i>
-                        </div>
-                        <p class="text-sm text-gray-500 font-light">Belum ada aktivitas</p>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
 

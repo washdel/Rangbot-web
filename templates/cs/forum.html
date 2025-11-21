@@ -1,0 +1,340 @@
+{% extends 'cs/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<main class="pt-20 pb-12 px-4 sm:px-6 lg:px-8 min-h-screen" style="background: linear-gradient(to bottom, #f0fdf4 0%, #ffffff 100%);">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2" style="color: #22c55e;">
+                Forum Monitoring
+            </h1>
+            <p class="text-gray-600 font-light text-sm sm:text-base">
+                Pantau dan kelola postingan forum beserta komentar. CS dapat menghapus postingan/komentar dan menambahkan catatan resmi.
+            </p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+            <div class="px-4 py-3 rounded-xl bg-white/80 backdrop-blur-sm border text-sm font-light" 
+                 style="border-color: {% if message.tags == 'success' %}rgba(34, 197, 94, 0.4){% elif message.tags == 'error' %}rgba(239, 68, 68, 0.4){% else %}rgba(229, 231, 235, 0.6){% endif %}; color: {% if message.tags == 'success' %}#22c55e{% elif message.tags == 'error' %}#ef4444{% else %}#6b7280{% endif %};">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Search, Filter, and Sort Controls -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 mb-6 border border-gray-200/60">
+            <form method="get" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Search Bar -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Cari</label>
+                        <input 
+                            type="text" 
+                            name="search" 
+                            value="{{ search_query }}"
+                            placeholder="Cari judul, penulis, atau kategori..."
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                    </div>
+                    
+                    <!-- Category Filter -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Kategori</label>
+                        <select 
+                            name="category" 
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                            <option value="">Semua Kategori</option>
+                            {% for value, label in category_choices %}
+                            <option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Sort -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Urutkan</label>
+                        <select 
+                            name="sort" 
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Terbaru</option>
+                            <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Terlama</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex gap-2">
+                    <button 
+                        type="submit" 
+                        class="px-6 py-2 rounded-lg text-sm font-light text-white transition-colors"
+                        style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);"
+                    >
+                        <i class="fas fa-search mr-2"></i>Cari
+                    </button>
+                    <a 
+                        href="{% url 'main:cs_forum' %}" 
+                        class="px-6 py-2 rounded-lg text-sm font-light text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
+                    >
+                        <i class="fas fa-redo mr-2"></i>Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Posts List (Accordion/Card Structure) -->
+        <div class="space-y-4">
+                        {% for post in posts %}
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/60 overflow-hidden">
+                <!-- Post Header (Always Visible) -->
+                <div class="p-6 border-b border-gray-200/60">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="text-lg font-medium text-gray-900">{{ post.title }}</h3>
+                                <span class="px-2 py-1 rounded-full text-xs font-medium" 
+                                      style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                                    {{ post.get_category_display }}
+                                </span>
+                            </div>
+                            
+                            <div class="flex items-center gap-4 text-sm text-gray-600 mt-2">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                    <span>
+                                        {% if post.author %}
+                                            <span class="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">{{ post.author.get_role_display }}</span>
+                                            <span>{{ post.author.get_display_name }}</span>
+                                        {% else %}
+                                            <span class="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">Guest</span>
+                                            <span>Guest</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-calendar text-gray-400"></i>
+                                    <span>{{ post.created_at|date:"d M Y, H:i" }}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-comments text-gray-400"></i>
+                                    <span>{{ post.comments.count }} komentar</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex gap-2">
+                            <button 
+                                onclick="togglePost({{ post.id }})" 
+                                id="toggle-btn-{{ post.id }}"
+                                class="px-4 py-2 rounded-lg text-sm font-light text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
+                            >
+                                <i class="fas fa-chevron-down mr-2"></i>Lihat Detail
+                            </button>
+                            <form method="post" class="inline" onsubmit="return confirm('Yakin ingin menghapus postingan ini? Semua komentar akan ikut terhapus.');">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_post">
+                                <input type="hidden" name="post_id" value="{{ post.id }}">
+                                <button type="submit" class="px-4 py-2 rounded-lg text-sm font-light text-white transition-colors bg-red-600 hover:bg-red-700">
+                                    <i class="fas fa-trash mr-2"></i>Hapus
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Post Content and Comments (Collapsible) -->
+                <div id="post-content-{{ post.id }}" class="hidden">
+                    <!-- Post Content -->
+                    <div class="p-6 bg-gray-50/50 border-b border-gray-200/60">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Isi Postingan:</h4>
+                        <div class="text-sm text-gray-600 whitespace-pre-wrap">{{ post.content }}</div>
+            </div>
+                    
+                    <!-- Comments Section -->
+                    <div class="p-6">
+                        <h4 class="text-sm font-medium text-gray-700 mb-4">Komentar ({{ post.comments.count }}):</h4>
+                        
+                        {% if post.comments.all %}
+                        <div class="space-y-4 mb-6">
+                            {% for comment in post.comments.all %}
+                            <div class="{% if comment.is_cs_note %}bg-green-50 border-l-4 border-green-500{% elif comment.replied_by_cs %}bg-blue-50 border-l-4 border-blue-400{% else %}bg-white border-l-4 border-gray-300{% endif %} p-4 rounded-lg">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            {% if comment.is_cs_note %}
+                                                <span class="px-2 py-0.5 rounded text-xs font-medium bg-green-600 text-white">
+                                                    <i class="fas fa-check-circle mr-1"></i>Catatan CS
+                                                </span>
+                                                {% if comment.replied_by_cs %}
+                                                    <span class="text-sm font-medium text-green-700">{{ comment.replied_by_cs.full_name }}</span>
+                                                {% else %}
+                                                    <span class="text-sm font-medium text-green-700">CS</span>
+                                                {% endif %}
+                                            {% elif comment.replied_by_cs %}
+                                                <span class="px-2 py-0.5 rounded text-xs font-medium bg-blue-600 text-white">
+                                                    <i class="fas fa-user-tie mr-1"></i>Komentar CS
+                                                </span>
+                                                {% if comment.replied_by_cs %}
+                                                    <span class="text-sm font-medium text-blue-700">{{ comment.replied_by_cs.full_name }}</span>
+                                                {% else %}
+                                                    <span class="text-sm font-medium text-blue-700">CS</span>
+                                                {% endif %}
+                                            {% else %}
+                                                {% if comment.author %}
+                                                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">{{ comment.author.get_role_display }}</span>
+                                                    <span class="text-sm font-medium text-gray-700">{{ comment.author.get_display_name }}</span>
+                                                {% else %}
+                                                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">Guest</span>
+                                                    <span class="text-sm font-medium text-gray-700">Guest</span>
+                                                {% endif %}
+                {% endif %}
+                                            <span class="text-xs text-gray-500">{{ comment.created_at|date:"d M Y, H:i" }}</span>
+                                        </div>
+                                        <div class="text-sm text-gray-700 whitespace-pre-wrap">{{ comment.content }}</div>
+                                    </div>
+                                    
+                                    {% if comment.replied_by_cs and not comment.is_cs_note %}
+                                    <form method="post" class="inline" onsubmit="return confirm('Yakin ingin menghapus komentar ini?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_comment">
+                                        <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                                        <button type="submit" class="text-red-600 hover:text-red-800 text-sm" title="Hapus komentar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% elif not comment.replied_by_cs %}
+                                    <form method="post" class="inline" onsubmit="return confirm('Yakin ingin menghapus komentar ini?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_comment">
+                                        <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                                        <button type="submit" class="text-red-600 hover:text-red-800 text-sm" title="Hapus komentar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                {% endif %}
+            </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-sm text-gray-500 italic mb-6">Belum ada komentar</p>
+            {% endif %}
+                        
+                        <!-- Add Comment Forms -->
+                        <div class="space-y-4">
+                            <!-- Add Regular Comment Form -->
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <h5 class="text-sm font-medium text-blue-800 mb-3">
+                                    <i class="fas fa-comment mr-2"></i>Tambah Komentar
+                                </h5>
+                                <form method="post" class="space-y-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="add_comment">
+                                    <input type="hidden" name="post_id" value="{{ post.id }}">
+                                    <textarea 
+                                        name="comment_content" 
+                                        rows="3"
+                                        placeholder="Tulis komentar untuk postingan ini..."
+                                        required
+                                        class="w-full px-4 py-2 rounded-lg border border-blue-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    ></textarea>
+                                    <button 
+                                        type="submit" 
+                                        class="px-4 py-2 rounded-lg text-sm font-light text-white transition-colors bg-blue-600 hover:bg-blue-700"
+                                    >
+                                        <i class="fas fa-paper-plane mr-2"></i>Kirim Komentar
+                                    </button>
+                                </form>
+        </div>
+
+                            <!-- Add CS Note Form -->
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <h5 class="text-sm font-medium text-green-800 mb-3">
+                                    <i class="fas fa-sticky-note mr-2"></i>Tambah Catatan CS (Resmi)
+                                </h5>
+                                <p class="text-xs text-green-700 mb-3">
+                                    <i class="fas fa-info-circle mr-1"></i>Catatan CS akan ditandai sebagai catatan resmi dengan badge khusus
+                                </p>
+                                <form method="post" class="space-y-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="add_cs_note">
+                                    <input type="hidden" name="post_id" value="{{ post.id }}">
+                                    <textarea 
+                                        name="note_content" 
+                                        rows="3"
+                                        placeholder="Tulis catatan resmi dari CS untuk postingan ini..."
+                                        required
+                                        class="w-full px-4 py-2 rounded-lg border border-green-300 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                                    ></textarea>
+                                    <button 
+                                        type="submit" 
+                                        class="px-4 py-2 rounded-lg text-sm font-light text-white transition-colors"
+                                        style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);"
+                                    >
+                                        <i class="fas fa-paper-plane mr-2"></i>Kirim Catatan CS
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-12 border border-gray-200/60 text-center">
+                <i class="fas fa-inbox text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500 font-light">Tidak ada postingan ditemukan</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if posts.has_other_pages %}
+        <div class="mt-6 flex justify-center gap-2">
+            {% if posts.has_previous %}
+            <a href="?page={{ posts.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+               class="px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 border border-gray-200">
+                <i class="fas fa-chevron-left mr-1"></i>Sebelumnya
+            </a>
+            {% endif %}
+            <span class="px-4 py-2 rounded-lg text-sm text-gray-900">
+                Halaman {{ posts.number }} dari {{ posts.paginator.num_pages }}
+            </span>
+            {% if posts.has_next %}
+            <a href="?page={{ posts.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+               class="px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 border border-gray-200">
+                Selanjutnya<i class="fas fa-chevron-right ml-1"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+<script>
+function togglePost(postId) {
+    const content = document.getElementById('post-content-' + postId);
+    const btn = document.getElementById('toggle-btn-' + postId);
+    const icon = btn.querySelector('i');
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+        btn.innerHTML = '<i class="fas fa-chevron-up mr-2"></i>Sembunyikan';
+    } else {
+        content.classList.add('hidden');
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
+        btn.innerHTML = '<i class="fas fa-chevron-down mr-2"></i>Lihat Detail';
+    }
+}
+</script>
+{% endblock %}

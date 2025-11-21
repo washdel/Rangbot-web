@@ -9,6 +9,8 @@ from django.utils import timezone
 from django.db.models import Q, Count
 from django.core.paginator import Paginator
 from django.contrib.auth.hashers import check_password, make_password
+from django.urls import reverse
+from urllib.parse import urlencode
 from .models import (
     CustomerService, ContactMessage, FAQ, ForumPost, ForumComment,
     Member, RangBotDevice, ProductInfo
@@ -221,31 +223,143 @@ def cs_faq(request):
 def cs_forum(request):
     """
     Menu Forum Monitoring
-    CS melihat dan memantau postingan forum
+    CS melihat dan memantau postingan forum dengan fitur lengkap
     """
     cs = get_cs(request)
     if not cs:
         messages.warning(request, 'Anda harus login terlebih dahulu.')
         return redirect('main:login')
     
-    # Get forum posts and comments
-    posts = ForumPost.objects.all().order_by('-created_at')
-    comments = ForumComment.objects.all().order_by('-created_at')
+    # Get filter parameters (needed for redirect after POST)
+    search_query = request.GET.get('search', '').strip()
+    category_filter = request.GET.get('category', '').strip()
+    sort_by = request.GET.get('sort', 'newest')
+    
+    # Handle POST requests (delete, add note)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        # Delete post
+        if action == 'delete_post':
+            post_id = request.POST.get('post_id')
+            try:
+                post = ForumPost.objects.get(id=post_id)
+                post_title = post.title
+                post.delete()  # This will cascade delete all comments
+                messages.success(request, f'Postingan "{post_title}" berhasil dihapus.')
+            except ForumPost.DoesNotExist:
+                messages.error(request, 'Postingan tidak ditemukan.')
+        
+        # Delete comment
+        elif action == 'delete_comment':
+            comment_id = request.POST.get('comment_id')
+            try:
+                comment = ForumComment.objects.get(id=comment_id)
+                comment.delete()
+                messages.success(request, 'Komentar berhasil dihapus.')
+            except ForumComment.DoesNotExist:
+                messages.error(request, 'Komentar tidak ditemukan.')
+        
+        # Add CS note
+        elif action == 'add_cs_note':
+            post_id = request.POST.get('post_id')
+            note_content = request.POST.get('note_content', '').strip()
+            
+            if not note_content:
+                messages.error(request, 'Catatan tidak boleh kosong.')
+            else:
+                try:
+                    post = ForumPost.objects.get(id=post_id)
+                    ForumComment.objects.create(
+                        post=post,
+                        author=None,  # CS note doesn't have forum user author
+                        content=note_content,
+                        is_cs_note=True,
+                        replied_by_cs=cs
+                    )
+                    messages.success(request, 'Catatan CS berhasil ditambahkan.')
+                except ForumPost.DoesNotExist:
+                    messages.error(request, 'Postingan tidak ditemukan.')
+                except Exception as e:
+                    messages.error(request, f'Error: {str(e)}')
+        
+        # Add regular comment from CS
+        elif action == 'add_comment':
+            post_id = request.POST.get('post_id')
+            comment_content = request.POST.get('comment_content', '').strip()
+            
+            if not comment_content:
+                messages.error(request, 'Komentar tidak boleh kosong.')
+            else:
+                try:
+                    post = ForumPost.objects.get(id=post_id)
+                    ForumComment.objects.create(
+                        post=post,
+                        author=None,  # CS comment doesn't have forum user author
+                        content=comment_content,
+                        is_cs_note=False,  # Regular comment, not official note
+                        replied_by_cs=cs
+                    )
+                    messages.success(request, 'Komentar berhasil ditambahkan.')
+                except ForumPost.DoesNotExist:
+                    messages.error(request, 'Postingan tidak ditemukan.')
+                except Exception as e:
+                    messages.error(request, f'Error: {str(e)}')
+        
+        # Preserve filter parameters in redirect
+        params = {}
+        if request.GET.get('search'):
+            params['search'] = request.GET.get('search')
+        if request.GET.get('category'):
+            params['category'] = request.GET.get('category')
+        if request.GET.get('sort'):
+            params['sort'] = request.GET.get('sort')
+        if params:
+            return redirect(f"{reverse('main:cs_forum')}?{urlencode(params)}")
+        return redirect('main:cs_forum')
+    
+    # Get forum posts with their comments (prefetch for efficiency)
+    posts = ForumPost.objects.select_related('author').prefetch_related('comments', 'comments__author', 'comments__replied_by_cs').all()
+    
+    # Apply search filter
+    if search_query:
+        posts = posts.filter(
+            Q(title__icontains=search_query) |
+            Q(content__icontains=search_query) |
+            Q(author__name__icontains=search_query) |
+            Q(author__username__icontains=search_query) |
+            Q(category__icontains=search_query)
+        )
+    
+    # Apply category filter
+    if category_filter:
+        posts = posts.filter(category=category_filter)
+    
+    # Apply sorting
+    if sort_by == 'oldest':
+        posts = posts.order_by('created_at')
+    else:  # newest (default)
+        posts = posts.order_by('-created_at')
     
     # Pagination
-    post_paginator = Paginator(posts, 20)
-    post_page = request.GET.get('post_page', 1)
-    post_page_obj = post_paginator.get_page(post_page)
+    paginator = Paginator(posts, 10)  # 10 posts per page
+    page = request.GET.get('page', 1)
+    try:
+        posts_page = paginator.get_page(page)
+    except:
+        posts_page = paginator.get_page(1)
     
-    comment_paginator = Paginator(comments, 20)
-    comment_page = request.GET.get('comment_page', 1)
-    comment_page_obj = comment_paginator.get_page(comment_page)
+    # Get category choices for filter
+    category_choices = ForumPost.CATEGORY_CHOICES
     
     context = get_cs_base_context(cs)
     context.update({
         'page_title': 'Forum Monitoring - CS Dashboard',
-        'posts': post_page_obj,
-        'comments': comment_page_obj,
+        'posts': posts_page,
+        'search_query': search_query,
+        'category_filter': category_filter,
+        'sort_by': sort_by,
+        'category_choices': category_choices,
     })
     
     return render(request, 'cs/forum.html', context)

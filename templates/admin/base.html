@@ -578,6 +578,7 @@
                     (currentPath.includes('products') && linkPage === 'products') ||
                     (currentPath.includes('customer-service') && linkPage === 'cs') ||
                     (currentPath.includes('admin/admins') && linkPage === 'admins') ||
+                    (currentPath.includes('notifications') && linkPage === 'notifications') ||
                     (currentPath.includes('activity-log') && linkPage === 'activity')) {
                     link.classList.add('active');
                 }
@@ -586,31 +587,31 @@
         
         // Remove all Django messages/notifications/toast alerts
         function removeAllMessages() {
-            // Remove message containers
-            const messageContainers = document.querySelectorAll('div[class*="bg-green-50"], div[class*="bg-red-50"], div[class*="bg-yellow-50"], div[class*="border-green"], div[class*="border-red"], div[class*="border-yellow"]');
+            // Only remove Django messages, not content
+            // Be more specific to avoid removing actual content
+            const messageContainers = document.querySelectorAll('div[class*="bg-green-50"], div[class*="bg-red-50"], div[class*="bg-yellow-50"]');
             messageContainers.forEach(container => {
-                // Check if it contains message icons
+                // Only remove if it's clearly a message (has message icon AND is small)
                 const hasMessageIcon = container.querySelector('.fa-check-circle, .fa-exclamation-circle, .fa-exclamation-triangle');
-                if (hasMessageIcon || container.textContent.trim().length < 200) {
-                    container.remove();
+                const isSmall = container.textContent.trim().length < 200;
+                const isInMainContent = container.closest('#main-content');
+                // Only remove if it's a message AND not part of main content structure
+                if (hasMessageIcon && isSmall && isInMainContent) {
+                    // Double check it's not a table or important content
+                    const isTable = container.closest('table');
+                    const isCard = container.closest('.glass-card');
+                    if (!isTable && !isCard) {
+                        container.remove();
+                    }
                 }
             });
             
-            // Remove containers with message icons
-            const iconContainers = document.querySelectorAll('div:has(.fa-check-circle), div:has(.fa-exclamation-circle), div:has(.fa-exclamation-triangle)');
-            iconContainers.forEach(container => {
-                // Only remove if it looks like a message box (has border, rounded, etc.)
-                if (container.classList.contains('rounded-xl') || container.classList.contains('rounded-lg') || 
-                    container.classList.contains('border') || container.textContent.trim().length < 200) {
-                    container.remove();
-                }
-            });
-            
-            // Remove message wrapper divs
+            // Remove message wrapper divs - but be very careful
             const messageWrappers = document.querySelectorAll('div.mb-6.space-y-2, div.mb-8.space-y-2');
             messageWrappers.forEach(wrapper => {
-                const hasMessages = wrapper.querySelector('div[class*="bg-green"], div[class*="bg-red"], div[class*="bg-yellow"]');
-                if (hasMessages) {
+                const hasMessages = wrapper.querySelector('div[class*="bg-green-50"], div[class*="bg-red-50"], div[class*="bg-yellow-50"]');
+                // Only remove if it ONLY contains messages, not other content
+                if (hasMessages && wrapper.children.length === wrapper.querySelectorAll('div[class*="bg-green-50"], div[class*="bg-red-50"], div[class*="bg-yellow-50"]').length) {
                     wrapper.remove();
                 }
             });

@@ -71,6 +71,12 @@ Rangbot_Web/
 │   ├── PROJECT_STRUCTURE.md        # Project structure
 │   └── CLEANUP_SUMMARY.md          # Cleanup notes
 │
+├── 🔧 Code Quality Tools
+│   ├── .editorconfig                # Editor configuration ✅ NEW
+│   ├── pyproject.toml               # Python tool config ✅ NEW
+│   ├── .python-lint-check.bat      # Windows lint script ✅ NEW
+│   └── .python-lint-check.sh       # Linux/Mac lint script ✅ NEW
+│
 └── 🔄 Git
     └── .git/                        # Git repository
 ```
@@ -169,6 +175,10 @@ docker-compose up --force-recreate
 - ✅ `DOCKER_QUICKSTART.md` - Quick start guide
 - ✅ `.gitignore` - Proper ignore rules
 - ✅ `.dockerignore` - Docker ignore rules
+- ✅ `.editorconfig` - Editor configuration untuk konsistensi indentasi
+- ✅ `pyproject.toml` - Python tool configuration
+- ✅ `.python-lint-check.bat` / `.python-lint-check.sh` - Script pengecekan indentasi
+- ✅ **IndentationError di `main/views.py` sudah diperbaiki**
 
 ---
 
@@ -231,6 +241,25 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ### **Django "static files not found"**
 - Collect: `docker-compose exec web python manage.py collectstatic --noinput`
+
+### **Error: "IndentationError: expected an indented block"**
+- ✅ **SUDAH DIPERBAIKI!** Error indentasi di `main/views.py` sudah diperbaiki
+- ✅ File konfigurasi sudah ditambahkan untuk mencegah error serupa:
+  - `.editorconfig` - Konsistensi indentasi di editor
+  - `pyproject.toml` - Konfigurasi Python tools
+  - `.python-lint-check.bat` / `.python-lint-check.sh` - Script pengecekan
+- **Cara mencegah di masa depan:**
+  1. Gunakan editor yang support `.editorconfig` (VS Code, PyCharm, dll)
+  2. Pastikan indentasi menggunakan **4 spasi** (bukan tab)
+  3. Jalankan script pengecekan sebelum commit:
+     ```bash
+     # Windows
+     .python-lint-check.bat
+     
+     # Linux/Mac
+     bash .python-lint-check.sh
+     ```
+  4. Selalu periksa indentasi setelah `if`, `elif`, `else`, `for`, `while`, `try`, `except`, `def`, `class`
 
 ---
 

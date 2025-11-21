@@ -4,19 +4,22 @@ from django.utils import timezone
 
 class ForumUser(models.Model):
     """
-    Model untuk pengguna forum (login sederhana dengan email)
+    Model untuk pengguna forum (sistem login terpisah)
     """
     ROLE_CHOICES = [
         ('petani', 'Petani'),
         ('mahasiswa', 'Mahasiswa'),
         ('peneliti', 'Peneliti'),
         ('siswa', 'Siswa'),
+        ('umum', 'Umum'),
         ('lainnya', 'Lainnya'),
     ]
     
+    username = models.CharField(max_length=100, unique=True, null=True, blank=True, verbose_name='Username')
     email = models.EmailField(unique=True, verbose_name='Email')
+    password = models.CharField(max_length=255, null=True, blank=True, verbose_name='Password')  # Hashed password
     name = models.CharField(max_length=100, verbose_name='Nama')
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='petani', verbose_name='Peran')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='petani', verbose_name='Kategori')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Dibuat pada')
     last_login = models.DateTimeField(null=True, blank=True, verbose_name='Login terakhir')
     
@@ -25,8 +28,20 @@ class ForumUser(models.Model):
         verbose_name_plural = 'Pengguna Forum'
         ordering = ['-created_at']
     
+    def get_display_name(self):
+        """
+        Get display name - use username if available, otherwise fallback to name or email
+        This is backward compatible for when migration hasn't been run yet
+        """
+        if hasattr(self, 'username') and self.username:
+            return self.username
+        elif hasattr(self, 'name') and self.name:
+            return self.name
+        else:
+            return self.email.split('@')[0] if self.email else 'User'
+    
     def __str__(self):
-        return f"{self.name} ({self.email})"
+        return f"{self.get_display_name()} ({self.email})"
 
 
 class ForumPost(models.Model):
@@ -73,8 +88,10 @@ class ForumComment(models.Model):
     Model untuk komentar pada postingan forum
     """
     post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name='comments', verbose_name='Postingan')
-    author = models.ForeignKey(ForumUser, on_delete=models.CASCADE, related_name='comments', verbose_name='Penulis')
+    author = models.ForeignKey(ForumUser, on_delete=models.CASCADE, related_name='comments', null=True, blank=True, verbose_name='Penulis')
     content = models.TextField(verbose_name='Isi Komentar')
+    is_cs_note = models.BooleanField(default=False, verbose_name='Catatan CS')
+    replied_by_cs = models.ForeignKey('CustomerService', on_delete=models.SET_NULL, null=True, blank=True, related_name='forum_notes', verbose_name='Ditulis oleh CS')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Dibuat pada')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Diperbarui pada')
     
@@ -84,7 +101,12 @@ class ForumComment(models.Model):
         ordering = ['created_at']
     
     def __str__(self):
-        return f"Komentar oleh {self.author.name} pada {self.post.title}"
+        if self.is_cs_note and self.replied_by_cs:
+            return f"Catatan CS oleh {self.replied_by_cs.full_name} pada {self.post.title}"
+        elif self.author:
+            return f"Komentar oleh {self.author.get_display_name()} pada {self.post.title}"
+        else:
+            return f"Komentar pada {self.post.title}"
 
 
 class Admin(models.Model):
@@ -412,9 +434,11 @@ class ActivityLog(models.Model):
     Mencatat semua aktivitas penting yang dilakukan admin
     """
     ACTION_TYPES = [
+        ('order_created', 'Pembelian Baru'),
         ('order_verified', 'Verifikasi Pembelian'),
         ('order_rejected', 'Pembelian Ditolak'),
         ('member_created', 'Member ID Dibuat'),
+        ('member_registered', 'Member Terdaftar'),
         ('serial_created', 'Nomor Seri Dibuat'),
         ('member_updated', 'Data Member Diperbarui'),
         ('member_deactivated', 'Member Dinonaktifkan'),
@@ -425,6 +449,12 @@ class ActivityLog(models.Model):
         ('admin_deactivated', 'Admin Dinonaktifkan'),
         ('cs_created', 'Customer Service Dibuat'),
         ('cs_deleted', 'Customer Service Dihapus'),
+        ('forum_post_created', 'Postingan Forum Baru'),
+        ('forum_comment_created', 'Komentar Forum Baru'),
+        ('forum_post_edited', 'Postingan Forum Diedit'),
+        ('forum_comment_edited', 'Komentar Forum Diedit'),
+        ('forum_post_deleted', 'Postingan Forum Dihapus'),
+        ('forum_comment_deleted', 'Komentar Forum Dihapus'),
         ('system_error', 'Error Sistem'),
     ]
     

@@ -1,0 +1,249 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .notification-row {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .notification-row:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .notification-row.unread {
+        background: rgba(239, 68, 68, 0.05);
+        border-left: 4px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .notification-row.read {
+        background: rgba(255, 255, 255, 0.8);
+        border-left: 4px solid rgba(34, 197, 94, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen animated-bg pb-12 fade-in-up">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Header -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2 gradient-text">
+                        Notifikasi
+                    </h1>
+                    <p class="text-gray-600 font-light text-sm sm:text-base">
+                        Kelola semua notifikasi member
+                    </p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 px-4 py-2 rounded-xl glass-card border" style="border-color: rgba(134, 239, 172, 0.3);">
+                        <span class="text-xs font-medium text-gray-600">Total: {{ total_notifications }}</span>
+                        <span class="text-gray-300">•</span>
+                        <span class="text-xs font-medium" style="color: #ef4444;">Belum dibaca: {{ unread_notifications }}</span>
+                        <span class="text-gray-300">•</span>
+                        <span class="text-xs font-medium" style="color: #22c55e;">Sudah dibaca: {{ read_notifications }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2 fade-in-up" style="animation-delay: 0.2s;">
+            {% for message in messages %}
+            <div class="p-4 rounded-xl border font-light text-sm backdrop-blur-sm transition-all duration-300 {% if message.tags == 'error' %}bg-red-50/80 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50/80 border-yellow-200 text-yellow-800{% else %}bg-green-50/80 border-green-200 text-green-800{% endif %}">
+                <div class="flex items-center gap-2">
+                    {% if message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% else %}
+                    <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Filters -->
+        <div class="glass-card filter-card rounded-2xl p-6 mb-6 fade-in-up" style="animation-delay: 0.2s;">
+            <form method="get" class="flex flex-wrap gap-4 items-end">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        <i class="fas fa-search text-green-500 text-xs"></i>
+                        Cari
+                    </label>
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="Judul, pesan, atau member ID..." 
+                           class="w-full px-4 py-2.5 rounded-xl border font-light text-sm input-field focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                           style="border-color: rgba(134, 239, 172, 0.3);">
+                </div>
+                <div class="min-w-[150px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        <i class="fas fa-filter text-green-500 text-xs"></i>
+                        Tipe Notifikasi
+                    </label>
+                    <select name="notification_type" 
+                            class="w-full px-4 py-2.5 rounded-xl border font-light text-sm input-field focus:outline-none focus:ring-2 focus:ring-green-500/20 appearance-none bg-white cursor-pointer"
+                            style="border-color: rgba(134, 239, 172, 0.3);">
+                        <option value="">Semua Tipe</option>
+                        {% for type_code, type_name in notification_types %}
+                        <option value="{{ type_code }}" {% if notification_type_filter == type_code %}selected{% endif %}>{{ type_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="min-w-[150px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        <i class="fas fa-eye text-green-500 text-xs"></i>
+                        Status
+                    </label>
+                    <select name="is_read" 
+                            class="w-full px-4 py-2.5 rounded-xl border font-light text-sm input-field focus:outline-none focus:ring-2 focus:ring-green-500/20 appearance-none bg-white cursor-pointer"
+                            style="border-color: rgba(134, 239, 172, 0.3);">
+                        <option value="">Semua</option>
+                        <option value="no" {% if is_read_filter == 'no' %}selected{% endif %}>Belum Dibaca</option>
+                        <option value="yes" {% if is_read_filter == 'yes' %}selected{% endif %}>Sudah Dibaca</option>
+                    </select>
+                </div>
+                <div class="min-w-[150px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        <i class="fas fa-user text-green-500 text-xs"></i>
+                        Member
+                    </label>
+                    <input type="text" name="member" value="{{ member_filter }}" placeholder="Member ID atau nama..." 
+                           class="w-full px-4 py-2.5 rounded-xl border font-light text-sm input-field focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                           style="border-color: rgba(134, 239, 172, 0.3);">
+                </div>
+                <div>
+                    <button type="submit" 
+                            class="px-6 py-2.5 rounded-xl text-white font-medium text-sm search-btn">
+                        <i class="fas fa-search mr-2"></i>Cari
+                    </button>
+                </div>
+                {% if search_query or notification_type_filter or is_read_filter or member_filter %}
+                <div>
+                    <a href="{% url 'main:admin_notifications_list' %}" 
+                       class="px-6 py-2.5 rounded-xl border font-light text-sm text-gray-700 transition-all duration-300"
+                       style="border-color: rgba(229, 231, 235, 0.6);"
+                       onmouseover="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.borderColor='rgba(239, 68, 68, 0.3)';"
+                       onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+                        <i class="fas fa-redo mr-2"></i>Reset
+                    </a>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Notifications Table -->
+        <div class="glass-card rounded-2xl border overflow-hidden fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.3s; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+            {% if notifications %}
+            <div class="overflow-x-auto green-scrollbar">
+                <table class="w-full">
+                    <thead>
+                        <tr class="table-header">
+                            <th class="text-left py-4 px-6">Member</th>
+                            <th class="text-left py-4 px-6">Tipe</th>
+                            <th class="text-left py-4 px-6">Judul</th>
+                            <th class="text-left py-4 px-6">Pesan</th>
+                            <th class="text-left py-4 px-6">Status</th>
+                            <th class="text-left py-4 px-6">Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for notification in notifications %}
+                        <tr class="notification-row border-b {% if notification.is_read %}read{% else %}unread{% endif %}" style="border-color: rgba(229, 231, 235, 0.3);">
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-user text-green-500"></i>
+                                    <div>
+                                        <div class="text-sm font-semibold text-gray-900">{{ notification.member.member_id }}</div>
+                                        <div class="text-xs text-gray-500">{{ notification.member.full_name }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                                    {{ notification.get_notification_type_display }}
+                                </span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-sm font-semibold text-gray-900">{{ notification.title }}</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-sm font-light text-gray-600 max-w-xs truncate">
+                                    {{ notification.message|truncatewords:15 }}
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                {% if notification.is_read %}
+                                <span class="status-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Sudah Dibaca</span>
+                                </span>
+                                {% else %}
+                                <span class="status-badge" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                    <i class="fas fa-circle"></i>
+                                    <span>Belum Dibaca</span>
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-sm font-light text-gray-600 flex items-center gap-2">
+                                    <i class="fas fa-calendar-alt text-xs text-gray-400"></i>
+                                    {{ notification.created_at|date:"d M Y H:i" }}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-16 fade-in-up">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(134, 239, 172, 0.1);">
+                    <i class="fas fa-bell text-4xl text-gray-300"></i>
+                </div>
+                <p class="text-gray-500 font-light text-lg">Tidak ada notifikasi ditemukan</p>
+                <p class="text-gray-400 font-light text-sm mt-2">Coba ubah filter atau kata kunci pencarian</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

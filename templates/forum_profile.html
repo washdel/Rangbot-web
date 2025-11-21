@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Data Diri - Forum RangBot{% endblock %}
+
+{% block content %}
+<div class="pt-28 pb-20 min-h-screen bg-gradient-to-b from-white via-gray-50/30 to-white relative overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.015]" style="background-image: radial-gradient(circle at 2px 2px, rgba(0,0,0,0.15) 1px, transparent 0); background-size: 40px 40px;"></div>
+    
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-4" style="background: rgba(134, 239, 172, 0.1); border-color: rgba(134, 239, 172, 0.4);">
+                <div class="w-2 h-2 rounded-full animate-pulse" style="background: #86efac;"></div>
+                <span class="text-xs sm:text-sm font-medium tracking-wide" style="color: #86efac;">Data Diri</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl text-gray-900 font-light tracking-tight mb-2">
+                Data Diri
+            </h1>
+            <p class="text-gray-600 font-light text-sm">
+                Informasi akun forum Anda
+            </p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+            <div class="px-4 py-3 rounded-xl bg-white/80 backdrop-blur-sm border text-sm font-light" 
+                 style="border-color: {% if message.tags == 'success' %}rgba(134, 239, 172, 0.4){% elif message.tags == 'error' %}rgba(239, 68, 68, 0.4){% else %}rgba(229, 231, 235, 0.6){% endif %}; color: {% if message.tags == 'success' %}#86efac{% elif message.tags == 'error' %}#ef4444{% else %}#6b7280{% endif %};">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Profile Card -->
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl border border-gray-200/60 p-6 sm:p-8 shadow-xl" style="border-color: rgba(229, 231, 235, 0.6);">
+            <div class="space-y-6">
+                <!-- Username -->
+                <div class="pb-6 border-b border-gray-200/60">
+                    <label class="block text-xs sm:text-sm font-light text-gray-500 mb-2">Username</label>
+                    <p class="text-lg sm:text-xl font-light text-gray-900">{{ forum_user.get_display_name }}</p>
+                </div>
+
+                <!-- Email -->
+                <div class="pb-6 border-b border-gray-200/60">
+                    <label class="block text-xs sm:text-sm font-light text-gray-500 mb-2">Email</label>
+                    <p class="text-lg sm:text-xl font-light text-gray-900">{{ forum_user.email }}</p>
+                </div>
+
+                <!-- Kategori -->
+                <div class="pb-6 border-b border-gray-200/60">
+                    <label class="block text-xs sm:text-sm font-light text-gray-500 mb-2">Kategori</label>
+                    <p class="text-lg sm:text-xl font-light text-gray-900">{{ forum_user.get_role_display }}</p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-8 pt-6 border-t border-gray-200/60 flex flex-col sm:flex-row gap-3">
+                <a href="{% url 'main:forum_list' %}" class="flex-1 px-6 py-3 rounded-xl text-gray-700 font-light text-sm sm:text-base transition-all duration-300 hover:bg-gray-50 border text-center" 
+                   style="border-color: rgba(229, 231, 235, 0.6);">
+                    <i class="fas fa-arrow-left mr-2"></i>Kembali ke Forum
+                </a>
+                <a href="{% url 'main:forum_logout' %}" class="flex-1 px-6 py-3 rounded-xl text-white font-light text-sm sm:text-base transition-all duration-300 hover:scale-105 text-center" 
+                   style="background: linear-gradient(135deg, #f87171 0%, #ef4444 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
