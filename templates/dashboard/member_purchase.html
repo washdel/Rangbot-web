@@ -1,0 +1,1029 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Pembelian Rangbot - Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
+    }
+    
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .animate-slide-in-right {
+        animation: slideInRight 0.6s ease-out;
+    }
+    
+    .animate-scale-in {
+        animation: scaleIn 0.4s ease-out;
+    }
+    
+    .package-card {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+    
+    .package-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+    
+    .package-card:hover::before {
+        left: 100%;
+    }
+    
+    .package-card.selected {
+        border-color: #22c55e !important;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(34, 197, 94, 0.02) 100%) !important;
+        box-shadow: 0 12px 40px rgba(34, 197, 94, 0.25), 0 0 0 1px rgba(34, 197, 94, 0.1) !important;
+        transform: translateY(-4px) scale(1.02);
+    }
+    
+    .package-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    }
+    
+    .step-number {
+        position: relative;
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+    }
+    
+    .step-number::after {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        opacity: 0.3;
+        filter: blur(8px);
+        z-index: -1;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .input-group {
+        position: relative;
+    }
+    
+    .input-group input,
+    .input-group textarea {
+        transition: all 0.3s ease;
+    }
+    
+    .input-group input:focus,
+    .input-group textarea:focus {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(34, 197, 94, 0.15) !important;
+    }
+    
+    .input-group {
+        position: relative;
+    }
+    
+    .input-icon {
+        position: absolute;
+        left: 1.25rem;
+        color: #9ca3af;
+        transition: color 0.3s ease;
+        pointer-events: none;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+    
+    .input-group input {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        line-height: 1.5;
+        min-height: 2.75rem;
+    }
+    
+    /* Center icon vertically for input fields */
+    /* Position icon at the center of input field: label (1.5rem) + margin (0.5rem) + half of input height */
+    .input-group .input-icon:not(.textarea-icon) {
+        top: calc(1.5rem + 0.5rem + 1.375rem); /* label + margin + half of (padding-top + line-height + padding-bottom) */
+        transform: translateY(-50%);
+    }
+    
+    .input-group textarea {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        line-height: 1.5;
+    }
+    
+    /* Position icon at top of textarea content area */
+    .input-group .input-icon.textarea-icon {
+        top: calc(1.5rem + 0.5rem + 0.75rem + 0.5rem); /* label + margin + padding-top + small offset */
+        transform: none;
+    }
+    
+    .input-group:focus-within .input-icon {
+        color: #22c55e;
+    }
+    
+    .payment-card {
+        position: relative;
+        overflow: visible;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer !important;
+        z-index: 10;
+        pointer-events: auto !important;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+    
+    .payment-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, transparent 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none !important;
+        z-index: -1;
+    }
+    
+    .payment-card:hover::before {
+        opacity: 1;
+    }
+    
+    .payment-card.selected {
+        border-color: #22c55e !important;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%) !important;
+        box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2) !important;
+        transform: scale(1.05) !important;
+    }
+    
+    .payment-card:hover:not(.selected) {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 12px 32px rgba(34, 197, 94, 0.15);
+    }
+    
+    .payment-card:active {
+        transform: scale(0.98) !important;
+    }
+    
+    .payment-card > * {
+        position: relative;
+        z-index: 1;
+        pointer-events: none !important;
+    }
+    
+    /* Ensure no other elements block payment cards */
+    .payment-card * {
+        pointer-events: none !important;
+    }
+    
+    .qty-btn {
+        transition: all 0.2s ease;
+    }
+    
+    .qty-btn:hover {
+        transform: scale(1.1);
+        background: rgba(34, 197, 94, 0.1) !important;
+        border-color: #22c55e !important;
+    }
+    
+    .qty-btn:active {
+        transform: scale(0.95);
+    }
+    
+    .submit-btn {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .submit-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(34, 197, 94, 0.4) !important;
+    }
+    
+    .order-summary-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 253, 244, 0.5) 100%);
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(34, 197, 94, 0.1);
+    }
+    
+    .price-highlight {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .badge-popular {
+        position: relative;
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: #d1d5db;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Define selectPayment function BEFORE any HTML that uses it -->
+<script>
+    // Define selectPayment function IMMEDIATELY in global scope
+    window.selectPayment = function(method) {
+        console.log('[selectPayment] Function called with method:', method);
+        
+        if (!method) {
+            console.error('[selectPayment] Method parameter is missing');
+            return false;
+        }
+        
+        // Get payment input
+        const paymentInput = document.getElementById('payment_method_input');
+        if (!paymentInput) {
+            console.error('[selectPayment] payment_method_input element not found');
+            return false;
+        }
+        
+        // Set payment method value
+        paymentInput.value = method;
+        console.log('[selectPayment] Payment method set to:', method);
+        
+        // Remove selected state from all payment cards
+        const allCards = document.querySelectorAll('.payment-card');
+        console.log('[selectPayment] Found', allCards.length, 'payment cards');
+        
+        allCards.forEach((btn) => {
+            btn.classList.remove('selected');
+            btn.style.setProperty('border-color', 'rgba(229, 231, 235, 0.6)', 'important');
+            btn.style.setProperty('background', 'rgba(255, 255, 255, 0.9)', 'important');
+            btn.style.setProperty('transform', 'scale(1)', 'important');
+        });
+        
+        // Add selected state to clicked card
+        const selectedBtn = document.querySelector(`[data-payment="${method}"]`);
+        if (selectedBtn) {
+            selectedBtn.classList.add('selected');
+            selectedBtn.style.setProperty('border-color', 'rgba(34, 197, 94, 0.6)', 'important');
+            selectedBtn.style.setProperty('background', 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%)', 'important');
+            selectedBtn.style.setProperty('transform', 'scale(1.05)', 'important');
+            console.log('[selectPayment] Payment card selected successfully:', method);
+            
+            // Update submit button state
+            if (typeof window.updateOrderSummary === 'function') {
+                // Get total quantity to check if items are selected
+                let totalQty = 0;
+                {% for plan in pricing_plans %}
+                const qty_{{ plan.package_type }}_input = document.getElementById('qty_{{ plan.package_type }}');
+                if (qty_{{ plan.package_type }}_input) {
+                    totalQty += parseInt(qty_{{ plan.package_type }}_input.value) || 0;
+                }
+                {% endfor %}
+                if (typeof window.updateSubmitButton === 'function') {
+                    window.updateSubmitButton(totalQty);
+                }
+            }
+            
+            return true;
+        } else {
+            console.error('[selectPayment] Payment card not found for method:', method);
+            return false;
+        }
+    };
+    
+    console.log('[Content Script] selectPayment function defined:', typeof window.selectPayment);
+</script>
+
+<div class="max-w-7xl mx-auto">
+    <!-- Header Section -->
+    <div class="mb-10 animate-fade-in-up">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);">
+                <i class="fas fa-shopping-cart text-3xl" style="color: #22c55e;"></i>
+            </div>
+            <div>
+                <h1 class="text-4xl sm:text-5xl font-light text-gray-900 mb-2 gradient-text">
+                    Pembelian Rangbot Tambahan
+                </h1>
+                <p class="text-gray-600 font-light text-base">
+                    Beli Rangbot tambahan untuk akun Anda. Setelah diverifikasi admin, perangkat baru akan otomatis ditambahkan ke dashboard Anda.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Form -->
+    <form method="post" action="{% url 'main:member_purchase' %}" id="main-purchase-form" class="space-y-8">
+        {% csrf_token %}
+        <input type="hidden" name="payment_method" id="payment_method_input" value="">
+        
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Left Column - Package Selection -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Step 1: Choose Package -->
+                <div class="glass-card rounded-3xl p-8 animate-fade-in-up" style="border: 1px solid rgba(34, 197, 94, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);">
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="step-number w-14 h-14 rounded-full text-white flex items-center justify-center font-light text-xl flex-shrink-0">
+                            1
+                        </div>
+                        <div>
+                            <h3 class="text-2xl text-gray-900 tracking-tight font-light mb-1">Pilih Paket</h3>
+                            <p class="text-sm text-gray-500 font-light">Pilih paket yang sesuai dengan kebutuhan Anda</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        {% for plan in pricing_plans %}
+                        <div class="package-card group relative text-left p-6 rounded-2xl border-2 flex flex-col h-full"
+                             data-package="{{ plan.package_type }}"
+                             style="border-color: {% if plan.package_type == 'basic' %}rgba(239, 68, 68, 0.3){% elif plan.package_type == 'professional' %}rgba(34, 197, 94, 0.4){% else %}rgba(239, 68, 68, 0.3){% endif %}; background: rgba(255, 255, 255, 0.8); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);">
+                            {% if plan.highlight %}
+                            <div class="badge-popular relative inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium mb-4 w-fit text-white">
+                                <i class="fas fa-star"></i>
+                                <span>Paling Populer</span>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="relative flex-1 flex flex-col">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                                         style="background: {% if plan.package_type == 'basic' %}rgba(239, 68, 68, 0.1){% elif plan.package_type == 'professional' %}rgba(34, 197, 94, 0.1){% else %}rgba(239, 68, 68, 0.1){% endif %};">
+                                        <i class="fas {% if plan.package_type == 'basic' %}fa-box{% elif plan.package_type == 'professional' %}fa-crown{% else %}fa-box{% endif %} text-xl"
+                                           style="color: {% if plan.package_type == 'basic' %}#ef4444{% elif plan.package_type == 'professional' %}#22c55e{% else %}#ef4444{% endif %};"></i>
+                                    </div>
+                                    <h4 class="text-2xl font-light tracking-tight" 
+                                        style="color: {% if plan.package_type == 'basic' %}#ef4444{% elif plan.package_type == 'professional' %}#22c55e{% else %}#ef4444{% endif %};">
+                                        {{ plan.name }}
+                                    </h4>
+                                </div>
+                                
+                                <p class="text-sm text-gray-600 mb-6 font-light leading-relaxed">{{ plan.description|default:"Paket lengkap untuk kebutuhan Anda" }}</p>
+                                
+                                <!-- Price -->
+                                <div class="mt-auto">
+                                    <div class="flex items-baseline gap-2 mb-6">
+                                        <span class="text-xl font-light text-gray-500">Rp</span>
+                                        <span class="text-4xl font-light price-highlight">{{ plan.price }}</span>
+                                    </div>
+                                    
+                                    <!-- Quantity Input -->
+                                    <div class="p-4 rounded-xl" style="background: rgba(249, 250, 251, 0.8); border: 1px solid rgba(229, 231, 235, 0.6);">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah:</label>
+                                        <input type="number" 
+                                               name="qty_{{ plan.package_type }}" 
+                                               id="qty_{{ plan.package_type }}"
+                                               value="0" 
+                                               min="0" 
+                                               step="1"
+                                               class="qty-input w-full text-center text-lg font-medium border rounded-lg py-3 focus:outline-none focus:ring-2 focus:ring-green-500/20 transition-all"
+                                               style="border-color: rgba(229, 231, 235, 0.6); background: white;"
+                                               data-package="{{ plan.package_type }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-span-2 empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <p class="text-gray-500 font-light">Belum ada paket tersedia. Silakan hubungi admin.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Step 2: Customer Information -->
+                <div class="glass-card rounded-3xl p-8 animate-fade-in-up" style="border: 1px solid rgba(34, 197, 94, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);">
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="step-number w-14 h-14 rounded-full text-white flex items-center justify-center font-light text-xl flex-shrink-0">
+                            2
+                        </div>
+                        <div>
+                            <h3 class="text-2xl text-gray-900 tracking-tight font-light mb-1">Informasi Customer</h3>
+                            <p class="text-sm text-gray-500 font-light">Data Anda sudah terisi, silakan periksa atau ubah jika perlu</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="input-group">
+                            <i class="fas fa-user input-icon"></i>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap <span class="text-red-500">*</span></label>
+                            <input type="text" name="name" value="{{ member.full_name }}" required
+                                   class="w-full pl-14 pr-4 py-3 rounded-xl border font-light text-sm transition-all focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                                   style="border-color: rgba(229, 231, 235, 0.6); background: rgba(255, 255, 255, 0.9);">
+                        </div>
+                        
+                        <div class="input-group">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email <span class="text-red-500">*</span></label>
+                            <input type="email" name="email" value="{{ member.email }}" required
+                                   class="w-full pl-14 pr-4 py-3 rounded-xl border font-light text-sm transition-all focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                                   style="border-color: rgba(229, 231, 235, 0.6); background: rgba(255, 255, 255, 0.9);">
+                        </div>
+                        
+                        <div class="input-group">
+                            <i class="fas fa-phone input-icon"></i>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Telepon <span class="text-red-500">*</span></label>
+                            <input type="tel" name="phone" value="{{ member.phone }}" required
+                                   class="w-full pl-14 pr-4 py-3 rounded-xl border font-light text-sm transition-all focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                                   style="border-color: rgba(229, 231, 235, 0.6); background: rgba(255, 255, 255, 0.9);">
+                        </div>
+                        
+                        <div class="input-group">
+                            <i class="fas fa-building input-icon"></i>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Greenhouse/Perusahaan</label>
+                            <input type="text" name="company"
+                                   class="w-full pl-14 pr-4 py-3 rounded-xl border font-light text-sm transition-all focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                                   style="border-color: rgba(229, 231, 235, 0.6); background: rgba(255, 255, 255, 0.9);"
+                                   placeholder="Opsional">
+                        </div>
+                        
+                        <div class="input-group md:col-span-2">
+                            <i class="fas fa-map-marker-alt input-icon textarea-icon"></i>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Alamat Instalasi <span class="text-red-500">*</span></label>
+                            <textarea name="address" rows="4" required
+                                      class="w-full pl-14 pr-4 py-3 rounded-xl border font-light text-sm transition-all focus:outline-none focus:ring-2 focus:ring-green-500/20 resize-none"
+                                      style="border-color: rgba(229, 231, 235, 0.6); background: rgba(255, 255, 255, 0.9);"
+                                      placeholder="Masukkan alamat lengkap lokasi instalasi..."></textarea>
+                        </div>
+                        
+                        <div class="input-group md:col-span-2">
+                            <i class="fas fa-sticky-note input-icon textarea-icon"></i>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Catatan (Opsional)</label>
+                            <textarea name="notes" rows="3"
+                                      class="w-full pl-14 pr-4 py-3 rounded-xl border font-light text-sm transition-all focus:outline-none focus:ring-2 focus:ring-green-500/20 resize-none"
+                                      style="border-color: rgba(229, 231, 235, 0.6); background: rgba(255, 255, 255, 0.9);"
+                                      placeholder="Catatan tambahan untuk tim kami..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Payment Method -->
+                <div class="glass-card rounded-3xl p-8 animate-fade-in-up" style="border: 1px solid rgba(34, 197, 94, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);">
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="step-number w-14 h-14 rounded-full text-white flex items-center justify-center font-light text-xl flex-shrink-0">
+                            3
+                        </div>
+                        <div>
+                            <h3 class="text-2xl text-gray-900 tracking-tight font-light mb-1">Metode Pembayaran</h3>
+                            <p class="text-sm text-gray-500 font-light">Pilih metode pembayaran yang Anda inginkan</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="payment-methods-container">
+                        <button type="button" 
+                                id="payment-transfer"
+                                class="payment-card p-5 rounded-xl border-2 text-center transition-all"
+                                data-payment="transfer"
+                                onclick="if(typeof window.selectPayment === 'function') { window.selectPayment('transfer'); } else { console.error('selectPayment not available'); }"
+                                style="border-color: rgba(229, 231, 235, 0.6); background: rgba(255, 255, 255, 0.9); cursor: pointer !important; position: relative; z-index: 10;">
+                            <div class="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-3" style="background: rgba(34, 197, 94, 0.1); pointer-events: none;">
+                                <i class="fas fa-university text-2xl" style="color: #22c55e; pointer-events: none;"></i>
+                            </div>
+                            <p class="text-sm font-medium text-gray-700" style="pointer-events: none;">Transfer Bank</p>
+                            <p class="text-xs text-gray-500 font-light mt-1" style="pointer-events: none;">BCA, Mandiri, BNI</p>
+                        </button>
+                        
+                        <button type="button" 
+                                id="payment-credit"
+                                class="payment-card p-5 rounded-xl border-2 text-center transition-all"
+                                data-payment="credit"
+                                onclick="if(typeof window.selectPayment === 'function') { window.selectPayment('credit'); } else { console.error('selectPayment not available'); }"
+                                style="border-color: rgba(229, 231, 235, 0.6); background: rgba(255, 255, 255, 0.9); cursor: pointer !important; position: relative; z-index: 10;">
+                            <div class="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-3" style="background: rgba(34, 197, 94, 0.1); pointer-events: none;">
+                                <i class="fas fa-credit-card text-2xl" style="color: #22c55e; pointer-events: none;"></i>
+                            </div>
+                            <p class="text-sm font-medium text-gray-700" style="pointer-events: none;">Kartu Kredit</p>
+                            <p class="text-xs text-gray-500 font-light mt-1" style="pointer-events: none;">Visa, Mastercard</p>
+                        </button>
+                        
+                        <button type="button" 
+                                id="payment-installment"
+                                class="payment-card p-5 rounded-xl border-2 text-center transition-all"
+                                data-payment="installment"
+                                onclick="if(typeof window.selectPayment === 'function') { window.selectPayment('installment'); } else { console.error('selectPayment not available'); }"
+                                style="border-color: rgba(229, 231, 235, 0.6); background: rgba(255, 255, 255, 0.9); cursor: pointer !important; position: relative; z-index: 10;">
+                            <div class="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-3" style="background: rgba(34, 197, 94, 0.1); pointer-events: none;">
+                                <i class="fas fa-calendar-alt text-2xl" style="color: #22c55e; pointer-events: none;"></i>
+                            </div>
+                            <p class="text-sm font-medium text-gray-700" style="pointer-events: none;">Cicilan</p>
+                            <p class="text-xs text-gray-500 font-light mt-1" style="pointer-events: none;">0% hingga 12 bulan</p>
+                        </button>
+                        
+                        <button type="button" 
+                                id="payment-leasing"
+                                class="payment-card p-5 rounded-xl border-2 text-center transition-all"
+                                data-payment="leasing"
+                                onclick="if(typeof window.selectPayment === 'function') { window.selectPayment('leasing'); } else { console.error('selectPayment not available'); }"
+                                style="border-color: rgba(229, 231, 235, 0.6); background: rgba(255, 255, 255, 0.9); cursor: pointer !important; position: relative; z-index: 10;">
+                            <div class="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-3" style="background: rgba(34, 197, 94, 0.1); pointer-events: none;">
+                                <i class="fas fa-handshake text-2xl" style="color: #22c55e; pointer-events: none;"></i>
+                            </div>
+                            <p class="text-sm font-medium text-gray-700" style="pointer-events: none;">Leasing</p>
+                            <p class="text-xs text-gray-500 font-light mt-1" style="pointer-events: none;">Flexible terms</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Order Summary -->
+            <div class="lg:col-span-1">
+                <div class="order-summary-card rounded-3xl p-6 sticky top-24 animate-slide-in-right">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(34, 197, 94, 0.1);">
+                            <i class="fas fa-receipt text-xl" style="color: #22c55e;"></i>
+                        </div>
+                        <h3 class="text-xl font-light text-gray-900">Ringkasan Pesanan</h3>
+                    </div>
+                    
+                    <div class="space-y-4 mb-6">
+                        <div id="order-items" class="space-y-3 min-h-[100px]">
+                            <div class="empty-state py-8">
+                                <i class="fas fa-shopping-bag text-3xl mb-2" style="color: #d1d5db;"></i>
+                                <p class="text-sm text-gray-500 font-light">Pilih paket terlebih dahulu</p>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t pt-4" style="border-color: rgba(34, 197, 94, 0.2);">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-sm font-light text-gray-600">Subtotal</span>
+                                <span class="text-sm font-medium text-gray-900" id="subtotal">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-3 border-t" style="border-color: rgba(34, 197, 94, 0.2);">
+                                <span class="text-lg font-medium text-gray-900">Total</span>
+                                <span class="text-2xl font-light price-highlight" id="total-price">Rp 0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" 
+                            id="submit-order-btn"
+                            class="submit-btn w-full py-4 rounded-xl text-white font-medium transition-all duration-300 relative overflow-hidden"
+                            style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3); opacity: 0.5; cursor: not-allowed; pointer-events: none;"
+                            disabled>
+                        <span class="relative z-10 flex items-center justify-center gap-2">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Kirim Pesanan</span>
+                        </span>
+                    </button>
+                    
+                    <div id="submit-hint" class="mt-2 text-xs text-center text-gray-500 font-light">
+                        <p id="submit-hint-text">Pilih paket, masukkan jumlah, dan pilih metode pembayaran</p>
+                    </div>
+                    
+                    <div class="mt-4 p-3 rounded-xl" style="background: rgba(34, 197, 94, 0.05); border: 1px solid rgba(34, 197, 94, 0.1);">
+                        <p class="text-xs text-gray-600 font-light text-center leading-relaxed">
+                            <i class="fas fa-info-circle mr-1" style="color: #22c55e;"></i>
+                            Setelah pesanan dikirim, tim kami akan menghubungi Anda dalam 1x24 jam untuk verifikasi.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Function is already defined in head section
+    // This section is for other initialization code
+    
+    // Package selection and quantity management
+    let selectedPackages = {};
+    let pricingData = {};
+    
+    // Initialize pricingData safely
+    try {
+        pricingData = {
+            {% for plan in pricing_plans %}
+            '{{ plan.package_type }}': {
+                name: '{{ plan.name|escapejs }}',
+                price: {% if plan.price_value %}{{ plan.price_value|floatformat:0 }}{% else %}0{% endif %},
+                priceFormatted: '{{ plan.price|escapejs }}'
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        };
+        console.log('[Script] pricingData initialized:', pricingData);
+    } catch (e) {
+        console.error('[Script] Error initializing pricingData:', e);
+        pricingData = {};
+    }
+    
+    function selectPackage(packageType) {
+        const btn = document.querySelector(`[data-package="${packageType}"]`);
+        if (btn) {
+            btn.classList.toggle('selected');
+            if (typeof window.updateOrderSummary === 'function') {
+                window.updateOrderSummary();
+            }
+        }
+    }
+    
+    
+    // Override updateOrderSummary with page-specific implementation
+    window.updateOrderSummary = function() {
+        console.log('[updateOrderSummary] Function called');
+        
+        let subtotal = 0;
+        let items = [];
+        let totalQty = 0;
+        
+        // Check pricingData
+        if (!pricingData || Object.keys(pricingData).length === 0) {
+            console.error('[updateOrderSummary] pricingData is empty or not defined');
+            return;
+        }
+        
+        {% for plan in pricing_plans %}
+        const qty_{{ plan.package_type }}_input = document.getElementById('qty_{{ plan.package_type }}');
+        
+        if (qty_{{ plan.package_type }}_input) {
+            const qty_{{ plan.package_type }} = parseInt(qty_{{ plan.package_type }}_input.value) || 0;
+            
+            if (qty_{{ plan.package_type }} > 0) {
+                if (!pricingData['{{ plan.package_type }}']) {
+                    console.error('[updateOrderSummary] pricingData for {{ plan.package_type }} not found');
+                } else {
+                    const price = pricingData['{{ plan.package_type }}'].price;
+                    const itemTotal = qty_{{ plan.package_type }} * price;
+                    subtotal += itemTotal;
+                    totalQty += qty_{{ plan.package_type }};
+                    
+                    items.push({
+                        name: pricingData['{{ plan.package_type }}'].name,
+                        qty: qty_{{ plan.package_type }},
+                        price: price,
+                        total: itemTotal
+                    });
+                }
+            }
+        }
+        {% endfor %}
+        
+        console.log('[updateOrderSummary] Total items:', items.length, 'Total qty:', totalQty, 'Subtotal:', subtotal);
+        
+        // Update order items display
+        const orderItems = document.getElementById('order-items');
+        if (!orderItems) {
+            console.error('[updateOrderSummary] order-items element not found');
+            return;
+        }
+        
+        if (items.length === 0) {
+            orderItems.innerHTML = `
+                <div class="empty-state py-8">
+                    <i class="fas fa-shopping-bag text-3xl mb-2" style="color: #d1d5db;"></i>
+                    <p class="text-sm text-gray-500 font-light">Pilih paket dan masukkan jumlah</p>
+                </div>
+            `;
+        } else {
+            orderItems.innerHTML = items.map(item => `
+                <div class="flex justify-between items-start p-3 rounded-xl animate-scale-in mb-2" style="background: rgba(249, 250, 251, 0.8); border: 1px solid rgba(229, 231, 235, 0.6);">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900 mb-1">${item.name}</p>
+                        <p class="text-xs font-light text-gray-500">${item.qty} x Rp ${item.price.toLocaleString('id-ID')}</p>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900 ml-4">Rp ${item.total.toLocaleString('id-ID')}</span>
+                </div>
+            `).join('');
+        }
+        
+        // Update totals
+        const subtotalEl = document.getElementById('subtotal');
+        const totalEl = document.getElementById('total-price');
+        
+        if (subtotalEl && totalEl) {
+            subtotalEl.textContent = `Rp ${subtotal.toLocaleString('id-ID')}`;
+            totalEl.textContent = `Rp ${subtotal.toLocaleString('id-ID')}`;
+        }
+        
+        // Update submit button state
+        if (typeof window.updateSubmitButton === 'function') {
+            window.updateSubmitButton(totalQty);
+        } else {
+            console.error('[updateOrderSummary] updateSubmitButton function not found');
+        }
+    };
+    
+    // Function to update submit button state
+    window.updateSubmitButton = function(totalQty) {
+        const submitBtn = document.getElementById('submit-order-btn');
+        const paymentInput = document.getElementById('payment_method_input');
+        const hintText = document.getElementById('submit-hint-text');
+        
+        if (!submitBtn) {
+            console.error('[updateSubmitButton] Submit button not found');
+            return;
+        }
+        
+        const hasPaymentMethod = paymentInput && paymentInput.value && paymentInput.value.trim() !== '';
+        const hasItems = totalQty > 0;
+        
+        console.log('[updateSubmitButton] hasItems:', hasItems, 'totalQty:', totalQty, 'hasPaymentMethod:', hasPaymentMethod);
+        
+        if (hasItems && hasPaymentMethod) {
+            // Enable button
+            submitBtn.disabled = false;
+            submitBtn.style.setProperty('opacity', '1', 'important');
+            submitBtn.style.setProperty('cursor', 'pointer', 'important');
+            submitBtn.style.setProperty('pointer-events', 'auto', 'important');
+            submitBtn.style.setProperty('background', 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', 'important');
+            submitBtn.style.setProperty('box-shadow', '0 4px 16px rgba(34, 197, 94, 0.3)', 'important');
+            
+            if (hintText) {
+                hintText.textContent = 'Semua data sudah lengkap. Klik untuk mengirim pesanan.';
+                hintText.style.color = '#22c55e';
+            }
+        } else {
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.style.setProperty('opacity', '0.5', 'important');
+            submitBtn.style.setProperty('cursor', 'not-allowed', 'important');
+            submitBtn.style.setProperty('pointer-events', 'none', 'important');
+            submitBtn.style.setProperty('background', 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)', 'important');
+            submitBtn.style.setProperty('box-shadow', 'none', 'important');
+            
+            if (hintText) {
+                let hint = 'Pilih paket, masukkan jumlah, dan pilih metode pembayaran';
+                if (!hasItems) {
+                    hint = 'Pilih paket dan masukkan jumlah terlebih dahulu';
+                } else if (!hasPaymentMethod) {
+                    hint = 'Pilih metode pembayaran terlebih dahulu';
+                }
+                hintText.textContent = hint;
+                hintText.style.color = '#6b7280';
+            }
+        }
+    };
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize order summary
+        console.log('[DOMContentLoaded] Calling updateOrderSummary...');
+        if (typeof window.updateOrderSummary === 'function') {
+            window.updateOrderSummary();
+        } else {
+            console.error('[DOMContentLoaded] updateOrderSummary function not found');
+        }
+        
+        // Also call it after a short delay to ensure all elements are ready
+        setTimeout(function() {
+            if (typeof window.updateOrderSummary === 'function') {
+                console.log('[DOMContentLoaded] Calling updateOrderSummary after delay...');
+                window.updateOrderSummary();
+            }
+        }, 100);
+        
+        // Add smooth scroll to form sections
+        const formSections = document.querySelectorAll('.glass-card');
+        formSections.forEach((section, index) => {
+            section.style.animationDelay = `${index * 0.1}s`;
+        });
+        
+        // Add event listeners to quantity inputs
+        const qtyInputs = document.querySelectorAll('.qty-input');
+        console.log('[DOMContentLoaded] Found', qtyInputs.length, 'quantity inputs');
+        
+        qtyInputs.forEach((input, index) => {
+            const packageType = input.getAttribute('data-package');
+            console.log('[DOMContentLoaded] Setting up quantity input', index, 'for package:', packageType);
+            
+            // Add multiple event listeners to ensure it works
+            input.addEventListener('change', function(e) {
+                console.log('[Event Listener] Quantity changed for', packageType, ':', this.value);
+                if (typeof window.updateOrderSummary === 'function') {
+                    window.updateOrderSummary();
+                } else {
+                    console.error('[Event Listener] updateOrderSummary not found');
+                }
+            });
+            
+            input.addEventListener('input', function(e) {
+                console.log('[Event Listener] Quantity input for', packageType, ':', this.value);
+                if (typeof window.updateOrderSummary === 'function') {
+                    window.updateOrderSummary();
+                }
+            });
+            
+            input.addEventListener('keyup', function(e) {
+                console.log('[Event Listener] Quantity keyup for', packageType, ':', this.value);
+                if (typeof window.updateOrderSummary === 'function') {
+                    window.updateOrderSummary();
+                }
+            });
+        });
+        
+        // Add click event listeners to payment cards as backup (multiple methods for reliability)
+        const paymentCards = document.querySelectorAll('.payment-card');
+        console.log('[DOMContentLoaded] Found', paymentCards.length, 'payment cards');
+        
+        paymentCards.forEach((card, index) => {
+            const paymentMethod = card.getAttribute('data-payment');
+            console.log('[DOMContentLoaded] Setting up card', index, 'with method:', paymentMethod);
+            
+            if (paymentMethod) {
+                // Method 1: Direct onclick (already in HTML, but ensure it works)
+                // Method 2: Add click event listener (capture phase)
+                card.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('[Event Listener] Payment card clicked:', paymentMethod);
+                    
+                    if (typeof window.selectPayment === 'function') {
+                        const result = window.selectPayment(paymentMethod);
+                        if (!result) {
+                            console.error('[Event Listener] selectPayment returned false');
+                        }
+                    } else {
+                        console.error('[Event Listener] selectPayment function not found');
+                    }
+                }, true);
+                
+                // Method 3: Add mousedown as backup
+                card.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    console.log('[MouseDown] Payment card mousedown:', paymentMethod);
+                });
+                
+                // Method 4: Add touchstart for mobile
+                card.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    console.log('[TouchStart] Payment card touched:', paymentMethod);
+                    if (typeof window.selectPayment === 'function') {
+                        window.selectPayment(paymentMethod);
+                    }
+                });
+                
+                // Verify card is clickable
+                const computedStyle = window.getComputedStyle(card);
+                console.log('[DOMContentLoaded] Card', index, 'pointer-events:', computedStyle.pointerEvents);
+                console.log('[DOMContentLoaded] Card', index, 'cursor:', computedStyle.cursor);
+            }
+        });
+        
+        // Test function availability
+        console.log('[DOMContentLoaded] selectPayment function available:', typeof window.selectPayment);
+        console.log('[DOMContentLoaded] updateOrderSummary function available:', typeof window.updateOrderSummary);
+        
+        // Check for success message and show popup
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                showSuccessPopup('{{ message|escapejs }}');
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    });
+    
+    // Success popup function
+    function showSuccessPopup(message) {
+        // Create popup overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'success-popup-overlay';
+        overlay.style.cssText = 'position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 9999; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;';
+        
+        // Create popup content
+        const popup = document.createElement('div');
+        popup.style.cssText = 'background: white; border-radius: 1.5rem; padding: 2rem; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); animation: scaleIn 0.3s ease;';
+        popup.innerHTML = `
+            <div class="text-center">
+                <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.2) 100%);">
+                    <i class="fas fa-check-circle text-5xl" style="color: #22c55e;"></i>
+                </div>
+                <h3 class="text-2xl font-light text-gray-900 mb-3">Pembelian Berhasil!</h3>
+                <p class="text-gray-600 font-light mb-6 leading-relaxed">${message}</p>
+                <button onclick="closeSuccessPopup()" class="px-6 py-3 rounded-xl text-white font-medium transition-all duration-300 hover:shadow-lg" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);">
+                    <i class="fas fa-check mr-2"></i>
+                    Mengerti
+                </button>
+            </div>
+        `;
+        
+        overlay.appendChild(popup);
+        document.body.appendChild(overlay);
+        
+        // Close on overlay click
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+                closeSuccessPopup();
+            }
+        });
+    }
+    
+    function closeSuccessPopup() {
+        const overlay = document.getElementById('success-popup-overlay');
+        if (overlay) {
+            overlay.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => {
+                overlay.remove();
+            }, 300);
+        }
+    }
+    
+    // Add animations for popup
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}

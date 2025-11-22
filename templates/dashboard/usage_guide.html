@@ -1,0 +1,509 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block page_title %}Cara Penggunaan Alat{% endblock %}
+{% block page_subtitle %}Panduan lengkap penggunaan perangkat RangBot{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+    
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+    
+    .guide-hero {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border-radius: 2rem;
+        padding: 3rem;
+        margin-bottom: 3rem;
+        animation: fadeInUp 0.6s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .guide-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
+        animation: pulse 4s ease-in-out infinite;
+    }
+    
+    .guide-step-card {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(229, 231, 235, 0.6);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .guide-step-card:nth-child(1) { animation-delay: 0.1s; }
+    .guide-step-card:nth-child(2) { animation-delay: 0.2s; }
+    .guide-step-card:nth-child(3) { animation-delay: 0.3s; }
+    .guide-step-card:nth-child(4) { animation-delay: 0.4s; }
+    .guide-step-card:nth-child(5) { animation-delay: 0.5s; }
+    
+    .guide-step-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+        transform: scaleY(0);
+        transition: transform 0.4s ease;
+    }
+    
+    .guide-step-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(34, 197, 94, 0.15), 0 0 0 1px rgba(34, 197, 94, 0.1);
+        border-color: rgba(34, 197, 94, 0.3);
+    }
+    
+    .guide-step-card:hover::before {
+        transform: scaleY(1);
+    }
+    
+    .step-number {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+        box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
+        position: relative;
+        animation: scaleIn 0.5s ease-out;
+    }
+    
+    .step-number::after {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(16, 185, 129, 0.3) 100%);
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .guide-step-card:hover .step-number::after {
+        opacity: 1;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .step-icon {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 1.25rem;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: #22c55e;
+        transition: all 0.3s ease;
+        margin-right: 1.5rem;
+    }
+    
+    .guide-step-card:hover .step-icon {
+        transform: rotate(5deg) scale(1.1);
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+    }
+    
+    .step-content {
+        flex: 1;
+    }
+    
+    .step-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.75rem;
+        background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .step-description {
+        color: #6b7280;
+        line-height: 1.75;
+        font-size: 1rem;
+    }
+    
+    .step-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 1.5rem;
+    }
+    
+    .step-list li {
+        padding: 0.875rem 1.25rem;
+        margin-bottom: 0.75rem;
+        background: rgba(249, 250, 251, 0.8);
+        border-left: 3px solid #22c55e;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        padding-left: 3rem;
+    }
+    
+    .step-list li::before {
+        content: '✓';
+        position: absolute;
+        left: 1rem;
+        color: #22c55e;
+        font-weight: 700;
+        font-size: 1.125rem;
+    }
+    
+    .step-list li:hover {
+        background: rgba(34, 197, 94, 0.05);
+        transform: translateX(8px);
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
+    }
+    
+    .feature-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #16a34a;
+        margin-top: 1rem;
+        animation: slideInRight 0.5s ease-out;
+    }
+    
+    .quick-tips {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-top: 3rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .tip-item {
+        display: flex;
+        align-items: start;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .tip-item:hover {
+        background: rgba(255, 255, 255, 0.9);
+        transform: translateX(8px);
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
+    }
+    
+    .tip-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.75rem;
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.125rem;
+        flex-shrink: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .guide-hero {
+            padding: 2rem 1.5rem;
+        }
+        
+        .guide-step-card {
+            padding: 1.5rem;
+        }
+        
+        .step-icon {
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <!-- Hero Section -->
+    <div class="guide-hero relative z-10">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="w-20 h-20 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);">
+                <i class="fas fa-book-open text-4xl" style="color: #22c55e;"></i>
+            </div>
+            <div>
+                <h1 class="text-4xl sm:text-5xl font-light text-gray-900 mb-2" style="background: linear-gradient(135deg, #1f2937 0%, #22c55e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    Panduan Penggunaan RangBot
+                </h1>
+                <p class="text-gray-600 font-light text-lg">
+                    Pelajari cara menggunakan perangkat RangBot dengan mudah dan efektif
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 1: Persiapan Awal -->
+    <div class="guide-step-card">
+        <div class="flex items-start gap-4">
+            <div class="flex items-center gap-4">
+                <div class="step-number">1</div>
+                <div class="step-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+            </div>
+            <div class="step-content">
+                <h2 class="step-title">Persiapan Awal</h2>
+                <p class="step-description">
+                    Sebelum menggunakan perangkat RangBot, pastikan semua persiapan telah dilakukan dengan baik untuk memastikan operasi yang optimal.
+                </p>
+                <ul class="step-list">
+                    <li>Pastikan perangkat RangBot sudah terhubung ke sumber daya listrik dengan stabil</li>
+                    <li>Periksa koneksi internet untuk akses kontrol via website dan sinkronisasi data</li>
+                    <li>Pastikan semua komponen perangkat dalam kondisi baik dan tidak ada kerusakan</li>
+                    <li>Verifikasi bahwa kamera dan sensor berfungsi dengan baik</li>
+                </ul>
+                <div class="feature-badge">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Waktu persiapan: 5-10 menit</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Menghidupkan Perangkat -->
+    <div class="guide-step-card">
+        <div class="flex items-start gap-4">
+            <div class="flex items-center gap-4">
+                <div class="step-number">2</div>
+                <div class="step-icon">
+                    <i class="fas fa-power-off"></i>
+                </div>
+            </div>
+            <div class="step-content">
+                <h2 class="step-title">Menghidupkan Perangkat</h2>
+                <p class="step-description">
+                    Proses menghidupkan perangkat RangBot sangat sederhana. Ikuti langkah-langkah berikut untuk memastikan perangkat siap digunakan.
+                </p>
+                <ul class="step-list">
+                    <li>Tekan dan tahan tombol power pada perangkat selama 2-3 detik</li>
+                    <li>Tunggu hingga indikator LED menyala hijau yang menandakan perangkat aktif</li>
+                    <li>Periksa status perangkat di dashboard untuk memastikan koneksi berhasil</li>
+                    <li>Tunggu hingga semua sistem selesai booting (sekitar 30-60 detik)</li>
+                </ul>
+                <div class="feature-badge">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Indikator hijau = Perangkat siap digunakan</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Kontrol via Website -->
+    <div class="guide-step-card">
+        <div class="flex items-start gap-4">
+            <div class="flex items-center gap-4">
+                <div class="step-number">3</div>
+                <div class="step-icon">
+                    <i class="fas fa-laptop-code"></i>
+                </div>
+            </div>
+            <div class="step-content">
+                <h2 class="step-title">Kontrol via Website</h2>
+                <p class="step-description">
+                    Akses halaman kontrol perangkat di dashboard untuk mengoperasikan RangBot secara remote dari mana saja. Kontrol penuh di ujung jari Anda.
+                </p>
+                <ul class="step-list">
+                    <li>Buka menu "Manajemen Rangbot" di dashboard untuk melihat daftar perangkat</li>
+                    <li>Pilih perangkat yang ingin dikontrol dan klik untuk masuk ke halaman kontrol</li>
+                    <li>Pilih blok lahan yang ingin dikontrol menggunakan peta interaktif</li>
+                    <li>Gunakan tombol kontrol untuk menggerakkan perangkat (maju, mundur, kiri, kanan)</li>
+                    <li>Monitor pergerakan melalui streaming kamera real-time</li>
+                </ul>
+                <div class="feature-badge">
+                    <i class="fas fa-globe"></i>
+                    <span>Kontrol dari mana saja, kapan saja</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 4: Deteksi Penyakit -->
+    <div class="guide-step-card">
+        <div class="flex items-start gap-4">
+            <div class="flex items-center gap-4">
+                <div class="step-number">4</div>
+                <div class="step-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+            <div class="step-content">
+                <h2 class="step-title">Deteksi Penyakit Stroberi</h2>
+                <p class="step-description">
+                    Gunakan teknologi AI untuk mendeteksi penyakit tanaman stroberi secara akurat. Dua metode tersedia untuk deteksi yang fleksibel.
+                </p>
+                <ul class="step-list">
+                    <li><strong>Streaming Real-time:</strong> Aktifkan streaming kamera untuk monitoring langsung dan deteksi otomatis</li>
+                    <li><strong>Upload Foto:</strong> Upload foto tanaman untuk deteksi manual menggunakan teknologi YOLO</li>
+                    <li>Lihat hasil deteksi di riwayat dengan informasi lengkap (jenis penyakit, tingkat keparahan, lokasi)</li>
+                    <li>Gunakan data riwayat untuk analisis tren dan perawatan preventif</li>
+                </ul>
+                <div class="feature-badge">
+                    <i class="fas fa-brain"></i>
+                    <span>Teknologi AI untuk deteksi akurat</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 5: Monitoring Data Sensor -->
+    <div class="guide-step-card">
+        <div class="flex items-start gap-4">
+            <div class="flex items-center gap-4">
+                <div class="step-number">5</div>
+                <div class="step-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+            <div class="step-content">
+                <h2 class="step-title">Monitoring Data Sensor</h2>
+                <p class="step-description">
+                    Pantau kondisi lingkungan kebun Anda secara real-time melalui data sensor yang terintegrasi dengan perangkat RangBot.
+                </p>
+                <ul class="step-list">
+                    <li>Akses menu "Data Sensor" di halaman manajemen perangkat</li>
+                    <li>Lihat data real-time: suhu, kelembaban, pH tanah, dan parameter lainnya</li>
+                    <li>Analisis grafik historis untuk melihat tren perubahan kondisi lingkungan</li>
+                    <li>Gunakan data untuk optimasi perawatan tanaman dan pencegahan masalah</li>
+                </ul>
+                <div class="feature-badge">
+                    <i class="fas fa-database"></i>
+                    <span>Data real-time dari Firebase</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Tips Section -->
+    <div class="quick-tips">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);">
+                <i class="fas fa-lightbulb text-2xl" style="color: #22c55e;"></i>
+            </div>
+            <h3 class="text-2xl font-semibold text-gray-900">Tips & Trik</h3>
+        </div>
+        
+        <div class="tip-item">
+            <div class="tip-icon">
+                <i class="fas fa-wifi"></i>
+            </div>
+            <div>
+                <h4 class="font-semibold text-gray-900 mb-1">Koneksi Stabil</h4>
+                <p class="text-sm text-gray-600">Pastikan koneksi internet stabil untuk kontrol real-time dan streaming yang lancar.</p>
+            </div>
+        </div>
+        
+        <div class="tip-item">
+            <div class="tip-icon">
+                <i class="fas fa-battery-full"></i>
+            </div>
+            <div>
+                <h4 class="font-semibold text-gray-900 mb-1">Perawatan Rutin</h4>
+                <p class="text-sm text-gray-600">Lakukan pengecekan rutin setiap minggu untuk memastikan semua komponen berfungsi optimal.</p>
+            </div>
+        </div>
+        
+        <div class="tip-item">
+            <div class="tip-icon">
+                <i class="fas fa-camera"></i>
+            </div>
+            <div>
+                <h4 class="font-semibold text-gray-900 mb-1">Kualitas Foto</h4>
+                <p class="text-sm text-gray-600">Untuk hasil deteksi terbaik, gunakan foto dengan pencahayaan yang cukup dan fokus yang jelas.</p>
+            </div>
+        </div>
+        
+        <div class="tip-item">
+            <div class="tip-icon">
+                <i class="fas fa-history"></i>
+            </div>
+            <div>
+                <h4 class="font-semibold text-gray-900 mb-1">Review Riwayat</h4>
+                <p class="text-sm text-gray-600">Rutin review riwayat deteksi untuk mengidentifikasi pola dan mengambil tindakan preventif.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

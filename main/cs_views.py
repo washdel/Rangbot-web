@@ -11,9 +11,10 @@ from django.core.paginator import Paginator
 from django.contrib.auth.hashers import check_password, make_password
 from django.urls import reverse
 from urllib.parse import urlencode
+from django.db import models
 from .models import (
     CustomerService, ContactMessage, FAQ, ForumPost, ForumComment,
-    Member, RangBotDevice, ProductInfo
+    Member, RangBotDevice, ProductInfo, ActivityLog
 )
 
 
@@ -67,13 +68,14 @@ def cs_dashboard(request):
     recent_forum_posts = ForumPost.objects.order_by('-created_at')[:5]
     recent_forum_comments = ForumComment.objects.order_by('-created_at')[:5]
     
-    # FAQ statistics
-    total_faqs = FAQ.objects.filter(is_active=True).count()
-    recent_faqs = FAQ.objects.filter(is_active=True).order_by('-updated_at')[:5]
-    
     # Member statistics (for info)
     total_members = Member.objects.filter(is_active=True).count()
     total_devices = RangBotDevice.objects.filter(is_active=True).count()
+    
+    # Recent activity logs (last 5) - same as admin dashboard
+    recent_notifications = list(ActivityLog.objects.select_related(
+        'performed_by', 'related_order', 'related_member'
+    ).order_by('-created_at')[:5])
     
     context = get_cs_base_context(cs)
     context.update({
@@ -86,10 +88,9 @@ def cs_dashboard(request):
         'new_forum_posts': new_forum_posts,
         'recent_forum_posts': recent_forum_posts,
         'recent_forum_comments': recent_forum_comments,
-        'total_faqs': total_faqs,
-        'recent_faqs': recent_faqs,
         'total_members': total_members,
         'total_devices': total_devices,
+        'recent_notifications': recent_notifications,
     })
     
     return render(request, 'cs/dashboard.html', context)
@@ -126,7 +127,58 @@ def cs_messages(request):
                     message.replied_at = timezone.now()
                     message.reply_message = reply_message
                     message.save()
-                    messages.success(request, f'Balasan untuk {message.name} telah dikirim.')
+                    
+                    # Send email to customer
+                    try:
+                        from django.core.mail import send_mail, EmailMessage
+                        from django.conf import settings
+                        from django.template.loader import render_to_string
+                        
+                        email_subject = f'Re: {message.subject}'
+                        
+                        # Create email body
+                        email_body_plain = f"""Halo {message.name},
+
+Terima kasih telah menghubungi Customer Service RangBot.
+
+Berikut adalah balasan untuk pertanyaan/pesan Anda:
+
+---
+Pesan Asli:
+Subjek: {message.subject}
+Pesan: {message.message}
+---
+
+Balasan:
+{reply_message}
+
+Jika Anda memiliki pertanyaan lebih lanjut, jangan ragu untuk menghubungi kami kembali melalui:
+- Email: {settings.DEFAULT_FROM_EMAIL}
+- Website: http://localhost:8000/hubungi-support/
+
+Salam,
+{cs.full_name}
+Customer Service RangBot
+
+---
+Email ini dikirim sebagai balasan untuk pesan Anda pada {message.created_at.strftime('%d %B %Y, %H:%M WIB')}.
+"""
+                        
+                        # Try to send email
+                        send_mail(
+                            subject=email_subject,
+                            message=email_body_plain,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[message.email],
+                            fail_silently=False,
+                        )
+                        messages.success(request, f'Balasan untuk {message.name} telah dikirim ke email {message.email}.')
+                    except Exception as e:
+                        # If email fails, still save the reply but show warning
+                        import logging
+                        logger = logging.getLogger(__name__)
+                        logger.error(f"Failed to send email: {str(e)}")
+                        messages.warning(request, f'Balasan telah disimpan, namun gagal mengirim email ke {message.email}. Error: {str(e)}')
                 else:
                     messages.error(request, 'Balasan tidak boleh kosong.')
             
@@ -139,6 +191,11 @@ def cs_messages(request):
                 message.status = 'read'
                 message.save()
                 messages.success(request, f'Pesan dari {message.name} telah dikembalikan dari arsip.')
+            
+            elif action == 'delete':
+                message_name = message.name
+                message.delete()
+                messages.success(request, f'Pesan dari {message_name} telah dihapus.')
         
         except ContactMessage.DoesNotExist:
             messages.error(request, 'Pesan tidak ditemukan.')
@@ -208,16 +265,126 @@ def cs_faq(request):
         messages.warning(request, 'Anda harus login terlebih dahulu.')
         return redirect('main:login')
     
-    # Get FAQs
-    faqs = FAQ.objects.all().order_by('order', '-created_at')
+    # Get FAQs ordered by order field then created_at
+    faqs = FAQ.objects.all().order_by('order', 'created_at')
+    active_faqs_count = FAQ.objects.filter(is_active=True).count()
+    total_faqs_count = faqs.count()
     
     context = get_cs_base_context(cs)
     context.update({
         'page_title': 'FAQ Management - CS Dashboard',
         'faqs': faqs,
+        'active_faqs_count': active_faqs_count,
+        'total_faqs_count': total_faqs_count,
     })
     
     return render(request, 'cs/faq.html', context)
+
+
+def cs_faq_add(request):
+    """
+    View untuk menambahkan FAQ baru (CS)
+    """
+    cs = get_cs(request)
+    if not cs:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    if request.method == 'POST':
+        question = request.POST.get('question', '').strip()
+        answer = request.POST.get('answer', '').strip()
+        order = request.POST.get('order', '0').strip()
+        is_active = request.POST.get('is_active') == 'on'
+        
+        if not question or not answer:
+            messages.error(request, 'Pertanyaan dan jawaban wajib diisi.')
+        else:
+            try:
+                order_int = int(order) if order else 0
+                faq = FAQ.objects.create(
+                    question=question,
+                    answer=answer,
+                    order=order_int,
+                    is_active=is_active
+                )
+                messages.success(request, 'FAQ berhasil ditambahkan.')
+                return redirect('main:cs_faq')
+            except ValueError:
+                messages.error(request, 'Format urutan tidak valid.')
+    
+    context = get_cs_base_context(cs)
+    context.update({
+        'page_title': 'Tambah FAQ - CS Dashboard',
+    })
+    
+    return render(request, 'cs/faq_add.html', context)
+
+
+def cs_faq_edit(request, faq_id):
+    """
+    View untuk edit FAQ (CS)
+    """
+    cs = get_cs(request)
+    if not cs:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    faq = get_object_or_404(FAQ, id=faq_id)
+    
+    if request.method == 'POST':
+        question = request.POST.get('question', '').strip()
+        answer = request.POST.get('answer', '').strip()
+        order = request.POST.get('order', '0').strip()
+        is_active = request.POST.get('is_active') == 'on'
+        
+        if not question or not answer:
+            messages.error(request, 'Pertanyaan dan jawaban wajib diisi.')
+        else:
+            try:
+                order_int = int(order) if order else 0
+                faq.question = question
+                faq.answer = answer
+                faq.order = order_int
+                faq.is_active = is_active
+                faq.save()
+                
+                messages.success(request, 'FAQ berhasil diperbarui.')
+                return redirect('main:cs_faq')
+            except ValueError:
+                messages.error(request, 'Format urutan tidak valid.')
+    
+    context = get_cs_base_context(cs)
+    context.update({
+        'page_title': 'Edit FAQ - CS Dashboard',
+        'faq': faq,
+    })
+    
+    return render(request, 'cs/faq_edit.html', context)
+
+
+def cs_faq_delete(request, faq_id):
+    """
+    View untuk menghapus FAQ (CS)
+    """
+    cs = get_cs(request)
+    if not cs:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    faq = get_object_or_404(FAQ, id=faq_id)
+    
+    if request.method == 'POST':
+        faq.delete()
+        messages.success(request, 'FAQ berhasil dihapus.')
+        return redirect('main:cs_faq')
+    
+    context = get_cs_base_context(cs)
+    context.update({
+        'page_title': 'Hapus FAQ - CS Dashboard',
+        'faq': faq,
+    })
+    
+    return render(request, 'cs/faq_delete.html', context)
 
 
 def cs_forum(request):
@@ -368,7 +535,8 @@ def cs_forum(request):
 def cs_members(request):
     """
     Informasi Member (Read-only)
-    CS melihat informasi member dan nomor seri untuk membantu pengguna
+    CS melihat informasi member yang sudah melakukan pembelian dan telah diverifikasi
+    Hanya menampilkan member dengan purchase order status 'verified'
     """
     cs = get_cs(request)
     if not cs:
@@ -379,32 +547,58 @@ def cs_members(request):
     search_query = request.GET.get('search', '').strip()
     member_filter = request.GET.get('member', '').strip()
     
-    # Get members
-    members = Member.objects.filter(rangbot_devices__isnull=False).distinct()
+    # Get members yang memiliki purchase order dengan status 'verified'
+    from .models import PurchaseOrder
+    verified_member_ids = PurchaseOrder.objects.filter(
+        status='verified',
+        member_id__isnull=False
+    ).values_list('member_id', flat=True).distinct()
+    
+    # Get members berdasarkan verified member IDs
+    members = Member.objects.filter(
+        member_id__in=verified_member_ids
+    ).distinct()
     
     if search_query:
         members = members.filter(
             Q(member_id__icontains=search_query) |
             Q(full_name__icontains=search_query) |
             Q(email__icontains=search_query) |
+            Q(phone__icontains=search_query) |
             Q(rangbot_devices__serial_number__icontains=search_query)
         ).distinct()
     
     if member_filter:
         members = members.filter(member_id__icontains=member_filter)
     
-    # Get member statistics
+    # Get member statistics dengan purchase order data
     members_with_stats = []
-    for member in members.order_by('-created_at')[:50]:  # Limit untuk performa
+    for member in members.order_by('-created_at')[:100]:  # Limit untuk performa
+        # Get verified purchase orders untuk member ini
+        verified_orders = PurchaseOrder.objects.filter(
+            member_id=member.member_id,
+            status='verified'
+        ).order_by('-verified_at')
+        
+        # Skip jika tidak ada verified orders
+        if not verified_orders.exists():
+            continue
+        
         all_devices = member.rangbot_devices.all()
         pro_count = sum(1 for d in all_devices if 'pro' in (d.device_name or '').lower() or 'professional' in (d.device_name or '').lower())
         basic_count = all_devices.count() - pro_count
+        
+        # Get total purchase info
+        total_orders = verified_orders.count()
+        latest_order = verified_orders.first()
         
         members_with_stats.append({
             'member': member,
             'total_devices': all_devices.count(),
             'pro_count': pro_count,
             'basic_count': basic_count,
+            'total_orders': total_orders,
+            'latest_order': latest_order,
         })
     
     context = get_cs_base_context(cs)
@@ -416,6 +610,57 @@ def cs_members(request):
     })
     
     return render(request, 'cs/members.html', context)
+
+
+def cs_member_detail(request, member_id):
+    """
+    Detail Member untuk CS (Read-only)
+    Menampilkan informasi lengkap member dan purchase orders yang sudah verified
+    """
+    cs = get_cs(request)
+    if not cs:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    member = get_object_or_404(Member, member_id=member_id)
+    
+    # Get verified purchase orders untuk member ini
+    from .models import PurchaseOrder
+    verified_orders = PurchaseOrder.objects.filter(
+        member_id=member_id,
+        status='verified'
+    ).order_by('-verified_at')
+    
+    # Get devices dari verified orders
+    devices = member.rangbot_devices.filter(
+        purchase_order__status='verified'
+    ).order_by('-created_at')
+    
+    # Get order details dengan device info
+    orders_with_details = []
+    for order in verified_orders:
+        order_devices = devices.filter(purchase_order=order)
+        orders_with_details.append({
+            'order': order,
+            'devices': order_devices,
+            'device_count': order_devices.count(),
+        })
+    
+    # Calculate total investment
+    from django.db.models import Sum
+    total_investment = verified_orders.aggregate(total=Sum('total_price'))['total'] or 0
+    
+    context = get_cs_base_context(cs)
+    context.update({
+        'page_title': f'Detail Member {member_id} - CS Dashboard',
+        'member': member,
+        'verified_orders': verified_orders,
+        'orders_with_details': orders_with_details,
+        'devices': devices,
+        'total_investment': total_investment,
+    })
+    
+    return render(request, 'cs/member_detail.html', context)
 
 
 def cs_notifications(request):
@@ -442,10 +687,72 @@ def cs_notifications(request):
     return render(request, 'cs/notifications.html', context)
 
 
+def cs_activity_log_list(request):
+    """
+    View untuk menampilkan riwayat aktivitas sistem (Riwayat Log)
+    Mirip dengan activity_log_list di admin, tapi untuk CS
+    """
+    cs = get_cs(request)
+    if not cs:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    # Get filter parameters
+    action_filter = request.GET.get('action_type', '')
+    search_query = request.GET.get('search', '').strip()
+    date_from = request.GET.get('date_from', '').strip()
+    date_to = request.GET.get('date_to', '').strip()
+    
+    # Get logs with related objects
+    logs = ActivityLog.objects.select_related('performed_by', 'related_order', 'related_member', 'related_device').all()
+    
+    # Apply filters
+    if action_filter:
+        logs = logs.filter(action_type=action_filter)
+    
+    if search_query:
+        logs = logs.filter(
+            models.Q(description__icontains=search_query) |
+            models.Q(performed_by__full_name__icontains=search_query) |
+            models.Q(performed_by__username__icontains=search_query)
+        )
+    
+    if date_from:
+        try:
+            from datetime import datetime
+            date_from_obj = datetime.strptime(date_from, '%Y-%m-%d')
+            logs = logs.filter(created_at__gte=date_from_obj)
+        except ValueError:
+            pass
+    
+    if date_to:
+        try:
+            from datetime import datetime
+            date_to_obj = datetime.strptime(date_to, '%Y-%m-%d')
+            logs = logs.filter(created_at__lte=date_to_obj)
+        except ValueError:
+            pass
+    
+    logs = logs.order_by('-created_at')
+    
+    context = get_cs_base_context(cs)
+    context.update({
+        'page_title': 'Riwayat Log - CS Dashboard',
+        'logs': logs,
+        'action_filter': action_filter,
+        'search_query': search_query,
+        'date_from': date_from,
+        'date_to': date_to,
+        'action_types': ActivityLog.ACTION_TYPES,
+    })
+    
+    return render(request, 'cs/activity_log_list.html', context)
+
+
 def cs_settings(request):
     """
-    Menu Pengaturan Akun CS
-    CS dapat mengubah password dan profil
+    Menu Informasi Profil CS
+    Menampilkan informasi profil CS (read-only)
     """
     cs = get_cs(request)
     if not cs:
@@ -454,7 +761,7 @@ def cs_settings(request):
     
     context = get_cs_base_context(cs)
     context.update({
-        'page_title': 'Pengaturan Akun - CS Dashboard',
+        'page_title': 'Informasi Profil - CS Dashboard',
     })
     
     return render(request, 'cs/settings.html', context)

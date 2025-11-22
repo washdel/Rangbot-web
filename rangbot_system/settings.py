@@ -148,3 +148,16 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Email Configuration
+# For development: use console backend (emails printed to console)
+# For production: configure SMTP settings
+EMAIL_BACKEND = config('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', 587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', True, cast=bool)
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', False, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', 'noreply@rangbot.com')
+SERVER_EMAIL = config('SERVER_EMAIL', DEFAULT_FROM_EMAIL)
+

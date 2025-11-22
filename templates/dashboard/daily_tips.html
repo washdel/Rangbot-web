@@ -1,0 +1,610 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block page_title %}Tips Harian Merawat Stroberi{% endblock %}
+{% block page_subtitle %}Panduan perawatan tanaman stroberi sehari-hari{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+    }
+    
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+    
+    .tips-hero {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border-radius: 2rem;
+        padding: 3rem;
+        margin-bottom: 3rem;
+        animation: fadeInUp 0.6s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .tips-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
+        animation: pulse 4s ease-in-out infinite;
+    }
+    
+    .tips-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .tip-card {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(229, 231, 235, 0.6);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+        cursor: pointer;
+    }
+    
+    .tip-card:nth-child(1) { animation-delay: 0.1s; }
+    .tip-card:nth-child(2) { animation-delay: 0.2s; }
+    .tip-card:nth-child(3) { animation-delay: 0.3s; }
+    .tip-card:nth-child(4) { animation-delay: 0.4s; }
+    .tip-card:nth-child(5) { animation-delay: 0.5s; }
+    .tip-card:nth-child(6) { animation-delay: 0.6s; }
+    
+    .tip-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s ease;
+    }
+    
+    .tip-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(50%, -50%);
+        transition: all 0.4s ease;
+        opacity: 0;
+    }
+    
+    .tip-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 24px 48px rgba(34, 197, 94, 0.2), 0 0 0 1px rgba(34, 197, 94, 0.1);
+        border-color: rgba(34, 197, 94, 0.4);
+    }
+    
+    .tip-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .tip-card:hover::after {
+        opacity: 1;
+        transform: translate(30%, -30%) scale(1.5);
+    }
+    
+    .tip-icon-wrapper {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 1.5rem;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.08) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        position: relative;
+        transition: all 0.4s ease;
+    }
+    
+    .tip-icon-wrapper::before {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border-radius: 1.5rem;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(16, 185, 129, 0.2) 100%);
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+    
+    .tip-card:hover .tip-icon-wrapper {
+        transform: rotate(5deg) scale(1.1);
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%);
+    }
+    
+    .tip-card:hover .tip-icon-wrapper::before {
+        opacity: 1;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .tip-icon {
+        font-size: 2.5rem;
+        color: #22c55e;
+        transition: all 0.3s ease;
+    }
+    
+    .tip-card:hover .tip-icon {
+        transform: scale(1.1);
+        animation: float 2s ease-in-out infinite;
+    }
+    
+    .tip-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #1f2937 0%, #22c55e 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        transition: all 0.3s ease;
+    }
+    
+    .tip-card:hover .tip-title {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .tip-description {
+        color: #6b7280;
+        line-height: 1.75;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .tip-features {
+        list-style: none;
+        padding: 0;
+        margin-top: 1.5rem;
+    }
+    
+    .tip-features li {
+        padding: 0.625rem 0;
+        color: #4b5563;
+        font-size: 0.9375rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    
+    .tip-features li::before {
+        content: '✓';
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #22c55e;
+        font-weight: 700;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .tip-card:hover .tip-features li::before {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: white;
+        transform: scale(1.1);
+    }
+    
+    .tip-card:hover .tip-features li {
+        color: #1f2937;
+        transform: translateX(4px);
+    }
+    
+    .tip-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #16a34a;
+        margin-top: 1rem;
+        animation: slideInLeft 0.5s ease-out;
+    }
+    
+    .highlight-section {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);
+        border: 2px solid rgba(34, 197, 94, 0.2);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        margin-top: 3rem;
+        animation: fadeInUp 0.8s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .highlight-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, transparent 0%, rgba(34, 197, 94, 0.05) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .highlight-section:hover::before {
+        opacity: 1;
+    }
+    
+    .highlight-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .highlight-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
+    }
+    
+    .highlight-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .highlight-item {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(229, 231, 235, 0.6);
+    }
+    
+    .highlight-item:hover {
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(34, 197, 94, 0.1);
+        border-color: rgba(34, 197, 94, 0.3);
+    }
+    
+    .highlight-item-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+        font-size: 1.125rem;
+    }
+    
+    .highlight-item-desc {
+        color: #6b7280;
+        font-size: 0.9375rem;
+        line-height: 1.6;
+    }
+    
+    @media (max-width: 768px) {
+        .tips-hero {
+            padding: 2rem 1.5rem;
+        }
+        
+        .tips-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .tip-card {
+            padding: 1.5rem;
+        }
+        
+        .tip-icon-wrapper {
+            width: 4rem;
+            height: 4rem;
+        }
+        
+        .tip-icon {
+            font-size: 2rem;
+        }
+        
+        .highlight-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Hero Section -->
+    <div class="tips-hero relative z-10">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="w-20 h-20 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);">
+                <i class="fas fa-seedling text-4xl" style="color: #22c55e;"></i>
+            </div>
+            <div>
+                <h1 class="text-4xl sm:text-5xl font-light text-gray-900 mb-2" style="background: linear-gradient(135deg, #1f2937 0%, #22c55e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    Tips Harian Merawat Stroberi
+                </h1>
+                <p class="text-gray-600 font-light text-lg">
+                    Panduan lengkap untuk merawat tanaman stroberi Anda dengan optimal menggunakan teknologi RangBot
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tips Grid -->
+    <div class="tips-grid">
+        <!-- Tip 1: Penyiraman -->
+        <div class="tip-card">
+            <div class="tip-icon-wrapper">
+                <i class="fas fa-tint tip-icon"></i>
+            </div>
+            <h3 class="tip-title">Penyiraman yang Tepat</h3>
+            <p class="tip-description">
+                Siram tanaman stroberi di pagi hari untuk menghindari kelembapan berlebih di malam hari. 
+                Gunakan data sensor kelembapan dari RangBot untuk menentukan waktu penyiraman optimal.
+            </p>
+            <ul class="tip-features">
+                <li>Siram di pagi hari (6-8 pagi)</li>
+                <li>Gunakan data sensor kelembapan</li>
+                <li>Hindari penyiraman berlebihan</li>
+                <li>Perhatikan drainase tanah</li>
+            </ul>
+            <div class="tip-badge">
+                <i class="fas fa-clock"></i>
+                <span>Waktu optimal: Pagi hari</span>
+            </div>
+        </div>
+
+        <!-- Tip 2: Pencahayaan -->
+        <div class="tip-card">
+            <div class="tip-icon-wrapper">
+                <i class="fas fa-sun tip-icon"></i>
+            </div>
+            <h3 class="tip-title">Pencahayaan Optimal</h3>
+            <p class="tip-description">
+                Pastikan tanaman stroberi mendapat sinar matahari minimal 6-8 jam per hari. 
+                Monitor suhu melalui dashboard untuk menghindari panas berlebih.
+            </p>
+            <ul class="tip-features">
+                <li>Minimal 6-8 jam sinar matahari</li>
+                <li>Monitor suhu real-time</li>
+                <li>Hindari paparan langsung berlebihan</li>
+                <li>Gunakan naungan saat siang terik</li>
+            </ul>
+            <div class="tip-badge">
+                <i class="fas fa-thermometer-half"></i>
+                <span>Suhu ideal: 18-25°C</span>
+            </div>
+        </div>
+
+        <!-- Tip 3: Pemupukan -->
+        <div class="tip-card">
+            <div class="tip-icon-wrapper">
+                <i class="fas fa-seedling tip-icon"></i>
+            </div>
+            <h3 class="tip-title">Pemupukan Rutin</h3>
+            <p class="tip-description">
+                Berikan pupuk organik setiap 2-3 minggu sekali. Gunakan data pH tanah dari sensor 
+                RangBot untuk menentukan kebutuhan nutrisi tanaman.
+            </p>
+            <ul class="tip-features">
+                <li>Pupuk organik setiap 2-3 minggu</li>
+                <li>Monitor pH tanah (5.5-6.5)</li>
+                <li>Gunakan pupuk seimbang NPK</li>
+                <li>Hindari over-fertilization</li>
+            </ul>
+            <div class="tip-badge">
+                <i class="fas fa-flask"></i>
+                <span>pH ideal: 5.5-6.5</span>
+            </div>
+        </div>
+
+        <!-- Tip 4: Monitoring Penyakit -->
+        <div class="tip-card">
+            <div class="tip-icon-wrapper">
+                <i class="fas fa-bug tip-icon"></i>
+            </div>
+            <h3 class="tip-title">Monitoring Penyakit</h3>
+            <p class="tip-description">
+                Gunakan fitur deteksi penyakit RangBot secara rutin untuk mengidentifikasi masalah 
+                sejak dini. Deteksi dini memudahkan penanganan dan mencegah penyebaran.
+            </p>
+            <ul class="tip-features">
+                <li>Deteksi rutin dengan AI</li>
+                <li>Review riwayat deteksi</li>
+                <li>Tindakan cepat saat terdeteksi</li>
+                <li>Isolasi tanaman terinfeksi</li>
+            </ul>
+            <div class="tip-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>Deteksi dini = Pencegahan efektif</span>
+            </div>
+        </div>
+
+        <!-- Tip 5: Pemangkasan -->
+        <div class="tip-card">
+            <div class="tip-icon-wrapper">
+                <i class="fas fa-cut tip-icon"></i>
+            </div>
+            <h3 class="tip-title">Pemangkasan Rutin</h3>
+            <p class="tip-description">
+                Pangkas daun yang menguning atau rusak secara teratur untuk menjaga kesehatan tanaman. 
+                Buang bagian yang terinfeksi untuk mencegah penyebaran penyakit.
+            </p>
+            <ul class="tip-features">
+                <li>Pangkas daun menguning</li>
+                <li>Buang bagian terinfeksi</li>
+                <li>Bersihkan alat pangkas</li>
+                <li>Lakukan secara rutin</li>
+            </ul>
+            <div class="tip-badge">
+                <i class="fas fa-calendar-check"></i>
+                <span>Rutin: Setiap 1-2 minggu</span>
+            </div>
+        </div>
+
+        <!-- Tip 6: Sirkulasi Udara -->
+        <div class="tip-card">
+            <div class="tip-icon-wrapper">
+                <i class="fas fa-wind tip-icon"></i>
+            </div>
+            <h3 class="tip-title">Sirkulasi Udara</h3>
+            <p class="tip-description">
+                Pastikan sirkulasi udara yang baik di sekitar tanaman untuk mencegah penyakit jamur. 
+                Monitor kelembaban udara melalui sensor RangBot.
+            </p>
+            <ul class="tip-features">
+                <li>Jaga jarak antar tanaman</li>
+                <li>Monitor kelembaban udara</li>
+                <li>Hindari kondisi terlalu lembab</li>
+                <li>Ventilasi yang memadai</li>
+            </ul>
+            <div class="tip-badge">
+                <i class="fas fa-leaf"></i>
+                <span>Kelembaban: 60-70%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Highlight Section -->
+    <div class="highlight-section">
+        <div class="highlight-title">
+            <div class="highlight-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div>
+                <h3 class="text-2xl font-semibold text-gray-900 mb-1">Tips Tambahan</h3>
+                <p class="text-gray-600 font-light">Praktik terbaik untuk hasil optimal</p>
+            </div>
+        </div>
+        
+        <div class="highlight-grid">
+            <div class="highlight-item">
+                <h4 class="highlight-item-title">
+                    <i class="fas fa-calendar-alt mr-2" style="color: #22c55e;"></i>
+                    Jadwal Perawatan
+                </h4>
+                <p class="highlight-item-desc">
+                    Buat jadwal rutin untuk penyiraman, pemupukan, dan monitoring. Konsistensi adalah kunci kesuksesan.
+                </p>
+            </div>
+            
+            <div class="highlight-item">
+                <h4 class="highlight-item-title">
+                    <i class="fas fa-database mr-2" style="color: #22c55e;"></i>
+                    Analisis Data
+                </h4>
+                <p class="highlight-item-desc">
+                    Gunakan data historis dari dashboard untuk mengidentifikasi pola dan mengoptimalkan perawatan.
+                </p>
+            </div>
+            
+            <div class="highlight-item">
+                <h4 class="highlight-item-title">
+                    <i class="fas fa-bell mr-2" style="color: #22c55e;"></i>
+                    Notifikasi Real-time
+                </h4>
+                <p class="highlight-item-desc">
+                    Aktifkan notifikasi untuk mendapatkan alert langsung saat ada deteksi penyakit atau anomali.
+                </p>
+            </div>
+            
+            <div class="highlight-item">
+                <h4 class="highlight-item-title">
+                    <i class="fas fa-users mr-2" style="color: #22c55e;"></i>
+                    Komunitas
+                </h4>
+                <p class="highlight-item-desc">
+                    Bergabung dengan forum untuk berbagi pengalaman dan belajar dari petani stroberi lainnya.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

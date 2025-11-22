@@ -56,6 +56,66 @@
         }
     }
     
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+    
+    @keyframes countUp {
+        from {
+            opacity: 0;
+            transform: scale(0.5);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+    
+    @keyframes pulse-ring {
+        0% {
+            transform: scale(0.8);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(2.4);
+            opacity: 0;
+        }
+    }
+    
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    
     .fade-in-up {
         animation: fadeInUp 0.6s ease-out;
     }
@@ -70,10 +130,13 @@
     
     .stat-card {
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
         position: relative;
         overflow: hidden;
+        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.5);
     }
     
     .stat-card::before {
@@ -83,27 +146,69 @@
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-        transition: left 0.5s;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+        transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .stat-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(134, 239, 172, 0.1) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
     }
     
     .stat-card:hover::before {
         left: 100%;
     }
     
+    .stat-card:hover::after {
+        opacity: 1;
+    }
+    
     .stat-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(134, 239, 172, 0.2);
+        transform: translateY(-12px) scale(1.03);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(134, 239, 172, 0.3), 0 0 40px rgba(134, 239, 172, 0.2);
+        border-color: rgba(134, 239, 172, 0.4);
+    }
+    
+    .stat-card:active {
+        transform: translateY(-8px) scale(1.01);
     }
     
     .stat-icon {
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
+        z-index: 1;
+    }
+    
+    .stat-icon::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(134, 239, 172, 0.2);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: -1;
     }
     
     .stat-card:hover .stat-icon {
-        transform: scale(1.15) rotate(10deg);
-        animation: float 3s ease-in-out infinite;
+        transform: scale(1.2) rotate(15deg);
+        animation: float 3s ease-in-out infinite, bounce 2s ease-in-out infinite;
+    }
+    
+    .stat-card:hover .stat-icon::before {
+        width: 120%;
+        height: 120%;
+        animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     }
     
     @keyframes pulse-glow {
@@ -140,16 +245,38 @@
     
     /* Glass morphism effect for cards */
     .glass-card {
-        background: rgba(255, 255, 255, 0.7);
+        background: rgba(255, 255, 255, 0.75);
         backdrop-filter: blur(20px) saturate(180%);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.4);
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(134, 239, 172, 0.05) 0%, rgba(34, 197, 94, 0.05) 100%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        pointer-events: none;
     }
     
     .glass-card:hover {
-        background: rgba(255, 255, 255, 0.9);
-        box-shadow: 0 12px 48px rgba(134, 239, 172, 0.2);
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 16px 64px rgba(134, 239, 172, 0.25), 0 0 0 1px rgba(134, 239, 172, 0.2);
+        transform: translateY(-4px);
+        border-color: rgba(134, 239, 172, 0.3);
+    }
+    
+    .glass-card:hover::before {
+        opacity: 1;
     }
     
     /* Gradient text effect */
@@ -162,9 +289,23 @@
     
     /* Animated background gradient */
     .animated-bg {
-        background: linear-gradient(-45deg, #f0fdf4, #ffffff, #f0fdf4, #ffffff);
+        background: linear-gradient(-45deg, #f0fdf4, #ffffff, #f0fdf4, #ffffff, #ecfdf5);
         background-size: 400% 400%;
-        animation: gradientShift 15s ease infinite;
+        animation: gradientShift 20s ease infinite;
+        position: relative;
+    }
+    
+    .animated-bg::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(134, 239, 172, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(34, 197, 94, 0.08) 0%, transparent 50%);
+        pointer-events: none;
     }
     
     @keyframes gradientShift {
@@ -183,90 +324,204 @@
     .section-header {
         position: relative;
         display: inline-block;
+        cursor: default;
     }
     
     .section-header::after {
         content: '';
         position: absolute;
-        bottom: -4px;
+        bottom: -6px;
         left: 0;
         width: 0;
-        height: 2px;
-        background: linear-gradient(90deg, #22c55e, #86efac);
-        transition: width 0.5s ease;
+        height: 3px;
+        background: linear-gradient(90deg, #22c55e, #86efac, #22c55e);
+        background-size: 200% 100%;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 2px;
+        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
     }
     
     .section-header:hover::after {
         width: 100%;
+        animation: shimmer 2s linear infinite;
     }
     
-    /* Table styling for Recent Messages */
-    .recent-messages-table {
+    .section-header::before {
+        content: '';
+        position: absolute;
+        bottom: -6px;
+        left: 0;
         width: 100%;
-        border-collapse: collapse;
+        height: 1px;
+        background: rgba(229, 231, 235, 0.5);
+        z-index: -1;
     }
     
-    .recent-messages-table thead {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        background: rgba(249, 250, 251, 0.95);
+    /* Activity Card Styles - Modern Card Layout */
+    .activity-card {
+        background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(229, 231, 235, 0.5);
+        border-radius: 1rem;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
     }
     
-    .recent-messages-table th {
-        white-space: nowrap;
+    .activity-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #22c55e, #86efac);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+        transform-origin: top;
+    }
+    
+    .activity-card:hover {
+        transform: translateX(8px) translateY(-2px);
+        box-shadow: 0 8px 24px rgba(134, 239, 172, 0.2), 0 0 0 1px rgba(134, 239, 172, 0.2);
+        background: rgba(255, 255, 255, 0.95);
+        border-color: rgba(134, 239, 172, 0.4);
+    }
+    
+    .activity-card:hover::before {
+        transform: scaleY(1);
+    }
+    
+    .activity-card:active {
+        transform: translateX(4px) translateY(0);
+    }
+    
+    .activity-card-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .activity-icon-wrapper {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .activity-card:hover .activity-icon-wrapper {
+        transform: scale(1.1) rotate(5deg);
+    }
+    
+    .activity-content {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .activity-title {
+        font-size: 0.875rem;
         font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+        line-height: 1.4;
+    }
+    
+    .activity-description {
         font-size: 0.75rem;
+        color: #6b7280;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
     
-    .recent-messages-table tbody tr {
-        transition: all 0.2s ease;
-        border-bottom: 1px solid rgba(229, 231, 235, 0.3);
+    .activity-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid rgba(229, 231, 235, 0.5);
     }
     
-    .recent-messages-table tbody tr:hover {
-        background: rgba(249, 250, 251, 0.8) !important;
-        transform: scale(1.01);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    .activity-time {
+        font-size: 0.7rem;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
     }
     
-    .recent-messages-table tbody tr:last-child {
-        border-bottom: none;
+    .activity-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 500;
     }
     
-    .recent-messages-table td {
-        vertical-align: middle;
-        padding: 0.75rem 1rem;
+    .activity-card-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem;
     }
     
-    .table-container {
-        width: 100%;
-        overflow-x: auto;
-        overflow-y: auto;
-        max-height: 24rem;
+    /* Empty state for activity cards */
+    .activity-empty {
+        text-center;
+        padding: 3rem 1rem;
+        color: #9ca3af;
     }
     
-    /* Responsive table adjustments */
-    @media (max-width: 640px) {
-        .recent-messages-table th,
-        .recent-messages-table td {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
-        }
-        
-        .recent-messages-table th {
-            font-size: 0.7rem;
-        }
+    .activity-empty-icon {
+        width: 4rem;
+        height: 4rem;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        background: rgba(229, 231, 235, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
     }
     
     /* Number counter animation */
     .number-counter {
         font-variant-numeric: tabular-nums;
         transition: all 0.3s ease;
+        display: inline-block;
+        position: relative;
+    }
+    
+    .number-counter::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, currentColor, transparent);
+        transition: width 0.5s ease;
+    }
+    
+    .stat-card:hover .number-counter::after {
+        width: 100%;
+    }
+    
+    .number-counter.animate {
+        animation: countUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     /* Status badge with glow */
@@ -343,11 +598,11 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Pesan Baru</h3>
-                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #3b82f6;">{{ new_messages }}</p>
+                        <p class="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-1 number-counter" style="color: #3b82f6;">{{ new_messages }}</p>
                         <p class="text-xs text-gray-500 font-light mb-4">Pesan belum dibaca</p>
                     </div>
-                    <a href="{% url 'main:cs_messages' %}?status=new" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
-                        Tangani sekarang <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    <a href="{% url 'main:cs_messages' %}?status=new" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group interactive-btn px-3 py-1.5 rounded-lg hover:bg-gray-50" data-tooltip="Klik untuk melihat pesan baru">
+                        Tangani sekarang <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-2 transition-transform duration-300"></i>
                     </a>
                 </div>
 
@@ -360,11 +615,11 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Belum Dibalas</h3>
-                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #ef4444;">{{ unread_messages }}</p>
+                        <p class="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-1 number-counter" style="color: #ef4444;">{{ unread_messages }}</p>
                         <p class="text-xs text-gray-500 font-light mb-4">Pesan menunggu balasan</p>
                     </div>
-                    <a href="{% url 'main:cs_messages' %}?status=new" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
-                        Lihat detail <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    <a href="{% url 'main:cs_messages' %}?status=new" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group interactive-btn px-3 py-1.5 rounded-lg hover:bg-gray-50" data-tooltip="Lihat detail pesan">
+                        Lihat detail <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-2 transition-transform duration-300"></i>
                     </a>
                 </div>
 
@@ -377,11 +632,11 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Total Pesan</h3>
-                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #22c55e;">{{ total_messages }}</p>
+                        <p class="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-1 number-counter" style="color: #22c55e;">{{ total_messages }}</p>
                         <p class="text-xs text-gray-500 font-light mb-4">Semua pesan masuk</p>
                     </div>
-                    <a href="{% url 'main:cs_messages' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
-                        Lihat semua <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    <a href="{% url 'main:cs_messages' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group interactive-btn px-3 py-1.5 rounded-lg hover:bg-gray-50" data-tooltip="Lihat semua pesan">
+                        Lihat semua <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-2 transition-transform duration-300"></i>
                     </a>
                 </div>
 
@@ -394,20 +649,20 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Diarsipkan</h3>
-                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #9ca3af;">{{ archived_messages }}</p>
+                        <p class="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-1 number-counter" style="color: #9ca3af;">{{ archived_messages }}</p>
                         <p class="text-xs text-gray-500 font-light mb-4">Pesan selesai ditangani</p>
                     </div>
-                    <a href="{% url 'main:cs_messages' %}?status=archived" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
-                        Lihat detail <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    <a href="{% url 'main:cs_messages' %}?status=archived" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group interactive-btn px-3 py-1.5 rounded-lg hover:bg-gray-50" data-tooltip="Lihat pesan yang diarsipkan">
+                        Lihat detail <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-2 transition-transform duration-300"></i>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Section: Forum & FAQ Statistics -->
+        <!-- Section: Forum Statistics -->
         <div class="mb-8 fade-in-up" style="animation-delay: 0.3s;">
-            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 px-1 section-header">Statistik Forum & FAQ</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 px-1 section-header">Statistik Forum</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 <!-- New Forum Posts Card -->
                 <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(147, 51, 234, 0.2); min-height: 180px; display: flex; flex-direction: column;">
                     <div class="flex items-center justify-between mb-4">
@@ -417,28 +672,11 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Posting Forum Hari Ini</h3>
-                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #9333ea;">{{ new_forum_posts }}</p>
+                        <p class="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-1 number-counter" style="color: #9333ea;">{{ new_forum_posts }}</p>
                         <p class="text-xs text-gray-500 font-light mb-4">Posting baru hari ini</p>
                     </div>
-                    <a href="{% url 'main:cs_forum' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
-                        Pantau forum <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
-                    </a>
-                </div>
-
-                <!-- Total FAQs Card -->
-                <div class="stat-card bg-white rounded-2xl border p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300" style="border-color: rgba(34, 197, 94, 0.2); min-height: 180px; display: flex; flex-direction: column;">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center stat-icon" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);">
-                            <i class="fas fa-question-circle text-xl sm:text-2xl" style="color: #22c55e;"></i>
-                        </div>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Total FAQ Aktif</h3>
-                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #22c55e;">{{ total_faqs }}</p>
-                        <p class="text-xs text-gray-500 font-light mb-4">FAQ yang aktif</p>
-                    </div>
-                    <a href="{% url 'main:cs_faq' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
-                        Kelola FAQ <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    <a href="{% url 'main:cs_forum' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group interactive-btn px-3 py-1.5 rounded-lg hover:bg-gray-50" data-tooltip="Pantau aktivitas forum">
+                        Pantau forum <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-2 transition-transform duration-300"></i>
                     </a>
                 </div>
 
@@ -451,11 +689,11 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Total Members Aktif</h3>
-                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #6366f1;">{{ total_members }}</p>
+                        <p class="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-1 number-counter" style="color: #6366f1;">{{ total_members }}</p>
                         <p class="text-xs text-gray-500 font-light mb-4">Member terdaftar</p>
                     </div>
-                    <a href="{% url 'main:cs_members' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
-                        Lihat info <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    <a href="{% url 'main:cs_members' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group interactive-btn px-3 py-1.5 rounded-lg hover:bg-gray-50" data-tooltip="Lihat informasi member">
+                        Lihat info <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-2 transition-transform duration-300"></i>
                     </a>
                 </div>
 
@@ -468,22 +706,22 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-xs sm:text-sm font-light text-gray-600 mb-2">Total Devices Aktif</h3>
-                        <p class="text-2xl sm:text-3xl font-semibold mb-1 number-counter" style="color: #a855f7;">{{ total_devices }}</p>
+                        <p class="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-1 number-counter" style="color: #a855f7;">{{ total_devices }}</p>
                         <p class="text-xs text-gray-500 font-light mb-4">Perangkat aktif</p>
                     </div>
-                    <a href="{% url 'main:cs_members' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group">
-                        Lihat info <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    <a href="{% url 'main:cs_members' %}" class="mt-auto inline-flex items-center text-xs font-light text-gray-500 hover:text-gray-900 transition-colors group interactive-btn px-3 py-1.5 rounded-lg hover:bg-gray-50" data-tooltip="Lihat informasi member">
+                        Lihat info <i class="fas fa-arrow-right ml-1 text-xs group-hover:translate-x-2 transition-transform duration-300"></i>
                     </a>
                 </div>
             </div>
         </div>
 
         <!-- Section: Recent Activity -->
-        <div class="mb-8 fade-in-up" style="animation-delay: 0.4s;">
+        <div id="recent-activity-section" class="mb-8 fade-in-up" style="animation-delay: 0.4s;">
             <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 px-1 section-header">Aktivitas Terkini</h2>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+            <div class="flex flex-col gap-5 sm:gap-6">
                 <!-- Recent Messages -->
-                <div class="glass-card rounded-2xl border shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 scale-in" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.5s;">
+                <div class="glass-card rounded-2xl border shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 scale-in w-full" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.5s;">
                     <div class="p-5 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.6);">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                             <div>
@@ -497,98 +735,58 @@
                     </div>
 
                     {% if recent_messages %}
-                    <div class="table-container green-scrollbar">
-                        <table class="recent-messages-table w-full">
-                            <thead class="sticky top-0 z-10" style="background: rgba(249, 250, 251, 0.95); backdrop-filter: blur(10px);">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b" style="border-color: rgba(229, 231, 235, 0.6);">
-                                        <div class="flex items-center gap-2">
-                                            <i class="fas fa-user text-xs"></i>
-                                            <span>Pengirim</span>
-                                        </div>
-                                    </th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b" style="border-color: rgba(229, 231, 235, 0.6);">
-                                        <div class="flex items-center gap-2">
-                                            <i class="fas fa-envelope text-xs"></i>
-                                            <span>Subjek</span>
-                                        </div>
-                                    </th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b hidden sm:table-cell" style="border-color: rgba(229, 231, 235, 0.6);">
-                                        <div class="flex items-center gap-2">
-                                            <i class="fas fa-clock text-xs"></i>
-                                            <span>Waktu</span>
-                                        </div>
-                                    </th>
-                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b" style="border-color: rgba(229, 231, 235, 0.6);">
-                                        <div class="flex items-center justify-center gap-2">
-                                            <i class="fas fa-info-circle text-xs"></i>
-                                            <span>Status</span>
-                                        </div>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y" style="border-color: rgba(229, 231, 235, 0.3);">
-                                {% for message in recent_messages %}
-                                <tr class="hover:bg-gray-50/50 transition-colors cursor-pointer" onclick="window.location.href='{% url 'main:cs_messages' %}?search={{ message.email|urlencode }}'">
-                                    <td class="px-4 py-3">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(59, 130, 246, 0.1);">
-                                                {% if message.status == 'new' %}
-                                                <i class="fas fa-envelope text-xs" style="color: #ef4444;"></i>
-                                                {% elif message.status == 'read' %}
-                                                <i class="fas fa-envelope-open text-xs" style="color: #3b82f6;"></i>
-                                                {% elif message.status == 'replied' %}
-                                                <i class="fas fa-reply text-xs" style="color: #22c55e;"></i>
-                                                {% else %}
-                                                <i class="fas fa-archive text-xs" style="color: #9ca3af;"></i>
-                                                {% endif %}
-                                            </div>
-                                            <div class="min-w-0">
-                                                <p class="text-sm font-medium text-gray-900 truncate">{{ message.name }}</p>
-                                                <p class="text-xs text-gray-500 font-light truncate sm:hidden">{{ message.created_at|date:"d M H:i" }}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <div class="min-w-0">
-                                            <p class="text-sm font-semibold text-gray-700 truncate">{{ message.subject }}</p>
-                                            <p class="text-xs text-gray-600 font-light line-clamp-1 mt-0.5">{{ message.message|truncatewords:10 }}</p>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-gray-600 font-light hidden sm:table-cell">
-                                        <div class="flex items-center gap-1">
-                                            <i class="fas fa-clock text-xs text-gray-400"></i>
-                                            <span>{{ message.created_at|date:"d M Y H:i" }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-center">
-                                        {% if message.status == 'new' %}
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white pulse-glow" style="background: #ef4444;">
-                                            Baru
-                                        </span>
-                                        {% elif message.status == 'read' %}
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
-                                            Dibaca
-                                        </span>
-                                        {% elif message.status == 'replied' %}
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
-                                            Terbalas
-                                        </span>
-                                        {% else %}
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background: rgba(156, 163, 175, 0.1); color: #6b7280;">
-                                            Diarsipkan
-                                        </span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <div class="activity-card-grid">
+                        {% for message in recent_messages %}
+                        <div class="activity-card" onclick="window.location.href='{% url 'main:cs_messages' %}?search={{ message.email|urlencode }}'">
+                            <div class="activity-card-header">
+                                <div class="activity-icon-wrapper" style="background: {% if message.status == 'new' %}rgba(239, 68, 68, 0.1){% elif message.status == 'read' %}rgba(59, 130, 246, 0.1){% elif message.status == 'replied' %}rgba(34, 197, 94, 0.1){% else %}rgba(156, 163, 175, 0.1){% endif %};">
+                                    {% if message.status == 'new' %}
+                                    <i class="fas fa-envelope text-sm" style="color: #ef4444;"></i>
+                                    {% elif message.status == 'read' %}
+                                    <i class="fas fa-envelope-open text-sm" style="color: #3b82f6;"></i>
+                                    {% elif message.status == 'replied' %}
+                                    <i class="fas fa-reply text-sm" style="color: #22c55e;"></i>
+                                    {% else %}
+                                    <i class="fas fa-archive text-sm" style="color: #9ca3af;"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">{{ message.name }}</div>
+                                    <div class="activity-description">
+                                        <span class="font-semibold text-gray-800">{{ message.subject }}</span> — {{ message.message|truncatewords:15 }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="activity-meta">
+                                <div class="activity-time">
+                                    <i class="fas fa-clock text-xs"></i>
+                                    <span>{{ message.created_at|date:"d M Y, H:i" }}</span>
+                                </div>
+                                {% if message.status == 'new' %}
+                                <span class="activity-status text-white pulse-glow" style="background: #ef4444;">
+                                    Baru
+                                </span>
+                                {% elif message.status == 'read' %}
+                                <span class="activity-status" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                                    Dibaca
+                                </span>
+                                {% elif message.status == 'replied' %}
+                                <span class="activity-status" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                                    Terbalas
+                                </span>
+                                {% else %}
+                                <span class="activity-status" style="background: rgba(156, 163, 175, 0.1); color: #6b7280;">
+                                    Diarsipkan
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                     {% else %}
-                    <div class="text-center py-10 sm:py-12">
-                        <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full mb-4" style="background: rgba(229, 231, 235, 0.3);">
-                            <i class="fas fa-inbox text-xl sm:text-2xl text-gray-400"></i>
+                    <div class="activity-empty">
+                        <div class="activity-empty-icon">
+                            <i class="fas fa-inbox text-gray-400"></i>
                         </div>
                         <p class="text-sm text-gray-500 font-light">Tidak ada pesan baru</p>
                     </div>
@@ -596,7 +794,7 @@
                 </div>
 
                 <!-- Recent Forum Posts -->
-                <div class="glass-card rounded-2xl border shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 scale-in" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.6s;">
+                <div class="glass-card rounded-2xl border shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 scale-in w-full" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.6s;">
                     <div class="p-5 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.6);">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                             <div>
@@ -610,37 +808,112 @@
                     </div>
 
                     {% if recent_forum_posts %}
-                    <div class="divide-y max-h-96 overflow-y-auto overflow-x-auto green-scrollbar" style="border-color: rgba(229, 231, 235, 0.3);">
+                    <div class="activity-card-grid">
                         {% for post in recent_forum_posts %}
-                        <div class="p-4 sm:p-5 hover:bg-gray-50/50 transition-colors table-row">
-                            <div class="flex items-start gap-3">
-                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style="background: rgba(147, 51, 234, 0.1);">
+                        <div class="activity-card" onclick="window.location.href='{% url 'main:cs_forum' %}?search={{ post.title|urlencode }}'">
+                            <div class="activity-card-header">
+                                <div class="activity-icon-wrapper" style="background: rgba(147, 51, 234, 0.1);">
                                     <i class="fas fa-comments text-sm" style="color: #9333ea;"></i>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-semibold text-gray-900 mb-1">{{ post.title }}</p>
-                                    <p class="text-xs text-gray-600 font-light mb-2 line-clamp-2">{{ post.content|truncatewords:20 }}</p>
-                                    <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 font-light">
-                                        <span><i class="fas fa-user mr-1"></i>{{ post.author.name }}</span>
-                                        <span>•</span>
-                                        <span><i class="fas fa-tag mr-1"></i>{{ post.get_category_display }}</span>
-                                        <span>•</span>
-                                        <span>{{ post.created_at|date:"d M Y H:i" }}</span>
+                                <div class="activity-content">
+                                    <div class="activity-title">{{ post.title }}</div>
+                                    <div class="activity-description">
+                                        {{ post.content|truncatewords:20 }}
                                     </div>
                                 </div>
-                                <a href="{% url 'main:forum_detail' post.id %}" class="text-xs text-green-600 hover:text-green-700 flex-shrink-0 transition-colors" title="Lihat detail">
-                                    <i class="fas fa-external-link-alt"></i>
-                                </a>
+                            </div>
+                            <div class="activity-meta">
+                                <div class="flex items-center gap-3">
+                                    <div class="activity-time">
+                                        <i class="fas fa-user text-xs"></i>
+                                        <span>{% if post.author %}{{ post.author.get_display_name }}{% else %}Guest{% endif %}</span>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-medium" style="background: rgba(147, 51, 234, 0.1); color: #9333ea;">
+                                        {{ post.get_category_display }}
+                                    </span>
+                                </div>
+                                <div class="activity-time">
+                                    <i class="fas fa-clock text-xs"></i>
+                                    <span>{{ post.created_at|date:"d M Y, H:i" }}</span>
+                                </div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                     {% else %}
-                    <div class="text-center py-10 sm:py-12">
-                        <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full mb-4" style="background: rgba(229, 231, 235, 0.3);">
-                            <i class="fas fa-comments text-xl sm:text-2xl text-gray-400"></i>
+                    <div class="activity-empty">
+                        <div class="activity-empty-icon">
+                            <i class="fas fa-comments text-gray-400"></i>
                         </div>
                         <p class="text-sm text-gray-500 font-light">Tidak ada posting forum baru</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Recent Activity Logs -->
+                <div class="glass-card rounded-2xl border shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 scale-in w-full" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.7s;">
+                    <div class="p-5 sm:p-6 border-b" style="border-color: rgba(229, 231, 235, 0.6);">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                            <div>
+                                <h3 class="text-lg sm:text-xl font-light text-gray-900 tracking-tight">Aktivitas Log Terbaru</h3>
+                                <p class="text-xs sm:text-sm text-gray-500 font-light mt-1">5 log aktivitas terakhir</p>
+                            </div>
+                            <a href="{% url 'main:cs_activity_log_list' %}" class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-light text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200" style="border: 1px solid rgba(229, 231, 235, 0.6);">
+                                Lihat Semua <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    {% if recent_notifications and recent_notifications|length > 0 %}
+                    <div class="activity-card-grid">
+                        {% for activity in recent_notifications %}
+                        <div class="activity-card" onclick="window.location.href='{% url 'main:cs_activity_log_list' %}'">
+                            <div class="activity-card-header">
+                                <div class="activity-icon-wrapper" style="background: {% if activity.action_type == 'order_created' %}rgba(59, 130, 246, 0.1){% elif activity.action_type == 'order_verified' %}rgba(34, 197, 94, 0.1){% elif activity.action_type == 'order_rejected' %}rgba(239, 68, 68, 0.1){% elif activity.action_type == 'member_registered' or activity.action_type == 'member_created' %}rgba(168, 85, 247, 0.1){% elif activity.action_type == 'forum_post_created' or activity.action_type == 'forum_comment_created' %}rgba(245, 158, 11, 0.1){% else %}rgba(134, 239, 172, 0.1){% endif %};">
+                                    {% if activity.action_type == 'order_created' %}
+                                    <i class="fas fa-shopping-cart text-sm" style="color: #3b82f6;"></i>
+                                    {% elif activity.action_type == 'order_verified' %}
+                                    <i class="fas fa-check-circle text-sm" style="color: #22c55e;"></i>
+                                    {% elif activity.action_type == 'order_rejected' %}
+                                    <i class="fas fa-times-circle text-sm" style="color: #ef4444;"></i>
+                                    {% elif activity.action_type == 'member_registered' or activity.action_type == 'member_created' %}
+                                    <i class="fas fa-user-plus text-sm" style="color: #a855f7;"></i>
+                                    {% elif activity.action_type == 'forum_post_created' %}
+                                    <i class="fas fa-comment-dots text-sm" style="color: #f59e0b;"></i>
+                                    {% elif activity.action_type == 'forum_comment_created' %}
+                                    <i class="fas fa-reply text-sm" style="color: #f59e0b;"></i>
+                                    {% else %}
+                                    <i class="fas fa-bell text-sm" style="color: #86efac;"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">{{ activity.get_action_type_display }}</div>
+                                    <div class="activity-description">
+                                        {{ activity.description|truncatewords:20 }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="activity-meta">
+                                <div class="activity-time">
+                                    <i class="fas fa-clock text-xs"></i>
+                                    <span>{{ activity.created_at|date:"d M Y, H:i" }}</span>
+                                </div>
+                                {% if activity.performed_by %}
+                                <div class="activity-time">
+                                    <i class="fas fa-user text-xs"></i>
+                                    <span>{{ activity.performed_by.get_display_name|default:activity.performed_by.username }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="activity-empty">
+                        <div class="activity-empty-icon">
+                            <i class="fas fa-history text-gray-400"></i>
+                        </div>
+                        <p class="text-sm text-gray-500 font-light">Belum ada aktivitas log</p>
                     </div>
                     {% endif %}
                 </div>

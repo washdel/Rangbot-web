@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.utils import timezone
 from django.db import transaction, models
+from urllib.parse import urlencode
 from .models import Admin, PurchaseOrder, Member, RangBotDevice, CustomerService, ProductInfo, FAQ, Article, ActivityLog, ForumPost, ForumComment, Notification
 from .utils import generate_member_id, generate_serial_number, get_next_serial_sequence
 from django.contrib.auth.hashers import make_password
@@ -954,13 +955,88 @@ def product_info_list(request):
         messages.warning(request, 'Anda harus login terlebih dahulu.')
         return redirect('main:login')
     
+    # Get filter parameters for forum (similar to CS forum)
+    search_query = request.GET.get('search', '').strip()
+    category_filter = request.GET.get('category', '').strip()
+    sort_by = request.GET.get('sort', 'newest')
+    
+    # Handle POST requests for forum (delete post/comment)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        # Delete post
+        if action == 'delete_post':
+            post_id = request.POST.get('post_id')
+            try:
+                post = ForumPost.objects.get(id=post_id)
+                post_title = post.title
+                post.delete()  # This will cascade delete all comments
+                messages.success(request, f'Postingan "{post_title}" berhasil dihapus.')
+            except ForumPost.DoesNotExist:
+                messages.error(request, 'Postingan tidak ditemukan.')
+        
+        # Delete comment
+        elif action == 'delete_comment':
+            comment_id = request.POST.get('comment_id')
+            try:
+                comment = ForumComment.objects.get(id=comment_id)
+                comment.delete()
+                messages.success(request, 'Komentar berhasil dihapus.')
+            except ForumComment.DoesNotExist:
+                messages.error(request, 'Komentar tidak ditemukan.')
+        
+        # Preserve filter parameters in redirect
+        params = {}
+        if request.GET.get('search'):
+            params['search'] = request.GET.get('search')
+        if request.GET.get('category'):
+            params['category'] = request.GET.get('category')
+        if request.GET.get('sort'):
+            params['sort'] = request.GET.get('sort')
+        if params:
+            return redirect(f"{reverse('main:product_info_list')}?{urlencode(params)}#tab-forum")
+        return redirect('main:product_info_list#tab-forum')
+    
     # Get all data (including inactive ones - admin can see everything)
     # FAQ: Show all, ordered by order field then created_at
     faqs = FAQ.objects.all().order_by('order', 'created_at')
     
-    # Forum: Show latest 50 posts and comments
-    forum_posts = ForumPost.objects.all().order_by('-created_at')[:50]
-    forum_comments = ForumComment.objects.all().order_by('-created_at')[:50]
+    # Forum: Get posts with filters (similar to CS forum)
+    from django.db.models import Q
+    from django.core.paginator import Paginator
+    
+    forum_posts = ForumPost.objects.select_related('author').prefetch_related('comments', 'comments__author', 'comments__replied_by_cs').all()
+    
+    # Apply search filter
+    if search_query:
+        forum_posts = forum_posts.filter(
+            Q(title__icontains=search_query) |
+            Q(content__icontains=search_query) |
+            Q(author__name__icontains=search_query) |
+            Q(author__username__icontains=search_query) |
+            Q(category__icontains=search_query)
+        )
+    
+    # Apply category filter
+    if category_filter:
+        forum_posts = forum_posts.filter(category=category_filter)
+    
+    # Apply sorting
+    if sort_by == 'oldest':
+        forum_posts = forum_posts.order_by('created_at')
+    else:  # newest (default)
+        forum_posts = forum_posts.order_by('-created_at')
+    
+    # Pagination for forum posts
+    paginator = Paginator(forum_posts, 10)  # 10 posts per page
+    page = request.GET.get('page', 1)
+    try:
+        forum_posts_page = paginator.get_page(page)
+    except:
+        forum_posts_page = paginator.get_page(1)
+    
+    # Get category choices for filter
+    category_choices = ForumPost.CATEGORY_CHOICES
     
     # Products: Show all products - ensure we get all products
     products = ProductInfo.objects.all().order_by('package_type')
@@ -973,13 +1049,17 @@ def product_info_list(request):
         'page_title': 'Manajemen Informasi Produk - Admin',
         'admin': admin,
         'faqs': faqs,
-        'forum_posts': forum_posts,
-        'forum_comments': forum_comments,
+        'forum_posts': forum_posts_page,  # Use paginated posts
         'products': products,
         'active_faqs_count': active_faqs_count,
         'active_products_count': active_products_count,
         'total_faqs_count': faqs.count(),
         'total_products_count': products.count(),
+        # Forum filter context
+        'search_query': search_query,
+        'category_filter': category_filter,
+        'sort_by': sort_by,
+        'category_choices': category_choices,
     }
     
     return render(request, 'admin/product_info_list.html', context)
@@ -1089,12 +1169,17 @@ def faq_list(request):
         messages.warning(request, 'Anda harus login terlebih dahulu.')
         return redirect('main:login')
     
-    faqs = FAQ.objects.all()
+    # Get FAQs ordered by order field then created_at
+    faqs = FAQ.objects.all().order_by('order', 'created_at')
+    active_faqs_count = FAQ.objects.filter(is_active=True).count()
+    total_faqs_count = faqs.count()
     
     context = {
         'page_title': 'Manajemen FAQ - Admin',
         'admin': admin,
         'faqs': faqs,
+        'active_faqs_count': active_faqs_count,
+        'total_faqs_count': total_faqs_count,
     }
     
     return render(request, 'admin/faq_list.html', context)
@@ -1127,7 +1212,7 @@ def faq_add(request):
                     is_active=is_active
                 )
                 messages.success(request, 'FAQ berhasil ditambahkan.')
-                return redirect('main:product_info_list')
+                return redirect('main:faq_list')
             except ValueError:
                 messages.error(request, 'Format urutan tidak valid.')
     
@@ -1168,7 +1253,7 @@ def faq_edit(request, faq_id):
                 faq.save()
                 
                 messages.success(request, 'FAQ berhasil diperbarui.')
-                return redirect('main:product_info_list')
+                return redirect('main:faq_list')
             except ValueError:
                 messages.error(request, 'Format urutan tidak valid.')
     

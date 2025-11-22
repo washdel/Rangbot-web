@@ -1,0 +1,373 @@
+{% extends 'cs/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .glass-card:hover {
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 12px 48px rgba(134, 239, 172, 0.2);
+    }
+    
+    .info-item {
+        transition: all 0.2s ease;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+    }
+    
+    .info-item:hover {
+        background: rgba(134, 239, 172, 0.05);
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .order-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .order-card:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+        border-left-color: #22c55e;
+    }
+    
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    
+    table th, table td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(229, 231, 235, 0.3);
+    }
+    
+    table th {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(34, 197, 94, 0.02) 100%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2 gradient-text">
+                Detail Member {{ member.member_id }}
+            </h1>
+            <p class="text-gray-600 font-light text-sm sm:text-base">
+                Informasi lengkap member dan riwayat pembelian terverifikasi
+            </p>
+        </div>
+        <a href="{% url 'main:cs_members' %}" 
+           class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl border font-medium text-sm text-gray-700 transition-all"
+           style="border-color: rgba(229, 231, 235, 0.6);"
+           onmouseover="this.style.background='rgba(134, 239, 172, 0.1)'; this.style.borderColor='rgba(134, 239, 172, 0.4)';"
+           onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(229, 231, 235, 0.6)';">
+            <i class="fas fa-arrow-left"></i>Kembali
+        </a>
+    </div>
+</div>
+
+<!-- Messages -->
+{% if messages %}
+<div class="mb-6 space-y-2 fade-in-up" style="animation-delay: 0.2s;">
+    {% for message in messages %}
+    <div class="px-4 py-3 rounded-xl glass-card text-sm font-light" 
+         style="border-color: {% if message.tags == 'success' %}rgba(34, 197, 94, 0.4){% elif message.tags == 'error' %}rgba(239, 68, 68, 0.4){% else %}rgba(229, 231, 235, 0.6){% endif %}; color: {% if message.tags == 'success' %}#22c55e{% elif message.tags == 'error' %}#ef4444{% else %}#6b7280{% endif %};">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} mr-2"></i>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="grid lg:grid-cols-3 gap-6">
+    <!-- Left Column - Member Information -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Member Information Card -->
+        <div class="glass-card rounded-2xl border p-5 sm:p-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.2s;">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%);">
+                    <i class="fas fa-user text-xl" style="color: #22c55e;"></i>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-semibold text-gray-900">Informasi Member</h2>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+                <div class="info-item">
+                    <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Member ID</label>
+                    <p class="text-base font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-id-card text-sm" style="color: #22c55e;"></i>
+                        {{ member.member_id }}
+                    </p>
+                </div>
+                <div class="info-item">
+                    <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Nama Lengkap</label>
+                    <p class="text-base font-semibold text-gray-900">{{ member.full_name }}</p>
+                </div>
+                <div class="info-item">
+                    <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Email</label>
+                    <p class="text-base font-medium text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-envelope text-sm" style="color: #6b7280;"></i>
+                        {{ member.email|default:"-" }}
+                    </p>
+                </div>
+                <div class="info-item">
+                    <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Nomor Telepon</label>
+                    <p class="text-base font-medium text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-phone text-sm" style="color: #6b7280;"></i>
+                        {{ member.phone|default:"-" }}
+                    </p>
+                </div>
+                <div class="info-item">
+                    <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Status Registrasi</label>
+                    <p class="text-base font-medium text-gray-900">
+                        {% if member.is_registered %}
+                        <span class="status-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">
+                            <i class="fas fa-check-circle"></i>Terdaftar
+                        </span>
+                        {% else %}
+                        <span class="status-badge" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
+                            <i class="fas fa-clock"></i>Belum Terdaftar
+                        </span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="info-item">
+                    <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Total Device</label>
+                    <p class="text-base font-semibold text-gray-900">{{ devices.count }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purchase Orders History -->
+        {% if orders_with_details %}
+        <div class="glass-card rounded-2xl border p-5 sm:p-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.3s;">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.1) 100%);">
+                    <i class="fas fa-shopping-bag text-xl" style="color: #a855f7;"></i>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-semibold text-gray-900">Riwayat Pembelian Terverifikasi</h2>
+            </div>
+            <div class="space-y-4">
+                {% for item in orders_with_details %}
+                {% with order=item.order %}
+                <div class="order-card glass-card rounded-xl border p-4" style="border-color: rgba(134, 239, 172, 0.2);">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-1">Order #{{ order.id }}</h3>
+                            <p class="text-sm text-gray-600">{{ order.get_order_number }}</p>
+                        </div>
+                        <span class="status-badge" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">
+                            <i class="fas fa-check-circle"></i>Terverifikasi
+                        </span>
+                    </div>
+                    
+                    <div class="grid sm:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Tanggal Verifikasi</label>
+                            <p class="text-sm font-medium text-gray-900">
+                                {% if order.verified_at %}
+                                <i class="fas fa-calendar-check text-xs mr-1" style="color: #22c55e;"></i>
+                                {{ order.verified_at|date:"d F Y, H:i" }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Diverifikasi Oleh</label>
+                            <p class="text-sm font-medium text-gray-900">
+                                {% if order.verified_by %}
+                                <i class="fas fa-user-shield text-xs mr-1" style="color: #6b7280;"></i>
+                                {{ order.verified_by.full_name }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Jenis Produk</label>
+                            <div class="flex flex-wrap gap-2 mt-1">
+                                {% if order.qty_basic > 0 %}
+                                <span class="px-2 py-1 rounded text-xs font-medium" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                                    Basic: {{ order.qty_basic }}
+                                </span>
+                                {% endif %}
+                                {% if order.qty_professional > 0 %}
+                                <span class="px-2 py-1 rounded text-xs font-medium" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
+                                    Professional: {{ order.qty_professional }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Jumlah Unit/Blok</label>
+                            <p class="text-sm font-semibold text-gray-900">{{ order.get_total_units }} unit</p>
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Total Pembayaran</label>
+                            <p class="text-base font-bold text-gray-900" style="color: #22c55e;">
+                                Rp {{ order.total_price|floatformat:0|default:"0" }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Metode Pembayaran</label>
+                            <p class="text-sm font-medium text-gray-900">
+                                {% if order.payment_method %}
+                                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                                    {% if order.payment_method == 'transfer' %}
+                                    <i class="fas fa-university text-xs"></i>
+                                    {% elif order.payment_method == 'credit' %}
+                                    <i class="fas fa-credit-card text-xs"></i>
+                                    {% elif order.payment_method == 'installment' %}
+                                    <i class="fas fa-calendar-alt text-xs"></i>
+                                    {% elif order.payment_method == 'leasing' %}
+                                    <i class="fas fa-handshake text-xs"></i>
+                                    {% else %}
+                                    <i class="fas fa-money-bill-wave text-xs"></i>
+                                    {% endif %}
+                                    <span class="font-semibold">{{ order.get_payment_method_display }}</span>
+                                </span>
+                                {% else %}
+                                <span class="text-gray-400 italic">Tidak ditentukan</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Serial Numbers untuk Order ini -->
+                    {% if item.devices %}
+                    <div class="mt-4 pt-4 border-t" style="border-color: rgba(229, 231, 235, 0.3);">
+                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-2">Nomor Serial ({{ item.device_count }})</label>
+                        <div class="flex flex-wrap gap-2">
+                            {% for device in item.devices %}
+                            <span class="px-3 py-1.5 rounded-lg text-xs font-medium glass-card" style="border-color: rgba(34, 197, 94, 0.2);">
+                                <i class="fas fa-barcode text-xs mr-1" style="color: #22c55e;"></i>
+                                {{ device.serial_number }}
+                                {% if device.device_name %}
+                                <span class="text-gray-500">- {{ device.device_name }}</span>
+                                {% endif %}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endwith %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column - Summary -->
+    <div class="space-y-6">
+        <!-- Summary Card -->
+        <div class="glass-card rounded-2xl border p-5 sm:p-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.4s;">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%);">
+                    <i class="fas fa-chart-line text-xl" style="color: #22c55e;"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Ringkasan</h2>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Total Pembelian</label>
+                    <p class="text-2xl font-bold" style="color: #22c55e;">{{ verified_orders.count }}</p>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Total Device</label>
+                    <p class="text-2xl font-bold text-gray-900">{{ devices.count }}</p>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">Total Investasi</label>
+                    <p class="text-2xl font-bold" style="color: #22c55e;">
+                        Rp {{ total_investment|floatformat:0|default:"0" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Devices List -->
+        {% if devices %}
+        <div class="glass-card rounded-2xl border p-5 sm:p-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.5s;">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%);">
+                    <i class="fas fa-microchip text-xl" style="color: #22c55e;"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Semua Device</h2>
+            </div>
+            <div class="space-y-2 max-h-96 overflow-y-auto">
+                {% for device in devices %}
+                <div class="px-3 py-2 rounded-lg border text-sm" style="border-color: rgba(134, 239, 172, 0.2); background: rgba(134, 239, 172, 0.05);">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-barcode text-xs" style="color: #22c55e;"></i>
+                            <span class="font-medium">{{ device.serial_number }}</span>
+                        </div>
+                        {% if device.status == 'active' %}
+                        <span class="px-2 py-0.5 rounded text-xs font-medium" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">Aktif</span>
+                        {% else %}
+                        <span class="px-2 py-0.5 rounded text-xs font-medium" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">Nonaktif</span>
+                        {% endif %}
+                    </div>
+                    {% if device.device_name %}
+                    <p class="text-xs text-gray-500 mt-1">{{ device.device_name }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

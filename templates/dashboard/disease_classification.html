@@ -1,0 +1,749 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block page_title %}Klasifikasi Umum Penyakit Stroberi{% endblock %}
+{% block page_subtitle %}Referensi untuk mengenali berbagai jenis penyakit tanaman stroberi{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+    }
+    
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+    
+    .disease-hero {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+        border-radius: 2rem;
+        padding: 3rem;
+        margin-bottom: 3rem;
+        animation: fadeInUp 0.6s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .disease-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+        animation: pulse 4s ease-in-out infinite;
+    }
+    
+    .disease-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .disease-card {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(229, 231, 235, 0.6);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+        cursor: pointer;
+    }
+    
+    .disease-card:nth-child(1) { animation-delay: 0.1s; }
+    .disease-card:nth-child(2) { animation-delay: 0.2s; }
+    .disease-card:nth-child(3) { animation-delay: 0.3s; }
+    .disease-card:nth-child(4) { animation-delay: 0.4s; }
+    .disease-card:nth-child(5) { animation-delay: 0.5s; }
+    .disease-card:nth-child(6) { animation-delay: 0.6s; }
+    
+    .disease-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s ease;
+    }
+    
+    .disease-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(circle, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(50%, -50%);
+        transition: all 0.4s ease;
+        opacity: 0;
+    }
+    
+    .disease-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 24px 48px rgba(239, 68, 68, 0.15), 0 0 0 1px rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+    
+    .disease-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .disease-card:hover::after {
+        opacity: 1;
+        transform: translate(30%, -30%) scale(1.5);
+    }
+    
+    .disease-header {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .disease-icon-wrapper {
+        width: 4.5rem;
+        height: 4.5rem;
+        border-radius: 1.25rem;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.08) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        transition: all 0.4s ease;
+        flex-shrink: 0;
+    }
+    
+    .disease-icon-wrapper::before {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border-radius: 1.25rem;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 38, 0.2) 100%);
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+    
+    .disease-card:hover .disease-icon-wrapper {
+        transform: rotate(-5deg) scale(1.1);
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(220, 38, 38, 0.15) 100%);
+    }
+    
+    .disease-card:hover .disease-icon-wrapper::before {
+        opacity: 1;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .disease-icon {
+        font-size: 2rem;
+        color: #ef4444;
+        transition: all 0.3s ease;
+    }
+    
+    .disease-card:hover .disease-icon {
+        transform: scale(1.1);
+        animation: float 2s ease-in-out infinite;
+    }
+    
+    .disease-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+        background: linear-gradient(135deg, #1f2937 0%, #ef4444 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        transition: all 0.3s ease;
+    }
+    
+    .disease-card:hover .disease-title {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .disease-content {
+        color: #4b5563;
+        line-height: 1.75;
+    }
+    
+    .disease-section {
+        margin-bottom: 1.25rem;
+        padding: 1rem;
+        background: rgba(249, 250, 251, 0.8);
+        border-left: 3px solid #ef4444;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .disease-card:hover .disease-section {
+        background: rgba(254, 242, 242, 0.8);
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+    }
+    
+    .disease-section-title {
+        font-weight: 600;
+        color: #ef4444;
+        margin-bottom: 0.5rem;
+        font-size: 0.9375rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .disease-section-title i {
+        font-size: 0.875rem;
+    }
+    
+    .disease-section-content {
+        color: #6b7280;
+        font-size: 0.9375rem;
+        line-height: 1.6;
+    }
+    
+    .severity-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-top: 1rem;
+        animation: slideInLeft 0.5s ease-out;
+    }
+    
+    .severity-high {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.08) 100%);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #dc2626;
+    }
+    
+    .severity-medium {
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.08) 100%);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+        color: #d97706;
+    }
+    
+    .info-section {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 38, 0.02) 100%);
+        border: 2px solid rgba(239, 68, 68, 0.2);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        margin-top: 3rem;
+        animation: fadeInUp 0.8s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .info-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, transparent 0%, rgba(239, 68, 68, 0.03) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .info-section:hover::before {
+        opacity: 1;
+    }
+    
+    .info-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .info-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .info-item {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(229, 231, 235, 0.6);
+    }
+    
+    .info-item:hover {
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+    
+    .info-item-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+        font-size: 1.125rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .info-item-title i {
+        color: #ef4444;
+    }
+    
+    .info-item-desc {
+        color: #6b7280;
+        font-size: 0.9375rem;
+        line-height: 1.6;
+    }
+    
+    @media (max-width: 768px) {
+        .disease-hero {
+            padding: 2rem 1.5rem;
+        }
+        
+        .disease-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .disease-card {
+            padding: 1.5rem;
+        }
+        
+        .disease-icon-wrapper {
+            width: 3.5rem;
+            height: 3.5rem;
+        }
+        
+        .disease-icon {
+            font-size: 1.5rem;
+        }
+        
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Hero Section -->
+    <div class="disease-hero relative z-10">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="w-20 h-20 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.1) 100%);">
+                <i class="fas fa-virus text-4xl" style="color: #ef4444;"></i>
+            </div>
+            <div>
+                <h1 class="text-4xl sm:text-5xl font-light text-gray-900 mb-2" style="background: linear-gradient(135deg, #1f2937 0%, #ef4444 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    Klasifikasi Penyakit Stroberi
+                </h1>
+                <p class="text-gray-600 font-light text-lg">
+                    Referensi lengkap untuk mengenali dan menangani berbagai jenis penyakit pada tanaman stroberi
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disease Grid -->
+    <div class="disease-grid">
+        <!-- Disease 1: Bercak Daun -->
+        <div class="disease-card">
+            <div class="disease-header">
+                <div class="disease-icon-wrapper">
+                    <i class="fas fa-circle disease-icon"></i>
+                </div>
+                <h3 class="disease-title">Bercak Daun (Leaf Spot)</h3>
+            </div>
+            <div class="disease-content">
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-eye"></i>
+                        <span>Gejala</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Bercak coklat atau hitam pada daun, biasanya dimulai dari tepi daun. Bercak dapat membesar dan menyatu, menyebabkan daun mengering dan rontok.
+                    </div>
+                </div>
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-microscope"></i>
+                        <span>Penyebab</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Jamur atau bakteri yang berkembang dalam kondisi lembap. Penyebaran terjadi melalui air hujan, angin, atau kontak langsung.
+                    </div>
+                </div>
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-first-aid"></i>
+                        <span>Penanganan</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Buang daun yang terinfeksi, gunakan fungisida sesuai dosis, pastikan sirkulasi udara baik, dan hindari penyiraman dari atas.
+                    </div>
+                </div>
+                <div class="severity-badge severity-high">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Tingkat Keparahan: Tinggi</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disease 2: Busuk Buah -->
+        <div class="disease-card">
+            <div class="disease-header">
+                <div class="disease-icon-wrapper">
+                    <i class="fas fa-apple-alt disease-icon"></i>
+                </div>
+                <h3 class="disease-title">Busuk Buah (Fruit Rot)</h3>
+            </div>
+            <div class="disease-content">
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-eye"></i>
+                        <span>Gejala</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Buah menjadi lunak, berubah warna menjadi coklat atau hitam, dan berbau busuk. Buah yang terinfeksi tidak dapat dikonsumsi.
+                    </div>
+                </div>
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-microscope"></i>
+                        <span>Penyebab</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Jamur Botrytis cinerea atau bakteri yang menyerang buah yang terluka, terlalu matang, atau dalam kondisi lembap.
+                    </div>
+                </div>
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-first-aid"></i>
+                        <span>Penanganan</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Buang buah yang terinfeksi segera, hindari kontak buah dengan tanah, jaga kebersihan kebun, dan panen buah tepat waktu.
+                    </div>
+                </div>
+                <div class="severity-badge severity-high">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Tingkat Keparahan: Tinggi</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disease 3: Embun Tepung -->
+        <div class="disease-card">
+            <div class="disease-header">
+                <div class="disease-icon-wrapper">
+                    <i class="fas fa-snowflake disease-icon"></i>
+                </div>
+                <h3 class="disease-title">Embun Tepung (Powdery Mildew)</h3>
+            </div>
+            <div class="disease-content">
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-eye"></i>
+                        <span>Gejala</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Lapisan putih seperti tepung pada permukaan daun dan buah. Daun dapat menguning, melengkung, dan rontok.
+                    </div>
+                </div>
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-microscope"></i>
+                        <span>Penyebab</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Jamur yang berkembang dalam kondisi lembap dan suhu hangat (20-25°C). Penyebaran melalui spora yang terbawa angin.
+                    </div>
+                </div>
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-first-aid"></i>
+                        <span>Penanganan</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Gunakan fungisida sistemik, tingkatkan sirkulasi udara, kurangi kelembapan, dan hindari penyiraman di malam hari.
+                    </div>
+                </div>
+                <div class="severity-badge severity-medium">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Tingkat Keparahan: Sedang</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disease 4: Layu Verticillium -->
+        <div class="disease-card">
+            <div class="disease-header">
+                <div class="disease-icon-wrapper">
+                    <i class="fas fa-leaf disease-icon"></i>
+                </div>
+                <h3 class="disease-title">Layu Verticillium (Verticillium Wilt)</h3>
+            </div>
+            <div class="disease-content">
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-eye"></i>
+                        <span>Gejala</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Daun menguning dan layu, dimulai dari bagian bawah tanaman. Tanaman dapat mati secara bertahap.
+                    </div>
+                </div>
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-microscope"></i>
+                        <span>Penyebab</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Jamur Verticillium yang hidup di dalam tanah dan menyerang sistem akar, menyumbat pembuluh xilem tanaman.
+                    </div>
+                </div>
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-first-aid"></i>
+                        <span>Penanganan</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Rotasi tanaman, gunakan varietas tahan penyakit, pastikan drainase baik, dan hindari penanaman di tanah yang terinfeksi.
+                    </div>
+                </div>
+                <div class="severity-badge severity-high">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Tingkat Keparahan: Tinggi</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disease 5: Antraknosa -->
+        <div class="disease-card">
+            <div class="disease-header">
+                <div class="disease-icon-wrapper">
+                    <i class="fas fa-dot-circle disease-icon"></i>
+                </div>
+                <h3 class="disease-title">Antraknosa (Anthracnose)</h3>
+            </div>
+            <div class="disease-content">
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-eye"></i>
+                        <span>Gejala</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Bercak cekung berwarna coklat atau hitam pada daun, batang, dan buah. Bercak dapat membesar dan menyebabkan kematian jaringan.
+                    </div>
+                </div>
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-microscope"></i>
+                        <span>Penyebab</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Jamur Colletotrichum yang menyebar melalui air hujan, penyiraman, atau kontak langsung dengan tanaman terinfeksi.
+                    </div>
+                </div>
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-first-aid"></i>
+                        <span>Penanganan</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Buang bagian yang terinfeksi, gunakan fungisida preventif, hindari penyiraman dari atas, dan jaga kebersihan alat.
+                    </div>
+                </div>
+                <div class="severity-badge severity-high">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Tingkat Keparahan: Tinggi</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disease 6: Karat Daun -->
+        <div class="disease-card">
+            <div class="disease-header">
+                <div class="disease-icon-wrapper">
+                    <i class="fas fa-fire disease-icon"></i>
+                </div>
+                <h3 class="disease-title">Karat Daun (Leaf Rust)</h3>
+            </div>
+            <div class="disease-content">
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-eye"></i>
+                        <span>Gejala</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Bintik-bintik kecil berwarna oranye atau coklat pada permukaan bawah daun. Daun dapat menguning dan rontok.
+                    </div>
+                </div>
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-microscope"></i>
+                        <span>Penyebab</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Jamur yang berkembang dalam kondisi lembap dan suhu sedang (18-24°C). Spora menyebar melalui angin dan air.
+                    </div>
+                </div>
+                <div class="disease-section">
+                    <div class="disease-section-title">
+                        <i class="fas fa-first-aid"></i>
+                        <span>Penanganan</span>
+                    </div>
+                    <div class="disease-section-content">
+                        Gunakan fungisida, tingkatkan sirkulasi udara, kurangi kelembapan daun, dan buang daun yang terinfeksi.
+                    </div>
+                </div>
+                <div class="severity-badge severity-medium">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Tingkat Keparahan: Sedang</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Section -->
+    <div class="info-section">
+        <div class="info-title">
+            <div class="info-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div>
+                <h3 class="text-2xl font-semibold text-gray-900 mb-1">Tips Deteksi & Pencegahan</h3>
+                <p class="text-gray-600 font-light">Praktik terbaik untuk identifikasi dan pencegahan penyakit</p>
+            </div>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-item">
+                <h4 class="info-item-title">
+                    <i class="fas fa-search"></i>
+                    Deteksi Dini
+                </h4>
+                <p class="info-item-desc">
+                    Gunakan fitur deteksi AI RangBot secara rutin untuk mengidentifikasi penyakit sejak tahap awal. Deteksi dini memudahkan penanganan.
+                </p>
+            </div>
+            
+            <div class="info-item">
+                <h4 class="info-item-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Pencegahan
+                </h4>
+                <p class="info-item-desc">
+                    Jaga kebersihan kebun, pastikan sirkulasi udara baik, dan monitor kondisi lingkungan melalui sensor RangBot.
+                </p>
+            </div>
+            
+            <div class="info-item">
+                <h4 class="info-item-title">
+                    <i class="fas fa-calendar-check"></i>
+                    Monitoring Rutin
+                </h4>
+                <p class="info-item-desc">
+                    Lakukan pemeriksaan visual dan deteksi AI secara berkala. Review riwayat deteksi untuk mengidentifikasi pola.
+                </p>
+            </div>
+            
+            <div class="info-item">
+                <h4 class="info-item-title">
+                    <i class="fas fa-user-md"></i>
+                    Tindakan Cepat
+                </h4>
+                <p class="info-item-desc">
+                    Segera ambil tindakan saat penyakit terdeteksi. Isolasi tanaman terinfeksi dan gunakan pengobatan yang tepat.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

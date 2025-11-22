@@ -42,6 +42,98 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Define toggle functions early, before any HTML elements that use them -->
+    <script>
+        // Define functions immediately in global scope to avoid "function not found" errors
+        // These must be defined before any onclick handlers that reference them
+        
+        // Toggle Sidebar (Mobile)
+        window.toggleSidebar = function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+            }
+        };
+        
+        // Toggle Sidebar (Desktop - Collapse/Expand)
+        window.toggleSidebarDesktop = function(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            console.log('toggleSidebarDesktop called');
+            
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const toggleIcon = document.getElementById('sidebar-toggle-icon');
+            
+            if (!sidebar) {
+                console.error('Sidebar not found');
+                return;
+            }
+            
+            if (!mainContent) {
+                console.error('Main content not found');
+                return;
+            }
+            
+            const isExpanded = sidebar.classList.contains('sidebar-expanded');
+            console.log('Current state - isExpanded:', isExpanded);
+            console.log('Sidebar classes before:', sidebar.className);
+            console.log('Sidebar computed width before:', window.getComputedStyle(sidebar).width);
+            
+            if (isExpanded) {
+                // Collapse
+                console.log('Collapsing sidebar...');
+                sidebar.classList.remove('sidebar-expanded');
+                sidebar.classList.add('sidebar-collapsed');
+                
+                // Force width with !important via setProperty
+                sidebar.style.setProperty('width', '5rem', 'important');
+                sidebar.style.setProperty('min-width', '5rem', 'important');
+                sidebar.style.setProperty('max-width', '5rem', 'important');
+                
+                mainContent.classList.remove('sidebar-expanded-content');
+                mainContent.classList.add('sidebar-collapsed-content');
+                mainContent.style.setProperty('margin-left', '5rem', 'important');
+                mainContent.style.setProperty('transition', 'margin-left 0.3s ease-in-out', 'important');
+                
+                if (toggleIcon) {
+                    toggleIcon.style.setProperty('transform', 'rotate(180deg)', 'important');
+                }
+                localStorage.setItem('sidebarCollapsed', 'true');
+            } else {
+                // Expand
+                console.log('Expanding sidebar...');
+                sidebar.classList.remove('sidebar-collapsed');
+                sidebar.classList.add('sidebar-expanded');
+                
+                // Force width with !important via setProperty
+                sidebar.style.setProperty('width', '16rem', 'important');
+                sidebar.style.setProperty('min-width', '16rem', 'important');
+                sidebar.style.setProperty('max-width', '16rem', 'important');
+                
+                mainContent.classList.remove('sidebar-collapsed-content');
+                mainContent.classList.add('sidebar-expanded-content');
+                mainContent.style.setProperty('margin-left', '16rem', 'important');
+                mainContent.style.setProperty('transition', 'margin-left 0.3s ease-in-out', 'important');
+                
+                if (toggleIcon) {
+                    toggleIcon.style.setProperty('transform', 'rotate(0deg)', 'important');
+                }
+                localStorage.setItem('sidebarCollapsed', 'false');
+            }
+            
+            console.log('Sidebar classes after:', sidebar.className);
+            console.log('Sidebar computed width after:', window.getComputedStyle(sidebar).width);
+            console.log('Main content margin after:', window.getComputedStyle(mainContent).marginLeft);
+        };
+    </script>
+    
     <style>
         * {
             font-family: 'Space Grotesk', 'Inter', sans-serif;
@@ -111,8 +203,81 @@
         }
         
         /* Sidebar toggle for mobile */
-        #sidebar.show {
-            transform: translateX(0) !important;
+        @media (max-width: 1023px) {
+            #sidebar.show {
+                transform: translateX(0) !important;
+            }
+            
+            #sidebar-overlay.show {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+        
+        /* Sidebar Collapse Styles */
+        /* Sidebar width - use inline style priority */
+        #sidebar.sidebar-expanded {
+            width: 16rem !important;
+            min-width: 16rem !important;
+            max-width: 16rem !important;
+        }
+        
+        #sidebar.sidebar-collapsed {
+            width: 5rem !important;
+            min-width: 5rem !important;
+            max-width: 5rem !important;
+        }
+        
+        /* Ensure sidebar width is applied */
+        #sidebar {
+            transition: width 0.3s ease-in-out !important;
+            box-sizing: border-box !important;
+        }
+        
+        .sidebar-text {
+            opacity: 1;
+            transition: opacity 0.2s ease-in-out;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        
+        .sidebar-collapsed .sidebar-text {
+            opacity: 0;
+            width: 0;
+        }
+        
+        .sidebar-section {
+            transition: opacity 0.2s ease-in-out;
+        }
+        
+        .sidebar-collapsed .sidebar-section {
+            opacity: 0;
+            height: 0;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .sidebar-collapsed .cs-nav-link {
+            justify-content: center;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .sidebar-collapsed #sidebar {
+            width: 5rem;
+        }
+        
+        /* Sidebar toggle icon rotation */
+        .sidebar-collapsed #sidebar-toggle-icon {
+            transform: rotate(180deg);
+        }
+        
+        /* Sidebar header text */
+        .sidebar-collapsed .sidebar-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
         }
         
         /* Main content adjustment */
@@ -120,20 +285,30 @@
             margin-left: 16rem;
         }
         
+        main.sidebar-collapsed-content {
+            margin-left: 5rem;
+        }
+        
         @media (max-width: 1023px) {
-            main.sidebar-expanded-content {
+            main.sidebar-expanded-content,
+            main.sidebar-collapsed-content {
                 margin-left: 0;
             }
         }
         
+        /* Sidebar header styling */
+        #sidebar > div:first-child {
+            min-height: 3.5rem;
+        }
+        
         /* Hide all Django messages/notifications/toast alerts */
         /* Hide message containers */
-        div[class*="bg-green-50"][class*="border"],
-        div[class*="bg-red-50"][class*="border"],
-        div[class*="bg-yellow-50"][class*="border"],
-        div[class*="border-green"],
-        div[class*="border-red"],
-        div[class*="border-yellow"] {
+        div[class*="bg-green-50"][class*="border"]:not(:has(table)):not(:has(.status-badge)),
+        div[class*="bg-red-50"][class*="border"]:not(:has(table)):not(:has(.status-badge)),
+        div[class*="bg-yellow-50"][class*="border"]:not(:has(table)):not(:has(.status-badge)),
+        div[class*="border-green"]:not(:has(table)):not(:has(.status-badge)),
+        div[class*="border-red"]:not(:has(table)):not(:has(.status-badge)),
+        div[class*="border-yellow"]:not(:has(table)):not(:has(.status-badge)) {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
@@ -143,13 +318,13 @@
             overflow: hidden !important;
         }
         
-        /* Hide all message boxes with specific patterns - using class selectors */
-        div[class*="bg-green-50"],
-        div[class*="bg-red-50"],
-        div[class*="bg-yellow-50"],
-        div[class*="border-green"],
-        div[class*="border-red"],
-        div[class*="border-yellow"] {
+        /* Hide all message boxes with specific patterns - BUT NOT FAQ content */
+        div[class*="bg-green-50"]:not(:has(table)):not(:has(.status-badge)),
+        div[class*="bg-red-50"]:not(:has(table)):not(:has(.status-badge)),
+        div[class*="bg-yellow-50"]:not(:has(table)):not(:has(.status-badge)),
+        div[class*="border-green"]:not(:has(table)):not(:has(.status-badge)),
+        div[class*="border-red"]:not(:has(table)):not(:has(.status-badge)),
+        div[class*="border-yellow"]:not(:has(table)):not(:has(.status-badge)) {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
@@ -159,13 +334,13 @@
             overflow: hidden !important;
         }
         
-        /* Hide message containers that contain check/exclamation icons */
-        div.rounded-xl.border:has(.fa-check-circle),
-        div.rounded-xl.border:has(.fa-exclamation-circle),
-        div.rounded-xl.border:has(.fa-exclamation-triangle),
-        div.rounded-lg.border:has(.fa-check-circle),
-        div.rounded-lg.border:has(.fa-exclamation-circle),
-        div.rounded-lg.border:has(.fa-exclamation-triangle) {
+        /* Hide message containers that contain check/exclamation icons - BUT NOT FAQ status badges */
+        div.rounded-xl.border:has(.fa-check-circle):not(:has(table)):not(:has(.status-badge)),
+        div.rounded-xl.border:has(.fa-exclamation-circle):not(:has(table)):not(:has(.status-badge)),
+        div.rounded-xl.border:has(.fa-exclamation-triangle):not(:has(table)):not(:has(.status-badge)),
+        div.rounded-lg.border:has(.fa-check-circle):not(:has(table)):not(:has(.status-badge)),
+        div.rounded-lg.border:has(.fa-exclamation-circle):not(:has(table)):not(:has(.status-badge)),
+        div.rounded-lg.border:has(.fa-exclamation-triangle):not(:has(table)):not(:has(.status-badge)) {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
@@ -173,6 +348,27 @@
             margin: 0 !important;
             padding: 0 !important;
             overflow: hidden !important;
+        }
+        
+        /* Ensure FAQ status badges and tables are always visible */
+        .status-badge,
+        table,
+        table .status-badge,
+        td .status-badge,
+        .glass-card:has(table),
+        .faq-row,
+        .faq-row .status-badge {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        table {
+            display: table !important;
+        }
+        
+        .status-badge {
+            display: inline-flex !important;
         }
     </style>
     
@@ -214,7 +410,8 @@
                 <!-- User Info & Sign Out -->
                 <div class="flex items-center gap-3 lg:gap-4">
                     {% if cs %}
-                    <div class="hidden sm:flex items-center gap-3 px-4 py-2 rounded-lg border" style="border-color: rgba(134, 239, 172, 0.3); background: rgba(255, 255, 255, 0.7);">
+                    <!-- User Info - Link to Profile -->
+                    <a href="{% url 'main:cs_settings' %}" class="hidden sm:flex items-center gap-3 px-4 py-2 rounded-lg border transition-all duration-200 hover:bg-gray-50 cursor-pointer" style="border-color: rgba(134, 239, 172, 0.3); background: rgba(255, 255, 255, 0.7);" onmouseover="this.style.borderColor='rgba(134, 239, 172, 0.5)'; this.style.background='rgba(134, 239, 172, 0.1)';" onmouseout="this.style.borderColor='rgba(134, 239, 172, 0.3)'; this.style.background='rgba(255, 255, 255, 0.7)';">
                         <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: rgba(134, 239, 172, 0.2);">
                             <span class="text-sm font-medium" style="color: #22c55e;">{{ cs.full_name|first|upper }}</span>
                         </div>
@@ -222,8 +419,9 @@
                             <span class="text-xs font-light text-gray-900">{{ cs.full_name|truncatewords:2 }}</span>
                             <span class="text-[10px] font-light text-gray-500">{{ cs.email|truncatewords:1 }}</span>
                         </div>
-                    </div>
+                    </a>
                     {% endif %}
+                    <!-- Sign Out Button -->
                     <a href="{% url 'main:cs_logout' %}" class="px-5 lg:px-6 py-2 lg:py-2.5 transition-all duration-200 font-light text-sm lg:text-base rounded-lg text-white relative overflow-hidden group" style="background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); box-shadow: 0 4px 12px rgba(134, 239, 172, 0.3);" onmouseover="this.style.boxShadow='0 6px 16px rgba(134, 239, 172, 0.4)';" onmouseout="this.style.boxShadow='0 4px 12px rgba(134, 239, 172, 0.3)';">
                         <span class="relative z-10">Sign Out</span>
                     </a>
@@ -235,80 +433,87 @@
     <!-- Sidebar Navigation -->
     {% block navigation_capsule %}
     <!-- Mobile Menu Button -->
-    <button id="sidebar-toggle" class="lg:hidden fixed top-20 right-4 z-50 w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300" style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(229, 231, 235, 0.3); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);" onmouseover="this.style.background='rgba(134, 239, 172, 0.1)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.9)';">
+    <button id="sidebar-toggle" class="lg:hidden fixed top-20 right-4 z-50 w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300" style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(229, 231, 235, 0.3); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);" onmouseover="this.style.background='rgba(134, 239, 172, 0.1)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.9)';" onclick="window.toggleSidebar()">
         <i class="fas fa-bars text-gray-700"></i>
     </button>
 
     <!-- Sidebar Overlay (Mobile) -->
-    <div id="sidebar-overlay" class="lg:hidden fixed inset-0 bg-black/50 z-40 opacity-0 invisible transition-all duration-300"></div>
+    <div id="sidebar-overlay" class="lg:hidden fixed inset-0 bg-black/50 z-40 opacity-0 invisible transition-all duration-300" onclick="window.toggleSidebar()"></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed top-16 sm:top-18 md:top-20 left-0 h-[calc(100vh-4rem)] sm:h-[calc(100vh-4.5rem)] md:h-[calc(100vh-5rem)] z-40 transform -translate-x-full lg:translate-x-0 transition-all duration-300 ease-in-out overflow-hidden flex flex-col" style="background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border-right: 1px solid rgba(134, 239, 172, 0.2); box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.3);">
-        <!-- Sidebar Header -->
+    <aside id="sidebar" class="fixed top-16 sm:top-18 md:top-20 left-0 h-[calc(100vh-4rem)] sm:h-[calc(100vh-4.5rem)] md:h-[calc(100vh-5rem)] z-40 transform -translate-x-full lg:translate-x-0 transition-all duration-300 ease-in-out overflow-hidden flex flex-col sidebar-expanded" style="background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border-right: 1px solid rgba(134, 239, 172, 0.2); box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.3); width: 16rem;">
+        <!-- Sidebar Header with Toggle Button -->
         <div class="flex items-center justify-between p-4 border-b backdrop-blur-sm" style="border-color: rgba(134, 239, 172, 0.15); background: rgba(255, 255, 255, 0.2); flex-shrink: 0;">
-            <div>
+            <div class="sidebar-text">
                 <p class="text-xs font-semibold uppercase tracking-wider" style="color: #6b7280; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);">Menu</p>
             </div>
+            <button id="sidebar-toggle-desktop" type="button" class="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-300 hover:scale-110 cursor-pointer z-50 relative" style="background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(134, 239, 172, 0.3); box-shadow: 0 2px 8px rgba(134, 239, 172, 0.15); pointer-events: auto;" title="Toggle Sidebar" onclick="if(typeof window.toggleSidebarDesktop === 'function') { window.toggleSidebarDesktop(event); } else { console.error('toggleSidebarDesktop function not found'); }" onmouseover="this.style.background='rgba(134, 239, 172, 0.2)'; this.style.borderColor='rgba(134, 239, 172, 0.5)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.5)'; this.style.borderColor='rgba(134, 239, 172, 0.3)';">
+                <i class="fas fa-chevron-left text-gray-700 text-xs transition-transform duration-300" id="sidebar-toggle-icon"></i>
+            </button>
         </div>
             
         <!-- Sidebar Content (Scrollable) -->
-        <div class="flex-1 overflow-y-auto green-scrollbar p-4 space-y-1">
+        <div class="flex-1 overflow-y-auto green-scrollbar p-4 space-y-1 sidebar-content">
             <!-- Dashboard -->
             <a href="{% url 'main:cs_dashboard' %}" class="cs-nav-link flex items-center gap-3 px-4 py-3 rounded-xl font-light text-sm transition-all duration-300 group" style="color: #6b7280;" data-page="dashboard" title="Dashboard">
                 <i class="fas fa-home w-5 text-center flex-shrink-0"></i>
-                <span>Dashboard</span>
+                <span class="sidebar-text">Dashboard</span>
             </a>
             
             <!-- Divider -->
             <div class="my-4 border-t" style="border-color: rgba(134, 239, 172, 0.2);"></div>
             
+            <!-- Customer Service Section -->
+            <div class="px-4 py-2 sidebar-section">
+                <p class="text-xs font-semibold uppercase tracking-wider sidebar-text" style="color: #6b7280; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);">Layanan</p>
+            </div>
+            
             <!-- Messages -->
             <a href="{% url 'main:cs_messages' %}" class="cs-nav-link flex items-center gap-3 px-4 py-3 rounded-xl font-light text-sm transition-all duration-300 group" style="color: #6b7280;" data-page="messages" title="Hubungi Customer Service">
                 <i class="fas fa-envelope w-5 text-center flex-shrink-0"></i>
-                <span>Pesan CS</span>
+                <span class="sidebar-text">Pesan CS</span>
                 {% if new_messages_count and new_messages_count > 0 %}
-                <span class="ml-auto px-2 py-0.5 rounded-full text-xs font-medium text-white" style="background: #ef4444;">{{ new_messages_count }}</span>
+                <span class="ml-auto px-2 py-0.5 rounded-full text-xs font-medium text-white sidebar-text" style="background: #ef4444;">{{ new_messages_count }}</span>
                 {% endif %}
             </a>
             
             <!-- FAQ -->
             <a href="{% url 'main:cs_faq' %}" class="cs-nav-link flex items-center gap-3 px-4 py-3 rounded-xl font-light text-sm transition-all duration-300 group" style="color: #6b7280;" data-page="faq" title="FAQ Management">
                 <i class="fas fa-question-circle w-5 text-center flex-shrink-0"></i>
-                <span>FAQ</span>
+                <span class="sidebar-text">FAQ</span>
             </a>
             
             <!-- Forum -->
             <a href="{% url 'main:cs_forum' %}" class="cs-nav-link flex items-center gap-3 px-4 py-3 rounded-xl font-light text-sm transition-all duration-300 group" style="color: #6b7280;" data-page="forum" title="Forum Monitoring">
                 <i class="fas fa-comments w-5 text-center flex-shrink-0"></i>
-                <span>Forum</span>
+                <span class="sidebar-text">Forum</span>
             </a>
             
             <!-- Member Info -->
             <a href="{% url 'main:cs_members' %}" class="cs-nav-link flex items-center gap-3 px-4 py-3 rounded-xl font-light text-sm transition-all duration-300 group" style="color: #6b7280;" data-page="members" title="Informasi Member">
                 <i class="fas fa-users w-5 text-center flex-shrink-0"></i>
-                <span>Member Info</span>
+                <span class="sidebar-text">Member Info</span>
             </a>
             
             <!-- Divider -->
             <div class="my-4 border-t" style="border-color: rgba(134, 239, 172, 0.2);"></div>
             
-            <!-- Notifications -->
-            <a href="{% url 'main:cs_notifications' %}" class="cs-nav-link flex items-center gap-3 px-4 py-3 rounded-xl font-light text-sm transition-all duration-300 group" style="color: #6b7280;" data-page="notifications" title="Notifikasi">
-                <i class="fas fa-bell w-5 text-center flex-shrink-0"></i>
-                <span>Notifikasi</span>
-            </a>
+            <!-- System Section -->
+            <div class="px-4 py-2 sidebar-section">
+                <p class="text-xs font-semibold uppercase tracking-wider sidebar-text" style="color: #6b7280; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);">Sistem</p>
+            </div>
             
-            <!-- Settings -->
-            <a href="{% url 'main:cs_settings' %}" class="cs-nav-link flex items-center gap-3 px-4 py-3 rounded-xl font-light text-sm transition-all duration-300 group" style="color: #6b7280;" data-page="settings" title="Pengaturan">
-                <i class="fas fa-cog w-5 text-center flex-shrink-0"></i>
-                <span>Pengaturan</span>
+            <!-- Activity Log / Riwayat Log -->
+            <a href="{% url 'main:cs_activity_log_list' %}" class="cs-nav-link flex items-center gap-3 px-4 py-3 rounded-xl font-light text-sm transition-all duration-300 group" style="color: #6b7280;" data-page="activity_log" title="Riwayat Log">
+                <i class="fas fa-history w-5 text-center flex-shrink-0"></i>
+                <span class="sidebar-text">Riwayat Log</span>
             </a>
         </div>
     </aside>
     {% endblock %}
 
     <!-- Main Content -->
-    <main id="main-content" class="{% block main_padding %}pt-20 sm:pt-24 md:pt-28 lg:pt-32{% endblock %} transition-all duration-300 min-h-screen sidebar-expanded-content">
+    <main id="main-content" class="{% block main_padding %}pt-20 sm:pt-24 md:pt-28 lg:pt-32{% endblock %} transition-all duration-300 min-h-screen sidebar-expanded-content" style="margin-left: 16rem;">
         <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6">
             {% block content %}{% endblock %}
         </div>
@@ -316,105 +521,166 @@
     
     {% block extra_js %}
     <script>
+        // Functions are already defined in the head section (before HTML elements)
+        // This section is for event listeners and other initialization code
+        
         // Remove all Django messages/notifications/toast alerts
         function removeAllMessages() {
-            // Remove message containers
+            // Skip entirely on FAQ pages
+            const currentPath = window.location.pathname;
+            if (currentPath.includes('/cs/faq')) {
+                return;
+            }
+            
+            // Only remove message containers, NOT FAQ status badges or other content
             const messageContainers = document.querySelectorAll('div[class*="bg-green-50"], div[class*="bg-red-50"], div[class*="bg-yellow-50"], div[class*="border-green"], div[class*="border-red"], div[class*="border-yellow"]');
             messageContainers.forEach(container => {
-                // Check if it contains message icons
+                // Skip if it's inside a table (FAQ status badges) or has class 'status-badge'
+                if (container.closest('table') || container.closest('.status-badge') || container.classList.contains('status-badge')) {
+                    return;
+                }
+                // Skip if it's inside glass-card with table (FAQ page structure)
+                if (container.closest('.glass-card') && container.closest('.glass-card').querySelector('table')) {
+                    return;
+                }
+                // Check if it contains message icons AND is a message box (not FAQ content)
                 const hasMessageIcon = container.querySelector('.fa-check-circle, .fa-exclamation-circle, .fa-exclamation-triangle');
-                if (hasMessageIcon || container.textContent.trim().length < 200) {
+                if (hasMessageIcon && container.textContent.trim().length < 200 && !container.closest('table') && !container.closest('.glass-card:has(table)')) {
                     container.remove();
                 }
             });
             
-            // Remove containers with message icons
-            const iconContainers = document.querySelectorAll('div:has(.fa-check-circle), div:has(.fa-exclamation-circle), div:has(.fa-exclamation-triangle)');
-            iconContainers.forEach(container => {
-                // Only remove if it looks like a message box (has border, rounded, etc.)
-                if (container.classList.contains('rounded-xl') || container.classList.contains('rounded-lg') || 
-                    container.classList.contains('border') || container.textContent.trim().length < 200) {
-                    container.remove();
-                }
-            });
-            
-            // Remove message wrapper divs
+            // Remove message wrapper divs (only if they contain actual messages, not FAQ content)
             const messageWrappers = document.querySelectorAll('div.mb-6.space-y-2, div.mb-8.space-y-2');
             messageWrappers.forEach(wrapper => {
+                // Skip if wrapper is inside main content area with tables (FAQ page)
+                if (wrapper.closest('table') || wrapper.querySelector('table') || wrapper.closest('.glass-card:has(table)')) {
+                    return;
+                }
                 const hasMessages = wrapper.querySelector('div[class*="bg-green"], div[class*="bg-red"], div[class*="bg-yellow"]');
-                if (hasMessages) {
+                if (hasMessages && !wrapper.closest('table') && !wrapper.closest('.glass-card:has(table)')) {
                     wrapper.remove();
                 }
             });
         }
         
-        // Run on page load
+        // Run on page load - but skip on FAQ page
         document.addEventListener('DOMContentLoaded', function() {
+            // Don't remove messages on FAQ page
+            const currentPath = window.location.pathname;
+            if (!currentPath.includes('/cs/faq')) {
             removeAllMessages();
             
             // Also run after a short delay to catch dynamically added messages
             setTimeout(removeAllMessages, 100);
             setTimeout(removeAllMessages, 500);
             setTimeout(removeAllMessages, 1000);
+            }
         });
         
-        // Run on any DOM changes (MutationObserver)
+        // Run on any DOM changes (MutationObserver) - but skip on FAQ page
+        const currentPath = window.location.pathname;
+        if (!currentPath.includes('/cs/faq')) {
         const observer = new MutationObserver(function(mutations) {
+                // Only remove messages if the mutation is not in a table or status-badge
+                let shouldRemove = true;
+                mutations.forEach(mutation => {
+                    mutation.addedNodes.forEach(node => {
+                        if (node.nodeType === 1) { // Element node
+                            if (node.closest('table') || node.closest('.status-badge') || 
+                                node.classList.contains('status-badge') || 
+                                node.querySelector('table') || node.querySelector('.status-badge')) {
+                                shouldRemove = false;
+                            }
+                        }
+                    });
+                });
+                if (shouldRemove) {
             removeAllMessages();
+                }
         });
         
         observer.observe(document.body, {
             childList: true,
             subtree: true
         });
-        
-        // Toggle Sidebar (Mobile)
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            
-            sidebar.classList.toggle('show');
-            overlay.classList.toggle('opacity-0');
-            overlay.classList.toggle('invisible');
-            
-            if (sidebar.classList.contains('show')) {
-                sidebar.style.transform = 'translateX(0)';
-            } else {
-                sidebar.style.transform = 'translateX(-100%)';
-            }
         }
         
-        // Add event listener to toggle button
+        // Initialize sidebar state from localStorage
         document.addEventListener('DOMContentLoaded', function() {
-            const toggleButton = document.getElementById('sidebar-toggle');
-            if (toggleButton) {
-                toggleButton.addEventListener('click', toggleSidebar);
+            // Mobile toggle
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', toggleSidebar);
             }
             
-            // Close sidebar when clicking overlay
-            const overlay = document.getElementById('sidebar-overlay');
-            if (overlay) {
-                overlay.addEventListener('click', toggleSidebar);
-            }
-            
-            // Close sidebar on mobile when clicking a link
-            if (window.innerWidth < 1024) {
-                document.querySelectorAll('.cs-nav-link').forEach(link => {
-                    link.addEventListener('click', () => {
-                        setTimeout(toggleSidebar, 100);
-                    });
+            // Desktop toggle
+            const toggleBtnDesktop = document.getElementById('sidebar-toggle-desktop');
+            if (toggleBtnDesktop) {
+                console.log('Desktop toggle button found, adding event listener');
+                toggleBtnDesktop.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Desktop toggle button clicked via event listener');
+                    if (typeof window.toggleSidebarDesktop === 'function') {
+                        window.toggleSidebarDesktop(e);
+                    } else {
+                        console.error('toggleSidebarDesktop function not found');
+                    }
                 });
+            } else {
+                console.error('Desktop toggle button not found');
             }
+            
+            // Restore sidebar state (Desktop only)
+            if (window.innerWidth >= 1024) {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.getElementById('main-content');
+                const toggleIcon = document.getElementById('sidebar-toggle-icon');
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                
+                if (sidebar && mainContent) {
+                    if (isCollapsed) {
+                        sidebar.classList.remove('sidebar-expanded');
+                        sidebar.classList.add('sidebar-collapsed');
+                        sidebar.style.width = '5rem';
+                        
+                        mainContent.classList.remove('sidebar-expanded-content');
+                        mainContent.classList.add('sidebar-collapsed-content');
+                        mainContent.style.marginLeft = '5rem';
+                        
+                        if (toggleIcon) {
+                            toggleIcon.style.transform = 'rotate(180deg)';
+                        }
+                    } else {
+                        sidebar.classList.add('sidebar-expanded');
+                        sidebar.style.width = '16rem';
+                        mainContent.classList.add('sidebar-expanded-content');
+                        mainContent.style.marginLeft = '16rem';
+                    }
+                }
+            }
+            
+            // Close sidebar when clicking on a link (mobile)
+            const navLinks = document.querySelectorAll('.cs-nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 1024) {
+                        if (typeof window.toggleSidebar === 'function') {
+                            window.toggleSidebar();
+                        }
+                    }
+                });
+            });
             
             // Highlight active menu item
             const currentPath = window.location.pathname;
-            const navLinks = document.querySelectorAll('.cs-nav-link');
-            
             navLinks.forEach(link => {
                 const href = link.getAttribute('href');
                 const dataPage = link.getAttribute('data-page');
                 
-                if (currentPath === href || (dataPage && currentPath.includes(dataPage))) {
+                // Exact match or path contains the data-page value
+                if (currentPath === href || (dataPage && (currentPath.includes('/' + dataPage + '/') || currentPath.endsWith('/' + dataPage) || currentPath.endsWith('/' + dataPage + '/')))) {
                     link.classList.add('active');
                 }
             });

@@ -1,0 +1,212 @@
+{% extends 'cs/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .activity-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+    }
+    
+    .activity-card:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(134, 239, 172, 0.15);
+    }
+    
+    .activity-icon {
+        transition: all 0.3s ease;
+    }
+    
+    .activity-card:hover .activity-icon {
+        transform: scale(1.1);
+    }
+    
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen animated-bg pb-12 fade-in-up">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Header -->
+        <div class="mb-8 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-light tracking-tight mb-2 gradient-text">
+                        Riwayat Log
+                    </h1>
+                    <p class="text-gray-600 font-light text-sm sm:text-base">
+                        Log semua aktivitas penting yang dilakukan di sistem
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2 fade-in-up" style="animation-delay: 0.2s;">
+            {% for message in messages %}
+            <div class="p-4 rounded-xl border font-light text-sm {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% elif message.tags == 'warning' %}bg-yellow-50 border-yellow-200 text-yellow-800{% else %}bg-green-50 border-green-200 text-green-800{% endif %}">
+                <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %} mr-2"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Filters -->
+        <div class="glass-card rounded-2xl border p-5 sm:p-6 mb-6 fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.2s;">
+            <form method="get" action="{% url 'main:cs_activity_log_list' %}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Tipe Aktivitas</label>
+                    <select name="action_type" class="w-full px-3 py-2 rounded-lg border text-sm" style="border-color: rgba(229, 231, 235, 0.6);">
+                        <option value="">Semua Tipe</option>
+                        {% for action_type, display_name in action_types %}
+                        <option value="{{ action_type }}" {% if action_filter == action_type %}selected{% endif %}>{{ display_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Pencarian</label>
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="Cari aktivitas..." class="w-full px-3 py-2 rounded-lg border text-sm" style="border-color: rgba(229, 231, 235, 0.6);">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Dari Tanggal</label>
+                    <input type="date" name="date_from" value="{{ date_from }}" class="w-full px-3 py-2 rounded-lg border text-sm" style="border-color: rgba(229, 231, 235, 0.6);">
+                </div>
+                <div class="flex items-end gap-2">
+                    <div class="flex-1">
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Sampai Tanggal</label>
+                        <input type="date" name="date_to" value="{{ date_to }}" class="w-full px-3 py-2 rounded-lg border text-sm" style="border-color: rgba(229, 231, 235, 0.6);">
+                    </div>
+                    <button type="submit" class="px-4 py-2 rounded-lg text-white text-sm font-light transition-all duration-300" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);" onmouseover="this.style.boxShadow='0 6px 16px rgba(34, 197, 94, 0.4)';" onmouseout="this.style.boxShadow='0 4px 12px rgba(34, 197, 94, 0.3)';">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Activity Logs List -->
+        <div class="glass-card rounded-2xl border overflow-hidden fade-in-up" style="border-color: rgba(134, 239, 172, 0.2); animation-delay: 0.3s;">
+            {% if logs %}
+            <div class="divide-y max-h-[600px] overflow-y-auto green-scrollbar" style="border-color: rgba(229, 231, 235, 0.3);">
+                {% for log in logs %}
+                <div class="activity-card p-4 sm:p-5">
+                    <div class="flex items-start gap-3 sm:gap-4">
+                        <!-- Icon -->
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 activity-icon" 
+                             style="{% if log.action_type == 'order_verified' or log.action_type == 'member_created' or log.action_type == 'serial_created' or log.action_type == 'member_activated' %}background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%);{% elif log.action_type == 'order_rejected' or log.action_type == 'member_deactivated' or log.action_type == 'admin_deactivated' %}background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%);{% else %}background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);{% endif %}">
+                            {% if log.action_type == 'order_verified' %}
+                            <i class="fas fa-check-circle text-lg sm:text-xl" style="color: #22c55e;"></i>
+                            {% elif log.action_type == 'order_rejected' %}
+                            <i class="fas fa-times-circle text-lg sm:text-xl" style="color: #ef4444;"></i>
+                            {% elif log.action_type == 'order_created' %}
+                            <i class="fas fa-shopping-cart text-lg sm:text-xl" style="color: #3b82f6;"></i>
+                            {% elif log.action_type == 'member_created' or log.action_type == 'member_registered' %}
+                            <i class="fas fa-user-plus text-lg sm:text-xl" style="color: #a855f7;"></i>
+                            {% elif log.action_type == 'forum_post_created' %}
+                            <i class="fas fa-comment-dots text-lg sm:text-xl" style="color: #f59e0b;"></i>
+                            {% elif log.action_type == 'forum_comment_created' %}
+                            <i class="fas fa-reply text-lg sm:text-xl" style="color: #f59e0b;"></i>
+                            {% else %}
+                            <i class="fas fa-bell text-lg sm:text-xl" style="color: #86efac;"></i>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
+                                <div>
+                                    <h3 class="text-sm sm:text-base font-semibold text-gray-900 mb-1">
+                                        {{ log.get_action_type_display }}
+                                    </h3>
+                                    <p class="text-xs sm:text-sm font-light text-gray-600 line-clamp-2">
+                                        {{ log.description }}
+                                    </p>
+                                </div>
+                                <div class="text-right flex-shrink-0 flex flex-col items-end gap-2">
+                                    <div>
+                                        <p class="text-xs font-light text-gray-500 whitespace-nowrap">
+                                            {{ log.created_at|date:"d M Y" }}
+                                        </p>
+                                        <p class="text-xs font-light text-gray-400 whitespace-nowrap">
+                                            {{ log.created_at|date:"H:i" }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Info -->
+                            <div class="flex flex-wrap items-center gap-3 mt-3 pt-3 border-t" style="border-color: rgba(229, 231, 235, 0.3);">
+                                {% if log.related_order %}
+                                <div class="flex items-center gap-1.5 text-xs text-gray-600">
+                                    <i class="fas fa-shopping-bag text-xs"></i>
+                                    <span>Order #{{ log.related_order.id }}</span>
+                                </div>
+                                {% endif %}
+                                {% if log.related_member %}
+                                <div class="flex items-center gap-1.5 text-xs text-gray-600">
+                                    <i class="fas fa-user text-xs"></i>
+                                    <span>{{ log.related_member.member_id }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="flex items-center gap-1.5 text-xs text-gray-600">
+                                    <i class="fas fa-user-circle text-xs"></i>
+                                    <span>{% if log.performed_by %}{{ log.performed_by.full_name }}{% else %}Sistem{% endif %}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-16">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(229, 231, 235, 0.3);">
+                    <i class="fas fa-history text-4xl text-gray-400"></i>
+                </div>
+                <p class="text-gray-500 font-light text-lg">Tidak ada log aktivitas ditemukan</p>
+                <p class="text-gray-400 font-light text-sm mt-2">
+                    {% if search_query or action_filter or date_from or date_to %}
+                    Coba ubah filter atau kata kunci pencarian
+                    {% else %}
+                    Belum ada aktivitas yang tercatat di sistem
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

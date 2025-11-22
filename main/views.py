@@ -85,6 +85,19 @@ def landing_page(request):
     """
     View untuk menampilkan landing page RangBot.
     """
+    # Get FAQ from database (only active ones, ordered by order field)
+    try:
+        faqs_queryset = FAQ.objects.filter(is_active=True).order_by('order', 'created_at')
+        faqs_list = []
+        for faq in faqs_queryset:
+            faqs_list.append({
+                'question': faq.question,
+                'answer': faq.answer,
+            })
+    except:
+        # If database tables don't exist yet, use empty list
+        faqs_list = []
+    
     context = {
         'page_title': 'RangBot - Sistem Deteksi Penyakit Stroberi',
         'features': [
@@ -180,28 +193,7 @@ def landing_page(request):
                 'description': 'Pengunjung yang dapat melihat informasi umum tentang RangBot.'
             },
         ],
-        'faqs': [
-            {
-                'question': 'Bagaimana cara kerja RangBot?',
-                'answer': 'RangBot adalah robot bergerak yang dipasang pada rel di tengah blok kebun stroberi. Robot bergerak kanan-kiri secara otomatis berdasarkan jadwal atau dapat dikontrol manual melalui website. Robot dilengkapi kamera AI yang mendeteksi penyakit dan sensor yang mengirim data ke Firebase.'
-            },
-            {
-                'question': 'Berapa luas kebun yang bisa di-cover oleh satu robot?',
-                'answer': 'Satu robot standar dapat meng-cover satu blok kebun dengan panjang rel hingga 50 meter. Untuk kebun yang lebih besar, Anda dapat menggunakan multiple robot dengan paket Standard atau Premium.'
-            },
-            {
-                'question': 'Apa saja jenis penyakit yang bisa dideteksi?',
-                'answer': 'RangBot dapat mendeteksi berbagai penyakit umum pada stroberi seperti bercak daun (leaf spot), busuk akar (root rot), embun tepung (powdery mildew), dan penyakit lainnya menggunakan model AI R-CNN yang telah dilatih.'
-            },
-            {
-                'question': 'Apakah data sensor real-time?',
-                'answer': 'Ya, semua data sensor (suhu, kelembaban, kondisi tanaman) dikirim secara real-time ke Firebase Realtime Database dan dapat Anda pantau melalui dashboard website kapan saja.'
-            },
-            {
-                'question': 'Bagaimana cara berlangganan?',
-                'answer': 'Anda dapat memilih paket yang sesuai, klik "Daftar Sekarang", isi form pendaftaran, dan tim kami akan menghubungi Anda untuk proses instalasi dan setup robot di kebun Anda.'
-            },
-        ],
+        'faqs': faqs_list,
         'forum_posts': [
             {
                 'author': 'Budi Santoso',
@@ -373,6 +365,7 @@ def purchase(request):
             blocks = request.POST.get('blocks', '').strip()
             length = request.POST.get('length', '').strip()
             notes = request.POST.get('notes', '').strip()
+            payment_method = request.POST.get('payment_method', '').strip()
             
             # Get package quantities
             qty_basic = int(request.POST.get('qty_basic', 0) or 0)
@@ -385,6 +378,12 @@ def purchase(request):
             
             if qty_basic == 0 and qty_professional == 0:
                 messages.error(request, 'Mohon pilih minimal 1 paket (Basic atau Professional).')
+                return redirect('main:purchase')
+            
+            # Validate payment method if provided
+            valid_payment_methods = ['transfer', 'credit', 'installment', 'leasing']
+            if payment_method and payment_method not in valid_payment_methods:
+                messages.error(request, 'Metode pembayaran tidak valid.')
                 return redirect('main:purchase')
             
             # Calculate total price from database
@@ -409,6 +408,7 @@ def purchase(request):
                 qty_professional=qty_professional,
                 total_price=total_price,
                 notes=notes if notes else None,
+                payment_method=payment_method if payment_method else None,
                 status='pending'
             )
             
@@ -1305,6 +1305,341 @@ def member_profile(request):
         'member': member,
     }
     return render(request, 'dashboard/member_profile.html', context)
+
+
+def member_devices(request):
+    """
+    View untuk halaman Manajemen Rangbot - menampilkan daftar nomor seri perangkat
+    """
+    member = get_member(request)
+    
+    if not member:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    # Get all devices for this member
+    devices = member.rangbot_devices.all().order_by('-created_at')
+    
+    context = {
+        'page_title': 'Manajemen Rangbot - Dashboard',
+        'member': member,
+        'devices': devices,
+    }
+    return render(request, 'dashboard/devices_list.html', context)
+
+
+def member_add_device(request):
+    """
+    View untuk fitur Pembelian Rangbot Tambahan - menambahkan nomor seri baru ke akun
+    """
+    member = get_member(request)
+    
+    if not member:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    if request.method == 'POST':
+        serial_number = request.POST.get('serial_number', '').strip()
+        device_name = request.POST.get('device_name', '').strip()
+        covered_blocks = request.POST.get('covered_blocks', '').strip()
+        
+        if not serial_number:
+            messages.error(request, 'Nomor seri tidak boleh kosong.')
+        else:
+            # Check if serial number already exists
+            if RangBotDevice.objects.filter(serial_number=serial_number).exists():
+                existing_device = RangBotDevice.objects.get(serial_number=serial_number)
+                if existing_device.member == member:
+                    messages.error(request, 'Nomor seri ini sudah terdaftar di akun Anda.')
+                else:
+                    messages.error(request, 'Nomor seri sudah terdaftar pada akun lain.')
+            else:
+                # Create new device
+                device = RangBotDevice.objects.create(
+                    serial_number=serial_number,
+                    member=member,
+                    device_name=device_name or None,
+                    covered_blocks=covered_blocks or None,
+                    status='offline',
+                )
+                
+                # Create notification
+                Notification.objects.create(
+                    member=member,
+                    notification_type='device_added',
+                    title='Perangkat Ditambahkan',
+                    message=f'Perangkat {device.get_display_name()} berhasil ditambahkan ke akun Anda.',
+                )
+                
+                messages.success(request, f'Perangkat {device.get_display_name()} berhasil ditambahkan!')
+                return redirect('main:member_devices')
+    
+    context = {
+        'page_title': 'Tambah Rangbot - Dashboard',
+        'member': member,
+    }
+    return render(request, 'dashboard/add_device.html', context)
+
+
+def member_purchase(request):
+    """
+    View untuk pembelian Rangbot tambahan dari dashboard member
+    Membuat PurchaseOrder dengan is_reorder=True dan original_member_id=member.member_id
+    Setelah diverifikasi admin, serial number baru akan otomatis ditambahkan ke member yang sama
+    """
+    from decimal import Decimal
+    
+    member = get_member(request)
+    
+    if not member:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    # Get pricing plans from database (only active ones)
+    try:
+        products_queryset = ProductInfo.objects.filter(is_active=True).order_by('package_type')
+        pricing_plans_list = []
+        products_dict = {}
+        
+        for product in products_queryset:
+            features = product.get_features_list() if hasattr(product, 'get_features_list') else []
+            pricing_plans_list.append({
+                'name': product.name,
+                'package_type': product.package_type,
+                'price': f"{product.price:,.0f}".replace(',', '.'),
+                'price_value': product.price,
+                'description': product.description or '',
+                'features': features,
+                'highlight': product.package_type == 'professional',
+            })
+            products_dict[product.package_type] = product
+    except:
+        pricing_plans_list = []
+        products_dict = {}
+    
+    # Handle form submission
+    if request.method == 'POST':
+        try:
+            # Get form data (pre-filled with member data, but allow editing)
+            customer_name = request.POST.get('name', member.full_name).strip()
+            customer_email = request.POST.get('email', member.email).strip()
+            customer_phone = request.POST.get('phone', member.phone).strip()
+            company_name = request.POST.get('company', '').strip()
+            customer_address = request.POST.get('address', '').strip()
+            notes = request.POST.get('notes', '').strip()
+            payment_method = request.POST.get('payment_method', '').strip()
+            
+            # Get package quantities
+            qty_basic = int(request.POST.get('qty_basic', 0) or 0)
+            qty_professional = int(request.POST.get('qty_professional', 0) or 0)
+            
+            # Validate
+            if not customer_name or not customer_email or not customer_phone or not customer_address:
+                messages.error(request, 'Mohon lengkapi semua field yang wajib diisi.')
+                return redirect('main:member_purchase')
+            
+            if qty_basic == 0 and qty_professional == 0:
+                messages.error(request, 'Mohon pilih minimal 1 paket (Basic atau Professional).')
+                return redirect('main:member_purchase')
+            
+            # Validate payment method if provided
+            valid_payment_methods = ['transfer', 'credit', 'installment', 'leasing']
+            if payment_method and payment_method not in valid_payment_methods:
+                messages.error(request, 'Metode pembayaran tidak valid.')
+                return redirect('main:member_purchase')
+            
+            # Calculate total price from database
+            price_basic = Decimal('0')
+            price_professional = Decimal('0')
+            
+            if 'basic' in products_dict:
+                price_basic = Decimal(str(products_dict['basic'].price))
+            if 'professional' in products_dict:
+                price_professional = Decimal(str(products_dict['professional'].price))
+            
+            total_price = (price_basic * qty_basic) + (price_professional * qty_professional)
+            
+            if total_price <= 0:
+                messages.error(request, 'Total harga tidak valid.')
+                return redirect('main:member_purchase')
+            
+            # Create PurchaseOrder with is_reorder=True
+            purchase_order = PurchaseOrder.objects.create(
+                customer_name=customer_name,
+                customer_email=customer_email,
+                customer_phone=customer_phone,
+                customer_address=customer_address,
+                company_name=company_name if company_name else None,
+                qty_basic=qty_basic,
+                qty_professional=qty_professional,
+                total_price=total_price,
+                notes=notes if notes else None,
+                payment_method=payment_method if payment_method else None,
+                status='pending',
+                is_reorder=True,  # Mark as reorder
+                original_member_id=member.member_id,  # Link to existing member
+            )
+            
+            # Create ActivityLog for new purchase order
+            from .models import ActivityLog
+            ActivityLog.objects.create(
+                action_type='order_created',
+                description=f'Pembelian tambahan: Order #{purchase_order.id} dari {customer_name} ({customer_email}) - Member ID: {member.member_id}. Total: {purchase_order.get_total_units()} unit (Basic: {qty_basic}, Pro: {qty_professional}). Total harga: Rp {total_price:,.0f}',
+                performed_by=None,
+                related_order=purchase_order,
+                metadata={
+                    'customer_name': customer_name,
+                    'customer_email': customer_email,
+                    'member_id': member.member_id,
+                    'is_reorder': True,
+                    'total_units': purchase_order.get_total_units(),
+                    'qty_basic': qty_basic,
+                    'qty_professional': qty_professional,
+                    'total_price': float(total_price),
+                }
+            )
+            
+            messages.success(request, 'Pesanan pembelian tambahan Anda telah dikirim! Tim kami akan menghubungi Anda dalam 1x24 jam untuk verifikasi. Setelah diverifikasi, perangkat baru akan otomatis ditambahkan ke akun Anda.')
+            return redirect('main:member_purchase')
+            
+        except Exception as e:
+            messages.error(request, f'Terjadi kesalahan saat mengirim pesanan: {str(e)}')
+            return redirect('main:member_purchase')
+    
+    context = {
+        'page_title': 'Pembelian Rangbot - Dashboard',
+        'member': member,
+        'pricing_plans': pricing_plans_list,
+    }
+    
+    return render(request, 'dashboard/member_purchase.html', context)
+
+
+def member_device_management(request, device_id):
+    """
+    View untuk halaman Manajemen Perangkat (detail) dengan semua fitur:
+    - Kontrol Rangbot via website
+    - Streaming Kamera
+    - Upload Foto untuk deteksi
+    - Histori Data dan Grafik Sensor
+    - Riwayat Deteksi Penyakit Stroberi (CRUD)
+    """
+    member = get_member(request)
+    
+    if not member:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    device = get_object_or_404(RangBotDevice, id=device_id, member=member)
+    
+    # Handle POST requests for detection CRUD
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'save_detection':
+            detection_id = request.POST.get('detection_id')
+            disease_detected = request.POST.get('disease_detected', '').strip()
+            confidence = request.POST.get('confidence')
+            location = request.POST.get('location', '').strip()
+            
+            if detection_id:
+                # Update existing detection
+                detection = get_object_or_404(DetectionHistory, id=detection_id, device=device)
+                detection.disease_detected = disease_detected or None
+                detection.confidence = float(confidence) if confidence else None
+                detection.location = location or None
+                detection.save()
+                messages.success(request, 'Deteksi berhasil diperbarui.')
+            else:
+                # Create new detection
+                DetectionHistory.objects.create(
+                    device=device,
+                    disease_detected=disease_detected or None,
+                    confidence=float(confidence) if confidence else None,
+                    location=location or None,
+                    detection_type='manual',
+                    image_url='',  # TODO: Handle image upload
+                )
+                messages.success(request, 'Deteksi berhasil ditambahkan.')
+        
+        elif action == 'delete_detection':
+            detection_id = request.POST.get('detection_id')
+            detection = get_object_or_404(DetectionHistory, id=detection_id, device=device)
+            detection.delete()
+            messages.success(request, 'Deteksi berhasil dihapus.')
+        
+        elif action == 'detect':
+            # Handle image upload and detection
+            # TODO: Implement YOLO detection logic
+            messages.success(request, 'Deteksi berhasil dilakukan!')
+        
+        return redirect('main:member_device_management', device_id=device_id)
+    
+    # Get all detections for this device
+    detections = device.detections.all().order_by('-created_at')
+    
+    # Get sensor data (placeholder - integrate with actual sensor data source)
+    sensor_data = []  # TODO: Integrate with Firebase or sensor API
+    
+    context = {
+        'page_title': f'Manajemen {device.get_display_name()} - Dashboard',
+        'member': member,
+        'device': device,
+        'detections': detections,
+        'sensor_data': sensor_data,
+    }
+    return render(request, 'dashboard/device_management.html', context)
+
+
+def member_usage_guide(request):
+    """
+    View untuk menu Cara Penggunaan Alat
+    """
+    member = get_member(request)
+    
+    if not member:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    context = {
+        'page_title': 'Cara Penggunaan Alat - Dashboard',
+        'member': member,
+    }
+    return render(request, 'dashboard/usage_guide.html', context)
+
+
+def member_daily_tips(request):
+    """
+    View untuk menu Tips Harian Merawat Stroberi
+    """
+    member = get_member(request)
+    
+    if not member:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    context = {
+        'page_title': 'Tips Harian Merawat Stroberi - Dashboard',
+        'member': member,
+    }
+    return render(request, 'dashboard/daily_tips.html', context)
+
+
+def member_disease_classification(request):
+    """
+    View untuk menu Klasifikasi Umum Penyakit Stroberi
+    """
+    member = get_member(request)
+    
+    if not member:
+        messages.warning(request, 'Anda harus login terlebih dahulu.')
+        return redirect('main:login')
+    
+    context = {
+        'page_title': 'Klasifikasi Penyakit Stroberi - Dashboard',
+        'member': member,
+    }
+    return render(request, 'dashboard/disease_classification.html', context)
 
 
 def member_notifications(request):

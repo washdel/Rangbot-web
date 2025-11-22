@@ -197,7 +197,6 @@
                             <tr class="table-header" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.05) 0%, rgba(147, 51, 234, 0.02) 100%);">
                                 <th class="text-left py-4 px-6">Serial Number</th>
                                 <th class="text-left py-4 px-6">Device Name</th>
-                                <th class="text-left py-4 px-6">Covered Blocks</th>
                                 <th class="text-left py-4 px-6">Aktif</th>
                                 <th class="text-left py-4 px-6">Tanggal Dibuat</th>
                             </tr>
@@ -219,16 +218,6 @@
                                             <span class="text-gray-400 italic">-</span>
                                         {% endif %}
                                     </div>
-                                </td>
-                                <td class="py-4 px-6">
-                                    {% if device.covered_blocks %}
-                                    <div class="text-sm font-light text-gray-600 flex items-center gap-2">
-                                        <i class="fas fa-map-marked-alt text-xs text-gray-400"></i>
-                                        {{ device.covered_blocks }}
-                                    </div>
-                                    {% else %}
-                                    <span class="text-gray-400 italic text-sm">-</span>
-                                    {% endif %}
                                 </td>
                                 <td class="py-4 px-6">
                                     {% if device.is_active %}
@@ -277,7 +266,6 @@
                             <tr class="table-header">
                                 <th class="text-left py-4 px-6">Serial Number</th>
                                 <th class="text-left py-4 px-6">Device Name</th>
-                                <th class="text-left py-4 px-6">Covered Blocks</th>
                                 <th class="text-left py-4 px-6">Aktif</th>
                                 <th class="text-left py-4 px-6">Tanggal Dibuat</th>
                             </tr>
@@ -299,16 +287,6 @@
                                             <span class="text-gray-400 italic">-</span>
                                         {% endif %}
                                     </div>
-                                </td>
-                                <td class="py-4 px-6">
-                                    {% if device.covered_blocks %}
-                                    <div class="text-sm font-light text-gray-600 flex items-center gap-2">
-                                        <i class="fas fa-map-marked-alt text-xs text-gray-400"></i>
-                                        {{ device.covered_blocks }}
-                                    </div>
-                                    {% else %}
-                                    <span class="text-gray-400 italic text-sm">-</span>
-                                    {% endif %}
                                 </td>
                                 <td class="py-4 px-6">
                                     {% if device.is_active %}

@@ -260,9 +260,9 @@
                                 <span class="text-2xl sm:text-3xl font-bold gradient-text">Rp {{ order.total_price|floatformat:0 }}</span>
                             </div>
                         </div>
-                        {% if order.payment_method %}
                         <div class="pt-4 border-t" style="border-color: rgba(229, 231, 235, 0.6);">
                             <label class="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-3 block">Metode Pembayaran</label>
+                            {% if order.payment_method %}
                             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-xl border transition-all duration-300 hover:bg-gray-50/50" style="border-color: rgba(134, 239, 172, 0.2); background: rgba(249, 250, 251, 0.5);">
                                 {% if order.payment_method == 'transfer' %}
                                 <div class="payment-badge flex-shrink-0" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">
@@ -314,8 +314,15 @@
                             </div>
                                 {% endif %}
                             </div>
+                            {% else %}
+                            <div class="p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6); background: rgba(249, 250, 251, 0.5);">
+                                <p class="text-sm font-medium text-gray-500 italic flex items-center gap-2">
+                                    <i class="fas fa-info-circle text-xs"></i>
+                                    Metode pembayaran belum ditentukan
+                                </p>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endif %}
                         {% if order.notes %}
                         <div class="pt-4 border-t" style="border-color: rgba(229, 231, 235, 0.6);">
                             <label class="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Catatan</label>
@@ -479,13 +486,13 @@
                             </span>
                             <span class="font-medium text-gray-900">{{ order.created_at|date:"d M Y, H:i" }}</span>
                         </div>
-                        {% if order.payment_method %}
                         <div class="pt-3 border-t" style="border-color: rgba(229, 231, 235, 0.6);">
                             <div class="flex flex-col gap-2">
                                 <span class="font-medium text-gray-600 flex items-center gap-2 text-xs">
                                     <i class="fas fa-credit-card text-xs"></i>Metode Pembayaran
                                 </span>
                                 <div class="flex items-center gap-2">
+                                    {% if order.payment_method %}
                                     {% if order.payment_method == 'transfer' %}
                                     <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">
                                         <i class="fas fa-university text-xs"></i>
@@ -506,11 +513,13 @@
                                         <i class="fas fa-handshake text-xs"></i>
                                         <span>{{ order.get_payment_method_display }}</span>
                                     </div>
+                                        {% endif %}
+                                    {% else %}
+                                    <span class="text-xs text-gray-400 italic">Tidak ditentukan</span>
                                     {% endif %}
                                 </div>
                         </div>
                         </div>
-                        {% endif %}
                         {% if order.is_reorder %}
                         <div class="pt-3 border-t" style="border-color: rgba(229, 231, 235, 0.6);">
                             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.1) 100%); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">

@@ -1,1 +1,155 @@
-Hai  hai
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Selamat datang, {{ member.full_name }}{% endblock %}
+
+{% block content %}
+<div class="fade-in-up">
+    <!-- Welcome Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-light tracking-tight mb-2 gradient-text">
+            Dashboard Member
+        </h1>
+        <p class="text-gray-600 font-light text-sm">
+            Kelola semua perangkat RangBot Anda dari satu tempat
+        </p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Total Devices Card -->
+        <div class="glass-card rounded-2xl border p-6" style="border-color: rgba(134, 239, 172, 0.2);">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(34, 197, 94, 0.1);">
+                    <i class="fas fa-robot text-2xl" style="color: #22c55e;"></i>
+                </div>
+            </div>
+            <h3 class="text-sm font-light text-gray-600 mb-2">Total Perangkat</h3>
+            <p class="text-3xl font-semibold mb-1" style="color: #22c55e;">{{ devices.count }}</p>
+            <p class="text-xs text-gray-500 font-light">Perangkat terdaftar</p>
+        </div>
+
+        <!-- Active Devices Card -->
+        <div class="glass-card rounded-2xl border p-6" style="border-color: rgba(134, 239, 172, 0.2);">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(34, 197, 94, 0.1);">
+                    <i class="fas fa-check-circle text-2xl" style="color: #22c55e;"></i>
+                </div>
+            </div>
+            <h3 class="text-sm font-light text-gray-600 mb-2">Perangkat Aktif</h3>
+            <p class="text-3xl font-semibold mb-1" style="color: #22c55e;">{{ active_devices_count }}</p>
+            <p class="text-xs text-gray-500 font-light">Sedang beroperasi</p>
+        </div>
+
+        <!-- Recent Detections Card -->
+        <div class="glass-card rounded-2xl border p-6" style="border-color: rgba(134, 239, 172, 0.2);">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(239, 68, 68, 0.1);">
+                    <i class="fas fa-microscope text-2xl" style="color: #ef4444;"></i>
+                </div>
+            </div>
+            <h3 class="text-sm font-light text-gray-600 mb-2">Deteksi Terbaru</h3>
+            <p class="text-3xl font-semibold mb-1" style="color: #ef4444;">{{ recent_detections.count }}</p>
+            <p class="text-xs text-gray-500 font-light">5 deteksi terakhir</p>
+        </div>
+    </div>
+
+    <!-- Recent Devices -->
+    <div class="glass-card rounded-2xl border mb-8" style="border-color: rgba(134, 239, 172, 0.2);">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">Perangkat Terbaru</h2>
+                    <p class="text-sm text-gray-500 font-light mt-1">Perangkat RangBot yang terdaftar</p>
+                </div>
+                <a href="{% url 'main:member_devices' %}" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all" style="border: 1px solid rgba(229, 231, 235, 0.6);">
+                    Lihat Semua <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="p-6">
+            {% if devices %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for device in devices|slice:":6" %}
+                <a href="{% url 'main:member_device_management' device.id %}" class="block p-4 rounded-xl border hover:shadow-lg transition-all" style="border-color: rgba(229, 231, 235, 0.6);">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(34, 197, 94, 0.1);">
+                            <i class="fas fa-robot text-lg" style="color: #22c55e;"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900">{{ device.get_display_name }}</h3>
+                            <p class="text-xs text-gray-500 font-mono">{{ device.serial_number }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        {% if device.status == 'active' %}
+                        <span class="px-2 py-1 rounded-full text-xs font-medium" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                            <i class="fas fa-circle text-xs mr-1"></i>Aktif
+                        </span>
+                        {% elif device.status == 'offline' %}
+                        <span class="px-2 py-1 rounded-full text-xs font-medium" style="background: rgba(156, 163, 175, 0.1); color: #6b7280;">
+                            <i class="fas fa-circle text-xs mr-1"></i>Offline
+                        </span>
+                        {% else %}
+                        <span class="px-2 py-1 rounded-full text-xs font-medium" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                            <i class="fas fa-circle text-xs mr-1"></i>Tidak Aktif
+                        </span>
+                        {% endif %}
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style="background: rgba(134, 239, 172, 0.1);">
+                    <i class="fas fa-robot text-2xl text-gray-400"></i>
+                </div>
+                <p class="text-gray-500 font-light mb-4">Belum ada perangkat terdaftar</p>
+                <a href="{% url 'main:member_add_device' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-medium transition-all" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);">
+                    <i class="fas fa-plus"></i>
+                    <span>Tambah Perangkat Pertama</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Detections -->
+    {% if recent_detections %}
+    <div class="glass-card rounded-2xl border" style="border-color: rgba(134, 239, 172, 0.2);">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">Deteksi Terbaru</h2>
+            <p class="text-sm text-gray-500 font-light mt-1">5 deteksi penyakit terakhir</p>
+        </div>
+        
+        <div class="p-6">
+            <div class="space-y-3">
+                {% for detection in recent_detections %}
+                <div class="p-4 rounded-xl border" style="border-color: rgba(229, 231, 235, 0.6);">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(239, 68, 68, 0.1);">
+                                <i class="fas fa-microscope text-lg" style="color: #ef4444;"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900">{{ detection.disease_detected|default:"Tidak terdeteksi" }}</h4>
+                                <p class="text-xs text-gray-500">{{ detection.device.get_display_name }} • {{ detection.created_at|date:"d M Y H:i" }}</p>
+                            </div>
+                        </div>
+                        {% if detection.confidence %}
+                        <span class="px-2 py-1 rounded-full text-xs font-medium" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                            {{ detection.confidence|floatformat:0 }}%
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
